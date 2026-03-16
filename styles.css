@@ -1,0 +1,906 @@
+@font-face {
+    font-family: "redaction50";
+    src: url("./fonts/Redaction_50-Regular.woff2") format("woff2");
+}
+@font-face {
+    font-family: "redaction70";
+    src: url("./fonts/Redaction_35-Regular.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+}
+@font-face {
+    font-family: "normal";
+    src: url("/fonts/Windows-Regular.woff2");
+}
+
+:root {
+    --gray: #dfdfdf;
+    --darkgray: #c0c0c0;
+    --blue: #1fa3fd;
+    --area-box: inset -1px -1px #0a0a0a,inset 1px 1px #dfdfdf,inset -2px -2px grey,inset 2px 2px #fff;
+    --field-box: inset -1px -1px #fff,inset 1px 1px grey,inset -2px -2px #dfdfdf,inset 2px 2px #0a0a0a;
+    --sunk-box: inset -1px -1px #fff,inset 1px 1px grey,inset -2px -2px #dfdfdf,inset 2px 2px #0a0a0a;
+    --shallow-box: inset -1px -1px #dfdfdf,inset 1px 1px grey;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+body {
+    font-family: "arial";
+    line-height: 1;
+    color: #000000;
+    background: black;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    align-items: center;
+}
+
+/* WebKit/Blink scrollbar: 1px black top+bottom on thumb, 1px black left border on gutter */
+::-webkit-scrollbar {
+    width: 16px;
+}
+::-webkit-scrollbar-corner {
+    background: #dfdfdf;
+}
+/* thumb with 1px black top and bottom lines */
+::-webkit-scrollbar-thumb {
+    background-color: var(--gray);
+    border-radius: 0 !important; /* square thumb */
+    border: 1px solid black;
+    border-width: 1px 1px 1px 1px; /* only top and bottom borders */
+}
+/* track (gutter) — keep your existing background-image and add left border */
+::-webkit-scrollbar-track {
+    background: transparent;
+    border-left: 1px solid black;
+    
+}
+
+/* Keep the thinner scrollbar for the applied-filters area as before */
+.applied-filters {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0,0,0,0.5) transparent;
+}
+
+.content-wrapper {
+    border: 2px solid #00ff;
+    border-width: 0 1px 0 1px;
+    background: var(--darkgray);
+    width: 95%;
+    max-width: 600px;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    height: 100vh;
+}
+
+h1.field {
+    margin: 1rem;
+    text-align: center;
+    font-size: clamp(14px, 5vw, 28px);
+
+    padding: 10px;
+
+    width: min(300px, 95%);
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: end;
+    justify-content: center;
+}
+
+.home {
+    
+    display: grid !important;
+    grid-template-columns: auto auto !important;
+}
+
+.field {
+    border-width: 2px;
+    border-style: groove;
+    border-color: threedface;
+    border-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='5' height='5' fill='gray' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M0 0h5v5H0V2h2v1h1V2H0' fill='%23fff'/%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M0 0h4v4H0V1h1v2h2V1H0'/%3E%3C/svg%3E") 2;
+}
+.area {
+    box-shadow: var(--area-box);
+}
+
+.title {
+    font-weight: normal;
+    padding:3px 6px;
+    font-size: 24px;
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
+    border: 1px solid black;
+
+    color: black;
+    background: none;
+}
+
+.title + .title {
+    margin-left: -1px;
+}
+.title-option {
+    font-weight: normal;
+    padding:2px 0px;
+    font-size: 18px;
+    color: blue;
+    border: 1px solid black;
+}
+.title-option:nth-child(1) {
+    border-right: 0;
+}
+.title-option:nth-child(3) {
+    border-left: 0;
+}
+.title-option:hover {
+    border-color: black;
+    border-right-color: black !important;
+    text-decoration: underline;
+}
+.title-option:active {
+    color: red;
+}
+
+.praxis {
+    color: black;
+    font-weight: normal;
+    background: transparent;
+    text-shadow: none;
+}
+
+.nova {
+    font-weight: normal;
+    margin-left: -1px;
+    background: black;
+
+    color: white;
+    text-shadow: 0 0 4px white;
+}
+
+a {
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.options-container {
+    display: grid;
+    padding: 10px;
+    width: min(444px, 95%);
+    max-height: fit-content;
+    align-content: start;
+    justify-content: center;
+    gap: 4px;
+    min-height: 250px;
+}
+
+@media (min-width: 600px) {
+    .columns {
+        grid-template-columns: 3fr 1fr;
+        height: 300px !important;
+        min-height: 0 !important;
+    }
+    .options-container {
+        grid-template-columns: 1fr 1fr;
+    }
+    .repo {
+        min-height: 0 !important;
+    }
+}
+
+.opportunity-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.0rem;
+}
+
+.sub-options {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.0rem;
+    width: 75%;
+}
+.sub-options > * {
+    width: 100%;
+}
+
+.option-btn-container {
+    display: flex;
+    flex-direction: column; 
+    align-items: center;
+    margin-bottom: 0.6rem;
+
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+span.option-btn {
+    font-size: 32px;
+    text-align: center;
+    color: blue;
+    background: silver;
+    width: fit-content;
+
+    display: flex;
+    position: relative;
+    z-index: 3;
+}
+
+.option-btn a {
+    padding: 2px 6px;
+    border: 1px solid blue;
+    color: blue;
+}
+.info {
+    border-left: 0 !important;
+    text-decoration: none !important;
+}
+.grant.info {
+    font-size: clamp(12px, 5vw, 24px);
+    color: blue;
+    border: 1px solid blue;
+    border-left: 1px solid blue !important;
+    border-width: 0 1px 1px 0;
+    padding: 3px 7px;
+}
+
+.twoline a{
+    display: flex;
+}
+.option-details.twoline {
+    width: 90px;
+    flex-direction: column;
+    align-items: center;
+}
+
+.sublink {
+    border: 0;
+}
+
+.option-details {
+    font-size: clamp(10px, 3.5vw, 15px);
+    border: 1px solid red;
+    border-top: 0;
+    width: 140px;
+    max-width: 100%;
+    color: red;
+    text-align: center;
+    display: flex;
+    justify-content: space-evenly;
+    cursor: default;
+
+    /* Collapsible animation: control height, padding and opacity.
+       We keep `display:flex` so layout is stable; collapse via max-height. */
+    overflow: hidden;
+    max-height: 0;
+    padding: 0 2px;
+    margin-top: -1px; /* small gap so border seam doesn't visually clash */
+    position: relative;
+    z-index: 1;
+    user-select: text;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    transition: max-height 50ms steps(2,end), padding 50ms steps(2,end);
+}
+
+/* Open state */
+.option-details.open {
+    padding: 4px 2px;
+    /* JS sets an inline max-height to the content height during expand;
+       avoid a fixed max-height here so the element can grow naturally. */
+    will-change: max-height;
+}
+
+/* Pop/jiggle animation removed — no-op when opening */
+.option-details:has(a) {
+    border: 1px solid blue !important;
+    border-top: 0 !important; 
+}
+.option-details a {
+    padding: 0px;
+    font-size: clamp(11px, 4vw, 15px);
+    margin-top: 1px;
+    color: blue;
+}
+
+.sub-options.option-btn-container {
+    width: 75%;
+}
+
+.option-btn a:hover,
+a.subbtn:hover {
+    color: red;
+    border-color: red;
+    border-right-color: red !important;
+}
+.option-details a:hover {
+    color: red;
+    text-decoration: underline;
+}
+.grant.info:hover {
+    color: red;
+    border-color: red !important;
+}
+
+.option-btn a:active,
+.grant.info:active,
+.option-details a:active{
+    background: red;
+    color: red;
+}
+
+.columns {
+    display: grid;
+    
+    justify-items: center;
+    width: min(600px, 95%);
+    min-height: 80%;
+    padding:10px 8px;
+    padding-bottom: 0;
+    overflow: visible;
+}
+
+.column-title {
+    text-align: center;
+    margin-bottom: 6px;
+}
+
+.repo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    overflow: hidden;
+    box-shadow: var(--sunk-box);
+    padding-right: 2px;
+    margin-bottom: 10px;
+    min-height: 400px;
+    max-height: 400px;
+    min-width: 0;
+}
+
+.repobox {
+    padding: 2px 2px;
+    padding: 2px 0px 2px 2px;
+    padding-bottom: 10px;
+    width: 100%;
+    flex: 1;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
+    overflow-y: scroll;
+    overflow-x: hidden;
+    font-size: 14px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    position: relative;
+}
+
+table {
+    clip-path: inset(2px 0px);
+    table-layout: fixed;
+    width: 100%;
+}
+
+table tbody {
+  display: table;
+  width: 100%;
+}
+
+tr {
+    border-bottom: 1px solid black;
+    background:var(--darkgray);
+}
+
+
+td {
+    padding: 8px 4px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    vertical-align: top;
+}
+
+td:nth-child(1) {
+    width: 25%;
+}
+
+td:nth-child(2) {
+    width: 50%;
+    border-left: 1px solid black;
+    text-align: center;
+}
+
+td:nth-child(3) {
+    width: 25%;
+    border-left: 1px solid black;
+    text-align: center;
+}
+
+td a {
+    color: blue;
+    text-decoration: none;
+    padding: 4px 6px;
+    display: inline;
+    word-break: break-word;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+}
+
+td a span {
+    display: inline;
+    white-space: nowrap;
+    margin-left: 4px;
+}
+td a:hover {
+    color: white;
+    text-shadow: 1px 0px 2px blue, -1px -0px 2px blue;
+    text-decoration: underline;
+    outline: 2px solid blue;
+    outline-offset: -2px;
+}
+td a:hover span svg {
+    stroke: white;
+}
+
+.opportunity-card {
+    padding: 8px 4px;
+    display: grid;
+    background: var(--gray);
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    align-items: start;
+    border: 1px solid black;
+    border-width: 0 0px 1px 0;
+}
+
+.opportunity-card:nth-child(odd) {
+
+}
+
+.opportunity-card:nth-child(even) {
+
+}
+
+.opportunity-card a {
+    color: blue;
+    text-decoration: none;
+}
+
+.link-text {
+    display: inline;
+    word-break: break-word;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+    padding: 4px 6px;
+}
+
+.link-text span {
+    display: inline;
+    white-space: nowrap;
+    margin-left: 4px;
+}
+
+.opportunity-card a:hover .link-text {
+    color: blue;
+    text-decoration: underline;
+    outline: 2px solid blue;
+    outline-offset: -2px;
+}
+.opportunity-card:nth-child(even) a:hover .link-text {
+    
+}
+
+.opportunity-card a:hover .link-text span svg {
+    stroke: white;
+}
+
+.top-right-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+    gap: 4px;
+}
+
+.grid-cell {
+    padding: 4px 4px 2px 4px;
+    background: var(--darkgray);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+}
+
+.type-cell {
+    
+}
+
+.fee-cell {
+    color: white;
+    /* don't stretch to fill the grid cell; size to content */
+    justify-self: start;
+    width: auto;
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 6px;
+    color: black;
+    background: yellow;
+}
+
+.date-cell {
+    padding: 4px;
+    background: var(--darkgray);
+    width: 75%;
+    min-width: max-content;
+}
+strong {
+    font-weight: normal;
+    color: black;
+}
+
+.filters {
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    width: 100%;
+    box-shadow: var(--sunk-box);
+    margin-bottom: 10px;
+    min-width: 0;
+    /* allow internal children to scroll when they reach their own max-height */
+    min-height: 0;
+    /* allow positioning of decorative gutter inside padding */
+    position: relative;
+    --filters-padding-right: 10px;
+}
+
+.filters-title {
+    text-align: center;
+    margin-bottom: 4px;
+}
+
+.applied-filters {
+    padding: 4px 0;
+    min-height: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    row-gap: 4px;
+    /* JS controls height via inline styles for animation */
+    width: 100%;
+    overflow-y: auto;
+    /* hide horizontal scrollbar; only allow vertical scroll */
+    overflow-x: hidden;
+    /* avoid layout shifts when the scrollbar appears (no persistent gutter) */
+    scrollbar-width: thin; /* Firefox */
+    scrollbar-color: rgba(0,0,0,0.45) transparent; /* Firefox thumb/track */
+    overscroll-behavior: contain;
+    box-sizing: border-box;
+     /* extend into the parent's right padding so the scrollbar appears inside
+         that padding (doesn't decenter content). Reserve native gutter to avoid
+         layout shift when it appears. */
+     scrollbar-gutter: stable;
+     --scrollbar-gutter-width: 8px; /* actual scrollbar width */
+     /* extend width into parent padding and cancel the extra space with negative margin */
+     width: calc(100% + var(--scrollbar-gutter-width));
+     margin-right: calc(-1 * var(--scrollbar-gutter-width));
+     padding-right: 0;
+}
+
+/* JS controls collapse/expand now; remove :empty rule to avoid conflicts. */
+
+/* WebKit scrollbar styling for a slimmer, unobtrusive scrollbar */
+.applied-filters::-webkit-scrollbar {
+    width: 8px;
+    background: transparent;
+}
+.applied-filters::-webkit-scrollbar-thumb {
+    background: rgba(0,0,0,0.45);
+    border-radius: 0 !important; /* square thumb */
+}
+.applied-filters::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.filter-item {
+    font-size: 12px;
+    color: blue;
+}
+
+.filters-divider {
+    border-top: 2px dashed blue;
+}
+
+.filter-selectors {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-top: 8px;
+    border-top: 2px dashed blue;
+    /* ensure this section is pushed down when .applied-filters grows */
+    margin-top: 0;
+}
+
+/* visually hide native select but keep it accessible to screen readers */
+.visually-hidden {
+    position: absolute !important;
+    height: 1px; width: 1px;
+    overflow: hidden;
+    clip: rect(1px, 1px, 1px, 1px);
+    white-space: nowrap;
+    border: 0; padding: 0; margin: -1px;
+}
+
+/* Custom dropdown styles */
+.custom-select {
+    position: relative;
+    width: 100%;
+    max-width: 240px;
+}
+.custom-selected {
+    padding: 4px 6px;
+    position: relative;
+    /* reserve space for the boxed arrow button on the right */
+    padding-right: 46px;
+    background: var(--gray);
+    border: 1px solid black;
+    cursor: pointer;
+    user-select: none;
+    font-family: arial;
+    font-size: 12px;
+    color: black;
+    display: flex;
+    align-items: center; /* ensure the control's content is vertically centered */
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.custom-select.open .custom-selected {
+    outline: 2px solid blue;
+    outline-offset: -1px;
+    color: white !important;
+    background: blue !important;
+}
+
+.custom-selected {
+    transition: font-size 50ms steps(1, end);
+    transform-origin: left center;
+    font-size: 12px;
+    display: inline-block;
+}
+
+.custom-selected:active {
+    font-size: 10px;
+}
+.custom-selected:hover {
+    background: white;
+}
+.custom-selected::after {
+    content: '>';
+    position: absolute;
+    /* center inside the boxed button on the right */
+    right: 0px;
+    top: 50%;
+    transform: translateY(-50%) rotate(90deg);
+    transform-origin: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 20px;
+    width: 20px;
+    font-size: 12px;
+    outline: 1px solid black;
+    line-height: 1;
+    color: black;
+    z-index: 2;
+}
+.custom-select.open .custom-selected::after {
+    content: '>';
+    /* open: point up */
+    transform: translateY(calc(-50% + 0px)) translateX(-0px) rotate(-90deg);
+    outline: 1px solid white;
+    outline-offset: -1px;
+    color: white;
+}
+    
+
+.custom-selected:active::after {
+    background: white;
+}
+.custom-selected:active {
+    background: blue !important;
+    color: white !important;
+}
+.custom-options {
+    position: absolute;
+    left: 0; right: 0;
+    margin: 4px 0 0 0;
+    padding: 0;
+    list-style: none;
+    background: var(--gray);
+    color: black;
+    max-height: 200px;
+    overflow: auto;
+    border: 1px solid #333;
+    display: none;
+    z-index: 200;
+}
+.custom-options[aria-hidden="false"] { display: block; }
+.custom-options li {
+    padding: 8px 10px;
+    cursor: pointer;
+    font-family: arial;
+    font-size: 12px;
+    color: black;
+    background: var(--gray);
+}
+.custom-options li:hover,
+.custom-options li[aria-selected="true"] {
+    background: blue;
+    color: white;
+}
+.custom-options li.disabled {
+    color: #666;
+    cursor: default;
+}
+
+.filter-dropdown {
+    padding: 4px 6px;
+    border: 1px solid black;
+    background: var(--gray);
+    font-family: arial;
+    font-size: 12px;
+    cursor: pointer;
+}
+.filter-dropdown:hover {
+    background: white;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    height: 24px;
+    transition: font-size 50ms steps(1), color 50ms steps(1);
+
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+.checkbox-label:active {
+    font-size: 10px;
+    color: white !important;
+    background:blue;
+}
+.checkbox-input {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1;
+    width: 16px;
+    height: 16px;
+    border-radius: 0;
+    vertical-align: middle;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background: white;
+    display: inline-block;
+    position: relative;
+    box-shadow: var(--sunk-box);
+    cursor: pointer;
+}
+.checkbox-input:active {
+    background: var(--gray) !important;
+    width: 12px;
+    height: 12px;
+}
+.checkbox-input:checked {
+    background: white;
+    border: none;
+}
+.checkbox-input:checked::after {
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 6px;
+    width: 2px;
+    height: 6px;
+    border: solid black;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+.checkbox-input:active::after {
+    top: 3px;
+    left: 5px;
+    height: 4px;
+    width: 1px;
+}
+
+.filter-dropdown.open-native {
+    outline: 2px solid red;
+    outline-offset: -1px;
+    background: var(--gray);
+    color: red;
+}
+.filter-dropdown option {
+    background: var(--gray);
+    color: black;
+}
+
+.filter-dropdown option:disabled {
+    display: none;
+}
+
+/* Some browsers don't reliably apply attribute selectors to <option>.
+   The JS already adds the class `clear-filter-option` — target that class too. */
+.filter-dropdown option.clear-filter-option {
+    color: #ff0000 !important;
+}
+
+/* Style the custom dropdown's generated list item when it has the same class */
+.custom-options li.clear-filter-option {
+    color: #ff0000 !important;
+}
+.custom-options li.clear-filter-option:hover {
+    color: white !important;
+    background: red !important;
+}
+
+.active-filter {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    background: transparent;
+    color: blue;
+    border: 2px solid blue;
+    padding: 4px 6px;
+    font-size: 12px;
+}
+
+.remove-filter-btn {
+    background: transparent;
+    border: none;
+    color: blue;
+    outline: 1px solid blue;
+    outline-offset: -1px;
+    cursor: pointer;
+    padding: 0;
+    width: 12px;
+    height: 12px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.remove-filter-btn:hover {
+    color: red;
+    outline: 2px solid red;
+}
+.remove-filter-btn:active {
+    outline: 2px solid red !important;
+    outline-offset: -2px;
+}
+
+/* Exclude-style for filters that remove matches (red outline + text) */
+.exclude-filter {
+    color: red;
+    border-color: red !important;
+
+}
+.exclude-filter .remove-filter-btn {
+    color: red;
+    outline: 1px solid red;
+}
+.exclude-filter .remove-filter-btn:hover {
+    outline: 2px solid red;
+}
