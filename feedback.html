@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Praxis Nova</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="content-wrapper">
+        
+        <h1 class="field">
+            <a href="/index.html" class="title-option">Home</a>
+            <span class="title">Feedback</span>
+            
+        </h1>
+    
+        <div class="field feedback">
+            <form class="feedback-form" action="#" method="post" novalidate>
+                <p class="feedback-intro">Please suggest anything</p>
+
+                <div class="form-row name">
+                    <label for="name">Name (optional)</label>
+                    <input class="form-input" type="text" id="name" name="name" />
+                </div>
+
+                <div class="form-row">
+                    <label for="suggestion">Suggestion</label>
+                    <textarea class="form-textarea" id="suggestion" name="suggestion" required rows="6" placeholder="What would you like?"></textarea>
+                </div>
+
+                <div class="form-row">
+                    <button class="form-submit" type="submit">Send Feedback</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>

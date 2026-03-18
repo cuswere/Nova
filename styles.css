@@ -71,7 +71,7 @@ body {
     border-width: 0 1px 0 1px;
     background: var(--darkgray);
     width: 95%;
-    max-width: 600px;
+    max-width: 800px;
     display: flex;
     align-items: center;
     flex-direction: column;
@@ -170,7 +170,7 @@ a {
 .options-container {
     display: grid;
     padding: 10px;
-    width: min(444px, 95%);
+    width: min(600px, 95%);
     max-height: fit-content;
     align-content: start;
     justify-content: center;
@@ -178,10 +178,11 @@ a {
     min-height: 250px;
 }
 
+
 @media (min-width: 600px) {
     .columns {
-        grid-template-columns: 3fr 1fr;
-        height: 300px !important;
+        grid-template-columns: 2fr 1fr;
+        height: 350px !important;
         min-height: 0 !important;
     }
     .options-container {
@@ -190,6 +191,7 @@ a {
     .repo {
         min-height: 0 !important;
     }
+   
 }
 
 .opportunity-group {
@@ -223,7 +225,7 @@ a {
 }
 
 span.option-btn {
-    font-size: 32px;
+    font-size: 36px;
     text-align: center;
     color: blue;
     background: silver;
@@ -252,21 +254,16 @@ span.option-btn {
     padding: 3px 7px;
 }
 
-.twoline a{
-    display: flex;
-}
-.option-details.twoline {
-    width: 90px;
-    flex-direction: column;
-    align-items: center;
-}
 
 .sublink {
     border: 0;
 }
+span.sublink {
+    color: black;
+}
 
 .option-details {
-    font-size: clamp(10px, 3.5vw, 15px);
+    font-size: 16px;
     border: 1px solid red;
     border-top: 0;
     width: 140px;
@@ -274,7 +271,10 @@ span.option-btn {
     color: red;
     text-align: center;
     display: flex;
-    justify-content: space-evenly;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
     cursor: default;
 
     /* Collapsible animation: control height, padding and opacity.
@@ -289,7 +289,14 @@ span.option-btn {
     -webkit-user-select: text;
     -moz-user-select: text;
     -ms-user-select: text;
-    transition: max-height 50ms steps(2,end), padding 50ms steps(2,end);
+    transition: max-height 200ms steps(4,end), padding 200ms steps(2,end);
+}
+
+/* allow sublinks inside the option-details box to wrap */
+.option-details .sublink,
+.option-details a.sublink {
+    display: inline-block;
+    white-space: normal;
 }
 
 /* Open state */
@@ -300,14 +307,12 @@ span.option-btn {
     will-change: max-height;
 }
 
-/* Pop/jiggle animation removed — no-op when opening */
 .option-details:has(a) {
     border: 1px solid blue !important;
     border-top: 0 !important; 
 }
 .option-details a {
     padding: 0px;
-    font-size: clamp(11px, 4vw, 15px);
     margin-top: 1px;
     color: blue;
 }
@@ -342,8 +347,7 @@ a.subbtn:hover {
     display: grid;
     
     justify-items: center;
-    width: min(600px, 95%);
-    min-height: 80%;
+    width: 95%;
     padding:10px 8px;
     padding-bottom: 0;
     overflow: visible;
@@ -376,7 +380,7 @@ a.subbtn:hover {
     flex: 1;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
     overflow-y: scroll;
     overflow-x: hidden;
-    font-size: 14px;
+    font-size: 16px;
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -392,6 +396,53 @@ table {
 table tbody {
   display: table;
   width: 100%;
+}
+
+.feedback {
+    width: 95%;
+}
+
+.feedback-intro {
+    color: black;
+    padding: 4px 0;
+    min-width: 50%;
+    text-align: center;
+    border: 1px solid black;
+}
+
+/* Feedback form layout (minimal, no visual styling like fonts or colors) */
+.feedback-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* center the form contents horizontally */
+    width: 100%;
+    padding: 8px;
+}
+.feedback-form .form-row {
+    width: 100%;
+    max-width: 700px; /* constrain form width */
+    display: flex;
+    flex-direction: column; /* put label and control on separate lines */
+    gap: 6px;
+    margin: 8px 0;
+    align-items: center;
+}
+.feedback-form label {
+    display: block;
+}
+.form-input,
+.form-textarea {
+    width: 100%;
+    box-sizing: border-box;
+}
+.form-submit {
+    align-self: center; /* center the button */
+}
+
+.form-row.name {
+    max-width: 200px;
+    border-top: 1px dashed black;
+    padding-top: 8px;
 }
 
 tr {
@@ -453,19 +504,12 @@ td a:hover span svg {
     padding: 8px 4px;
     display: grid;
     background: var(--gray);
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1.5fr;
     gap: 8px;
+    column-gap: 16px;
     align-items: start;
     border: 1px solid black;
     border-width: 0 0px 1px 0;
-}
-
-.opportunity-card:nth-child(odd) {
-
-}
-
-.opportunity-card:nth-child(even) {
-
 }
 
 .opportunity-card a {
@@ -513,6 +557,7 @@ td a:hover span svg {
     background: var(--darkgray);
     display: flex;
     align-items: center;
+    text-align: center;
     justify-content: center;
     
 }
@@ -610,7 +655,7 @@ strong {
 }
 
 .filter-item {
-    font-size: 12px;
+    font-size: 14px;
     color: blue;
 }
 
@@ -621,6 +666,7 @@ strong {
 .filter-selectors {
     display: flex;
     flex-direction: column;
+    align-items: center;
     gap: 6px;
     padding-top: 8px;
     border-top: 2px dashed blue;
@@ -642,8 +688,9 @@ strong {
 .custom-select {
     position: relative;
     width: 100%;
-    max-width: 240px;
+    max-width: 150px;
 }
+
 .custom-selected {
     padding: 4px 6px;
     position: relative;
@@ -657,7 +704,7 @@ strong {
     font-size: 12px;
     color: black;
     display: flex;
-    align-items: center; /* ensure the control's content is vertically centered */
+    align-items: center;
     width: 100%;
     box-sizing: border-box;
 }
@@ -670,46 +717,48 @@ strong {
 }
 
 .custom-selected {
-    transition: font-size 50ms steps(1, end);
     transform-origin: left center;
-    font-size: 12px;
+    font-size: 14px;
     display: inline-block;
 }
 
+/* Only animate font-size when NOT active so pressing is immediate
+   but releasing transitions smoothly back to the normal size. */
+.custom-selected:not(:active) {
+    transition: font-size 50ms steps(1, end);
+}
+
 .custom-selected:active {
-    font-size: 10px;
+    font-size: 12px;
 }
 .custom-selected:hover {
     background: white;
 }
+
+/* Arrow glyph: use static glyphs (no rotation) and center on the right */
 .custom-selected::after {
-    content: '>';
+    content: '▸';
     position: absolute;
-    /* center inside the boxed button on the right */
     right: 0px;
     top: 50%;
-    transform: translateY(-50%) rotate(90deg);
-    transform-origin: center;
+    transform: translateY(-50%);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    height: 20px;
-    width: 20px;
-    font-size: 12px;
+    width: 22px;
+    height: 22px;
+    font-size: 14px;
     outline: 1px solid black;
     line-height: 1;
     color: black;
     z-index: 2;
 }
 .custom-select.open .custom-selected::after {
-    content: '>';
-    /* open: point up */
-    transform: translateY(calc(-50% + 0px)) translateX(-0px) rotate(-90deg);
+    content: '▾';
     outline: 1px solid white;
     outline-offset: -1px;
     color: white;
 }
-    
 
 .custom-selected:active::after {
     background: white;
@@ -726,7 +775,6 @@ strong {
     list-style: none;
     background: var(--gray);
     color: black;
-    max-height: 200px;
     overflow: auto;
     border: 1px solid #333;
     display: none;
@@ -737,7 +785,7 @@ strong {
     padding: 8px 10px;
     cursor: pointer;
     font-family: arial;
-    font-size: 12px;
+    font-size: 14px;
     color: black;
     background: var(--gray);
 }
@@ -756,7 +804,7 @@ strong {
     border: 1px solid black;
     background: var(--gray);
     font-family: arial;
-    font-size: 12px;
+    font-size: 14px;
     cursor: pointer;
 }
 .filter-dropdown:hover {
@@ -769,15 +817,17 @@ strong {
     gap: 8px;
     cursor: pointer;
     height: 24px;
-    transition: font-size 50ms steps(1), color 50ms steps(1);
-
+    transition: color 50ms steps(1, end);
     user-select: none;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
 }
+.checkbox-label:not(:active) {
+    transition: font-size 150ms steps(1, end), color 50ms steps(1, end);
+}
 .checkbox-label:active {
-    font-size: 10px;
+    font-size: 12px;
     color: white !important;
     background:blue;
 }
@@ -863,7 +913,6 @@ strong {
     color: blue;
     border: 2px solid blue;
     padding: 4px 6px;
-    font-size: 12px;
 }
 
 .remove-filter-btn {
@@ -874,9 +923,9 @@ strong {
     outline-offset: -1px;
     cursor: pointer;
     padding: 0;
-    width: 12px;
-    height: 12px;
-    font-size: 12px;
+    width: 14px;
+    height: 14px;
+    font-size: 14px;
     display: flex;
     align-items: center;
     justify-content: center;

@@ -13,7 +13,7 @@ document.addEventListener('pointerup', () => { pointerIsDown = false; }, { captu
 // Animate the `.applied-filters` container when filters are added/removed.
 function animateFilterArea(container, startingHeight) {
     if (!container) return;
-    const duration = 100; // ms (matches CSS)
+    const duration = 200; // ms (matches CSS)
     const MAX = 165; // px - same as CSS
 
     // compute current content height after DOM updates
@@ -30,7 +30,7 @@ function animateFilterArea(container, startingHeight) {
 
     // Only animate padding when expanding from nothing, not during transitions
     const transitionStr = isTransition 
-        ? `max-height ${duration}ms steps(3,end)`
+        ? `max-height ${duration}ms steps(4,end)`
         : `max-height ${duration}ms steps(3,end), padding ${Math.max(120, duration - 20)}ms steps(3,end)`;
     // add a short JS delay before starting the expand animation when truly expanding from nothing
     const expandDelay = isTransition ? 0 : 120; // ms
@@ -104,6 +104,8 @@ async function loadOpportunities() {
         const response = await fetch('data/opportunities.json');
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         opportunities = await response.json();
+        // Apply any filters passed via URL before rendering
+        applyFiltersFromUrl();
         populateTypeDropdown();
         updateAppliedFiltersDisplay();
         populateOpportunitiesMainTable();
@@ -111,13 +113,36 @@ async function loadOpportunities() {
         console.error('Error loading opportunities:', error);
     }
 }
+
+// Read URL query parameters and apply initial filters.
+// Supported: `type` (comma-separated or single) and `hideFees` (true/1)
+function applyFiltersFromUrl() {
+    try {
+        const params = new URLSearchParams(window.location.search);
+        const types = [];
+        if (params.has('type')) {
+            const raw = params.getAll('type').join(',');
+            raw.split(',').map(s => s.trim()).filter(Boolean).forEach(t => types.push(t.toLowerCase()));
+        }
+        if (types.length > 0) activeFilters.type = types;
+        if (params.has('hideFees')) {
+            const v = params.get('hideFees');
+            activeFilters.hideFees = (v === '1' || v === 'true');
+        }
+    } catch (err) {
+        // ignore URL parsing errors
+    }
+}
 // Populate type dropdown with unique types from opportunities
 function populateTypeDropdown() {
     const dropdown = document.querySelector('select[name="type"]');
     if (!dropdown) return;
 
-    // Extract unique types
-    const types = [...new Set(opportunities.map(opp => opp.type).filter(Boolean))].sort();
+    // Extract unique types from the currently visible pool (respecting
+    // expiration and the hide-fees toggle) so expired opportunities don't
+    // contribute categories.
+    const source = getVisibleOpportunities();
+    const types = [...new Set(source.map(opp => opp.type).filter(Boolean))].sort();
 
     // Remove all options except the first one (disabled "Type")
     while (dropdown.options.length > 1) {
@@ -138,7 +163,7 @@ function populateTypeDropdown() {
     if (activeFilters.type.length > 0) {
         const clearOption = document.createElement('option');
         clearOption.value = '__clear__';
-        clearOption.textContent = 'Clear Type filters';
+        clearOption.textContent = 'Clear Categories';
         clearOption.className = 'clear-filter-option';
         dropdown.appendChild(clearOption);
     }
@@ -320,6 +345,24 @@ function syncCustomSelectFromNative(nativeSelect) {
     });
 }
 
+// Return the current set of opportunities that should be visible to the
+// user based on expiration and the hide-fees toggle. This deliberately
+// does NOT apply the `type` filter because the dropdown shows available
+// types to choose from.
+function getVisibleOpportunities() {
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+
+    return opportunities.filter(opp => {
+        // hide by fees if requested
+        if (activeFilters.hideFees && ((opp.fees || '').toLowerCase() === 'y')) return false;
+        // hide expired
+        const d = new Date(opp.deadline);
+        if (!isNaN(d) && d < todayStart) return false;
+        return true;
+    });
+}
+
 // Populate opportunities table
 function populateOpportunitiesMainTable() {
     const container = document.querySelector('.repobox');
@@ -336,8 +379,30 @@ function populateOpportunitiesMainTable() {
 
     // Optionally hide fee-charged opportunities when the toggle is enabled
     if (activeFilters.hideFees) {
-        filtered = filtered.filter(opp => opp.fees !== 'y');
+        filtered = filtered.filter(opp => ((opp.fees || '').toLowerCase() !== 'y'));
     }
+
+    // Filter out opportunities whose deadline is before today and sort by
+    // nearest deadline first. Treat invalid/missing deadlines as keepers
+    // and place them at the end when sorting.
+    (function filterAndSortByDeadline() {
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
+
+        filtered = filtered.filter(opp => {
+            const d = new Date(opp.deadline);
+            if (isNaN(d)) return true; // keep items with no/invalid deadline
+            return d >= todayStart;
+        });
+
+        filtered.sort((a, b) => {
+            const da = new Date(a.deadline);
+            const db = new Date(b.deadline);
+            const ta = isNaN(da) ? Infinity : da.getTime();
+            const tb = isNaN(db) ? Infinity : db.getTime();
+            return ta - tb;
+        });
+    })();
 
     filtered.forEach((item) => {
         const card = document.createElement('div');
@@ -391,17 +456,17 @@ function populateOpportunitiesMainTable() {
 
         const typeCell = document.createElement('div');
         typeCell.className = 'grid-cell field type-cell';
-        typeCell.style.fontSize = '13px';
         typeCell.innerHTML = `${item.type || '-'}`;
         topRightGrid.appendChild(typeCell);
 
+        // Normalize fees to make comparisons case-insensitive
+        const feeFlag = (item.fees || '').toLowerCase();
         // Only show fee cell when fees is not 'n' (don't display for 'n')
-        if (item.fees !== 'n') {
+        if (feeFlag !== 'n') {
             const feeCell = document.createElement('div');
             feeCell.className = 'grid-cell field fee-cell';
-            feeCell.style.fontSize = '13px';
 
-            if (item.fees === 'y') {
+            if (feeFlag === 'y') {
                 feeCell.classList.add('fee-charged');
                 feeCell.innerHTML = 'fee';
             } else {
@@ -413,17 +478,25 @@ function populateOpportunitiesMainTable() {
 
         card.appendChild(topRightGrid);
 
-        // Format date as "Feb 2, '26'"
-        const date = new Date(item.deadline);
-        const month = date.toLocaleDateString('en-US', { month: 'short' });
-        const day = date.getDate();
-        const year = date.getFullYear().toString().slice(-2);
+        // Format date as "Feb 2, '26'" when possible; otherwise display raw text
+        let deadlineText = '-';
+        if (item.deadline !== undefined && item.deadline !== null && item.deadline !== '') {
+            const parsed = new Date(item.deadline);
+            if (isNaN(parsed)) {
+                // Non-parseable text (e.g. "Not specified") — show as-is
+                deadlineText = item.deadline;
+            } else {
+                const month = parsed.toLocaleDateString('en-US', { month: 'short' });
+                const day = parsed.getDate();
+                const year = parsed.getFullYear().toString().slice(-2);
+                deadlineText = `${month} ${day}, '${year}`;
+            }
+        }
 
         // Deadline column (left, new row)
         const deadlineColumnDiv = document.createElement('div');
-        deadlineColumnDiv.style.fontSize = '13px';
         deadlineColumnDiv.className = 'field date-cell';
-        deadlineColumnDiv.innerHTML = `<strong>Deadline: </strong> ${month} ${day}, '${year}`;
+        deadlineColumnDiv.innerHTML = `<strong>Deadline: </strong> ${deadlineText}`;
         card.appendChild(deadlineColumnDiv);
 
         container.appendChild(card);
@@ -588,11 +661,25 @@ document.querySelectorAll('a.info').forEach(infoLink => {
     // Remove any inline display so CSS controls layout (we'll manage max-height)
     optionDetails.style.display = '';
 
+    // helper to hide/restore only the inner content nodes (keep container border visible)
+    // Use opacity + pointer-events so layout/scrollHeight is unaffected.
+    const setInnerContentHidden = (hide) => {
+        Array.from(optionDetails.children).forEach((ch) => {
+            try {
+                ch.style.transition = 'opacity 0ms linear';
+                ch.style.opacity = hide ? '0' : '';
+                ch.style.pointerEvents = hide ? 'none' : '';
+            } catch (err) { /* ignore */ }
+        });
+    };
+
     if (initiallyHidden) {
-        // Start collapsed
+        // Start collapsed: keep the container present but hide its inner text
         optionDetails.classList.remove('open');
         optionDetails.style.maxHeight = '0px';
         optionDetails.style.overflow = 'hidden';
+        // hide only the content so the border/background remains visible
+        setInnerContentHidden(true);
         infoLink.textContent = '+';
         infoLink.setAttribute('aria-expanded', 'false');
     } else {
@@ -603,6 +690,8 @@ document.querySelectorAll('a.info').forEach(infoLink => {
         // set explicit maxHeight with a small buffer so the bottom won't clip
         optionDetails.style.maxHeight = (optionDetails.scrollHeight + 8) + 'px';
         optionDetails.style.overflow = '';
+        // ensure inner content is visible when starting open
+        setInnerContentHidden(false);
         // Force layout then restore transition so future toggles animate
         optionDetails.getBoundingClientRect();
         requestAnimationFrame(() => { optionDetails.style.transition = prevTransition; });
@@ -617,7 +706,8 @@ document.querySelectorAll('a.info').forEach(infoLink => {
         const isOpen = infoLink.getAttribute('aria-expanded') === 'true';
 
         if (isOpen) {
-            // close
+            // close: hide inner text during collapse so border stays visible
+            setInnerContentHidden(true);
             optionDetails.style.overflow = 'hidden';
             optionDetails.style.maxHeight = (optionDetails.scrollHeight + 8) + 'px';
             requestAnimationFrame(() => {
@@ -628,12 +718,13 @@ document.querySelectorAll('a.info').forEach(infoLink => {
             infoLink.setAttribute('aria-expanded', 'false');
 
             optionDetails.addEventListener('transitionend', function onClose(e) {
-                if (e.propertyName !== 'max-height') return;
+                if (e.propertyName !== 'max-height' && e.propertyName !== 'maxHeight') return;
                 optionDetails.style.overflow = '';
                 optionDetails.removeEventListener('transitionend', onClose);
             }, { once: true });
         } else {
-            // open
+            // open: hide inner text until expand animation finishes
+            setInnerContentHidden(true);
             optionDetails.classList.add('open');
             optionDetails.style.overflow = 'hidden';
             optionDetails.style.maxHeight = '0px';
@@ -643,14 +734,45 @@ document.querySelectorAll('a.info').forEach(infoLink => {
             infoLink.textContent = '−';
             infoLink.setAttribute('aria-expanded', 'true');
 
-            // no pop/jiggle animation — open without extra animation class
+            // Restore inner content when the expand transition finishes. Accept
+            // multiple propertyName variants and use a timeout fallback. Wait an
+            // extra frame before clearing maxHeight to avoid a bounce where the
+            // element shrinks and cuts off content.
+            (function() {
+                const DURATION = 240; // ms — slightly longer than CSS 200ms
+                let timer = null;
+                const cleanup = (fromEvent) => {
+                    // reveal inner text
+                    setInnerContentHidden(false);
+                    // measure the new content height and lock maxHeight to avoid
+                    // an instantaneous shrink/bounce when we clear the inline
+                    // maxHeight. Then clear it after a short delay so the
+                    // element becomes auto-sized.
+                    const newH = optionDetails.scrollHeight;
+                    optionDetails.style.maxHeight = newH + 'px';
+                    optionDetails.style.overflow = '';
+                    // give browser a moment to reflow with revealed content,
+                    // then clear the fixed maxHeight so natural layout resumes.
+                    requestAnimationFrame(() => {
+                        window.setTimeout(() => {
+                            // use 'none' so the element is not constrained by max-height
+                            // (clearing to '' would fall back to the stylesheet's
+                            // `max-height: 0` and cause a shrink)
+                            optionDetails.style.maxHeight = 'none';
+                        }, 40);
+                    });
+                    if (timer) { clearTimeout(timer); timer = null; }
+                };
 
-            optionDetails.addEventListener('transitionend', function onOpen(e) {
-                if (e.propertyName !== 'max-height') return;
-                optionDetails.style.maxHeight = '';
-                optionDetails.style.overflow = '';
-                optionDetails.removeEventListener('transitionend', onOpen);
-            }, { once: true });
+                const onOpen = (e) => {
+                    if (!e || !e.propertyName || e.propertyName === 'max-height' || e.propertyName === 'maxHeight') {
+                        cleanup(true);
+                    }
+                };
+
+                optionDetails.addEventListener('transitionend', onOpen, { once: true });
+                timer = window.setTimeout(() => { cleanup(false); }, DURATION);
+            })();
         }
     });
 
