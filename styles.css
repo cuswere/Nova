@@ -289,7 +289,7 @@ span.sublink {
     -webkit-user-select: text;
     -moz-user-select: text;
     -ms-user-select: text;
-    transition: max-height 200ms steps(4,end), padding 200ms steps(2,end);
+    transition: max-height 200ms steps(4,end);
 }
 
 /* allow sublinks inside the option-details box to wrap */
