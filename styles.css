@@ -259,16 +259,16 @@ span.option-btn {
     border: 0;
 }
 span.sublink {
-    color: black;
+    
 }
 
 .option-details {
-    font-size: 16px;
+    font-size: 18px;
     border: 1px solid red;
     border-top: 0;
     width: 140px;
     max-width: 100%;
-    color: red;
+    color: black;
     text-align: center;
     display: flex;
     justify-content: center;
@@ -301,7 +301,7 @@ span.sublink {
 
 /* Open state */
 .option-details.open {
-    padding: 4px 2px;
+    padding: 6px 2px;
     /* JS sets an inline max-height to the content height during expand;
        avoid a fixed max-height here so the element can grow naturally. */
     will-change: max-height;
@@ -725,15 +725,16 @@ strong {
 /* Only animate font-size when NOT active so pressing is immediate
    but releasing transitions smoothly back to the normal size. */
 .custom-selected:not(:active) {
-    transition: font-size 50ms steps(1, end);
+    
 }
 
 .custom-selected:active {
-    font-size: 12px;
+    font-size: 13px;
 }
 .custom-selected:hover {
-    background: white;
+    background-color: var(--darkgray);
 }
+
 
 /* Arrow glyph: use static glyphs (no rotation) and center on the right */
 .custom-selected::after {
@@ -761,12 +762,9 @@ strong {
 }
 
 .custom-selected:active::after {
-    background: white;
+    background-color: var(--darkgray);
 }
-.custom-selected:active {
-    background: blue !important;
-    color: white !important;
-}
+
 .custom-options {
     position: absolute;
     left: 0; right: 0;
@@ -782,16 +780,52 @@ strong {
 }
 .custom-options[aria-hidden="false"] { display: block; }
 .custom-options li {
+    position: relative;
     padding: 8px 10px;
     cursor: pointer;
     font-family: arial;
     font-size: 14px;
     color: black;
     background: var(--gray);
+    overflow: visible;
 }
-.custom-options li:hover,
-.custom-options li[aria-selected="true"] {
-    background: blue;
+
+/* static border drawn by a non-scaling pseudo-element so scaling the
+   label doesn't affect border position/size */
+.custom-options li::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    box-sizing: border-box;
+    outline: 1px dashed transparent;
+    outline-offset: -4px;
+    pointer-events: none;
+}
+.custom-options li:hover::after,
+.custom-options li[aria-selected="true"]::after {
+    outline-color: blue;
+}
+
+.custom-options li:active::after {
+    outline-offset: -3px;
+    outline-style: solid;
+}
+.custom-options li:active {
+    background-color: blue;
+}
+
+/* scale only the inner label to avoid layout shifts */
+.custom-options li .opt-label {
+    display: inline-block;
+    transform: scale(1);
+    transform-origin: left center;
+}
+.custom-options li:hover .opt-label,
+.custom-options li[aria-selected="true"] .opt-label {
+    color: blue;
+    transform: scale(1.25);
+}
+.custom-options li:active .opt-label {
     color: white;
 }
 .custom-options li.disabled {
@@ -808,7 +842,7 @@ strong {
     cursor: pointer;
 }
 .filter-dropdown:hover {
-    background: white;
+    background-color: var(--darkgray);
 }
 
 .checkbox-label {
@@ -900,9 +934,18 @@ strong {
 .custom-options li.clear-filter-option {
     color: #ff0000 !important;
 }
-.custom-options li.clear-filter-option:hover {
-    color: white !important;
-    background: red !important;
+
+.custom-options li.clear-filter-option:hover .opt-label,
+.custom-options li.clear-filter-option[aria-selected="true"] .opt-label {
+    color: red !important;
+}
+
+.custom-options li.clear-filter-option:hover::after {
+    outline-color: red;
+}
+
+.custom-options li.clear-filter-option:active {
+    background-color: red !important;
 }
 
 .active-filter {

@@ -186,7 +186,12 @@ function syncCustomSelectFromNative(nativeSelect) {
     Array.from(nativeSelect.options).forEach(opt => {
         if (opt.disabled || opt.value === 'TYPE_LABEL') return;
         const li = document.createElement('li');
-        li.textContent = opt.textContent;
+        // wrap visible text in a span so we can scale the text without
+        // affecting the li's border/outline layout
+        const span = document.createElement('span');
+        span.className = 'opt-label';
+        span.textContent = opt.textContent;
+        li.appendChild(span);
         li.dataset.value = opt.value;
 
         // copy any classes present on the native <option> (e.g. clear-filter-option)
