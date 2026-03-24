@@ -646,11 +646,11 @@ function setupFilterListeners() {
 
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
-        loadOpportunities();
+        if (document.querySelector('.repobox')) loadOpportunities();
         setupFilterListeners();
     });
 } else {
-    loadOpportunities();
+    if (document.querySelector('.repobox')) loadOpportunities();
     setupFilterListeners();
 }
 

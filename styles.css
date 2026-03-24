@@ -1,18 +1,3 @@
-@font-face {
-    font-family: "redaction50";
-    src: url("./fonts/Redaction_50-Regular.woff2") format("woff2");
-}
-@font-face {
-    font-family: "redaction70";
-    src: url("./fonts/Redaction_35-Regular.woff2") format("woff2");
-    font-weight: 400;
-    font-style: normal;
-}
-@font-face {
-    font-family: "normal";
-    src: url("/fonts/Windows-Regular.woff2");
-}
-
 :root {
     --gray: #dfdfdf;
     --darkgray: #c0c0c0;
@@ -720,6 +705,7 @@ strong {
     transform-origin: left center;
     font-size: 14px;
     display: inline-block;
+    height: 22px;
 }
 
 /* Only animate font-size when NOT active so pressing is immediate
@@ -746,23 +732,25 @@ strong {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 22px;
-    height: 22px;
+    width: 21px;
+    height: 21px;
     font-size: 14px;
-    outline: 1px solid black;
+    border: 1px solid black;
+    border-width: 0 0 0 1px;
     line-height: 1;
     color: black;
     z-index: 2;
 }
 .custom-select.open .custom-selected::after {
     content: '▾';
+    border-width: 0;
     outline: 1px solid white;
-    outline-offset: -1px;
+    outline-offset: -2px;
     color: white;
 }
 
 .custom-selected:active::after {
-    background-color: var(--darkgray);
+
 }
 
 .custom-options {
