@@ -5,10 +5,12 @@ let activeFilters = {
     hideFees: false
 };
 
-// Track whether a pointer is currently pressed so expand can wait for release
-let pointerIsDown = false;
-document.addEventListener('pointerdown', () => { pointerIsDown = true; }, { capture: true });
-document.addEventListener('pointerup', () => { pointerIsDown = false; }, { capture: true });
+// --- Feedback form config ---
+// Paste your Google Form's formResponse URL and entry.XXXXXXXXX field IDs here.
+// See README.md for how to find them. Leave blank to show a "not connected" notice.
+const FEEDBACK_FORM_ACTION = '';
+const FEEDBACK_ENTRY_NAME = '';
+const FEEDBACK_ENTRY_SUGGESTION = '';
 
 // Animate the `.applied-filters` container when filters are added/removed.
 function animateFilterArea(container, startingHeight) {
@@ -100,6 +102,11 @@ function animateFilterArea(container, startingHeight) {
 
 // Load opportunities from static JSON file
 async function loadOpportunities() {
+    const container = document.querySelector('.repobox');
+    if (container) {
+        container.innerHTML = '';
+        container.appendChild(makeStatusMessage('Loading…'));
+    }
     try {
         const response = await fetch('data/opportunities.json');
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -111,7 +118,19 @@ async function loadOpportunities() {
         populateOpportunitiesMainTable();
     } catch (error) {
         console.error('Error loading opportunities:', error);
+        if (container) {
+            container.innerHTML = '';
+            container.appendChild(makeStatusMessage("Couldn't load opportunities."));
+        }
     }
+}
+
+// Build a simple centered status message element for the opportunities list
+function makeStatusMessage(text) {
+    const el = document.createElement('div');
+    el.className = 'repo-status-message';
+    el.textContent = text;
+    return el;
 }
 
 // Read URL query parameters and apply initial filters.
@@ -241,6 +260,7 @@ function syncCustomSelectFromNative(nativeSelect) {
         if (isOpen) wrapper.classList.add('open'); else wrapper.classList.remove('open');
         if (!isOpen) {
             // reset active index when closed
+            const optionEls = getOptionEls();
             if (activeIndex >= 0 && optionEls[activeIndex]) {
                 optionEls[activeIndex].setAttribute('aria-selected', 'false');
                 optionEls[activeIndex].tabIndex = -1;
@@ -249,28 +269,19 @@ function syncCustomSelectFromNative(nativeSelect) {
         }
     };
 
-    // track whether the open came from keyboard (so we know whether to auto-focus first option)
-    let openedViaKeyboard = false;
-    selectedDiv.addEventListener('click', (e) => {
+    selectedDiv.addEventListener('click', () => {
         const isOpen = ul.getAttribute('aria-hidden') === 'false';
-        openedViaKeyboard = false;
         open(!isOpen);
-        if (!isOpen && openedViaKeyboard) {
-            const firstIdx = getOptionEls().findIndex(el => !el.classList.contains('disabled'));
-            if (firstIdx !== -1) setActive(firstIdx);
-        }
     });
 
     selectedDiv.addEventListener('keydown', (e) => {
         if (e.key === 'ArrowDown') {
             e.preventDefault();
-            openedViaKeyboard = true;
             open(true);
             const firstIdx = getOptionEls().findIndex(el => !el.classList.contains('disabled'));
             if (firstIdx !== -1) setActive(firstIdx);
         } else if (e.key === 'ArrowUp') {
             e.preventDefault();
-            openedViaKeyboard = true;
             open(true);
             const optionEls = getOptionEls();
             const lastIdx = optionEls.length - 1 - [...optionEls].reverse().findIndex(el => !el.classList.contains('disabled'));
@@ -278,7 +289,6 @@ function syncCustomSelectFromNative(nativeSelect) {
         } else if (e.key === ' ' || e.key === 'Enter') {
             e.preventDefault();
             const isOpen = ul.getAttribute('aria-hidden') === 'false';
-            openedViaKeyboard = true;
             open(!isOpen);
             if (!isOpen) {
                 const firstIdx = getOptionEls().findIndex(el => !el.classList.contains('disabled'));
@@ -409,6 +419,11 @@ function populateOpportunitiesMainTable() {
         });
     })();
 
+    if (filtered.length === 0) {
+        container.appendChild(makeStatusMessage('Nothing matches these filters.'));
+        return;
+    }
+
     filtered.forEach((item) => {
         const card = document.createElement('div');
         card.className = 'opportunity-card';
@@ -447,7 +462,7 @@ function populateOpportunitiesMainTable() {
         iconSpan.style.marginLeft = '0px';
 
         const icon = document.createElement('span');
-        icon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 20 20" fill="none" style="margin-left:4px;display:inline;vertical-align:middle"><path d="M14.5 2.5H17.5V5.5" stroke="#00ff" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 10L17.5 2.5" stroke="#00ff" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><path d="M17.5 10.5V17.5H2.5V2.5H9.5" stroke="#00ff" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+        icon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 20 20" fill="none" style="margin-left:4px;display:inline;vertical-align:middle"><path d="M14.5 2.5H17.5V5.5" stroke="blue" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 10L17.5 2.5" stroke="blue" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><path d="M17.5 10.5V17.5H2.5V2.5H9.5" stroke="blue" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 
         iconSpan.appendChild(icon);
         linkContent.appendChild(iconSpan);
@@ -463,6 +478,13 @@ function populateOpportunitiesMainTable() {
         typeCell.className = 'grid-cell field type-cell';
         typeCell.innerHTML = `${item.type || '-'}`;
         topRightGrid.appendChild(typeCell);
+
+        if (item.country) {
+            const countryCell = document.createElement('div');
+            countryCell.className = 'grid-cell field country-cell';
+            countryCell.innerHTML = item.country;
+            topRightGrid.appendChild(countryCell);
+        }
 
         // Normalize fees to make comparisons case-insensitive
         const feeFlag = (item.fees || '').toLowerCase();
@@ -644,14 +666,64 @@ function setupFilterListeners() {
 }
 
 
+// Wire up the feedback form to submit to a Google Form's formResponse endpoint.
+function setupFeedbackForm() {
+    const form = document.querySelector('.feedback-form');
+    if (!form) return;
+    const status = form.querySelector('.form-status');
+    const submitBtn = form.querySelector('.form-submit');
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        if (!FEEDBACK_FORM_ACTION || !FEEDBACK_ENTRY_SUGGESTION) {
+            if (status) {
+                status.textContent = 'Feedback form is not yet connected — see README.md to set it up.';
+                status.className = 'form-status form-status-error';
+            }
+            return;
+        }
+
+        const body = new URLSearchParams();
+        if (FEEDBACK_ENTRY_NAME) body.set(FEEDBACK_ENTRY_NAME, form.querySelector('#name').value);
+        body.set(FEEDBACK_ENTRY_SUGGESTION, form.querySelector('#suggestion').value);
+
+        if (submitBtn) submitBtn.disabled = true;
+        try {
+            // Google Forms doesn't return a readable CORS response, so we fire-and-forget with no-cors.
+            await fetch(FEEDBACK_FORM_ACTION, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body
+            });
+            form.reset();
+            if (status) {
+                status.textContent = 'Thanks — sent.';
+                status.className = 'form-status form-status-success';
+            }
+        } catch (error) {
+            console.error('Error submitting feedback:', error);
+            if (status) {
+                status.textContent = 'Something went wrong — please try again.';
+                status.className = 'form-status form-status-error';
+            }
+        } finally {
+            if (submitBtn) submitBtn.disabled = false;
+        }
+    });
+}
+
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         if (document.querySelector('.repobox')) loadOpportunities();
         setupFilterListeners();
+        setupFeedbackForm();
     });
 } else {
     if (document.querySelector('.repobox')) loadOpportunities();
     setupFilterListeners();
+    setupFeedbackForm();
 }
 
 document.querySelectorAll('a.info').forEach(infoLink => {

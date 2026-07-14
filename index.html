@@ -3,44 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Praxis Nova — an updating roster of grants, exhibitions, residencies, and other opportunities for artists.">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='black'/%3E%3Cpath d='M16 2 L19 13 L30 16 L19 19 L16 30 L13 19 L2 16 L13 13 Z' fill='white'/%3E%3C/svg%3E">
     <title>Praxis Nova</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="content-wrapper">
-       
+
         <h1 class="field home"><span class="title praxis">Praxis</span><span class="title nova">nova</span></h1>
-           
+
         <div class="field options-container">
             <div class="opportunity-group">
                 <div class="option-btn-container">
-                    <span class="option-btn"><a href="/opportunities.html">Opportunities</a><a class="info">+</a></span>
+                    <span class="option-btn"><a href="opportunities.html">Opportunities</a><a class="info">+</a></span>
                     <div class="option-details">
-                        <a class="sublink" href="/opportunities.html?type=grant">Grants </a>
-                         + 
-                        <a class="sublink" href="/opportunities.html?type=exhibition">Exhibitions</a>
-                         + 
-                        <a class="sublink" href="/opportunities.html?type=residency">Residencies</a>
-                         + 
+                        <a class="sublink" href="opportunities.html?type=grant">Grants </a>
+                         +
+                        <a class="sublink" href="opportunities.html?type=exhibition">Exhibitions</a>
+                         +
+                        <a class="sublink" href="opportunities.html?type=residency">Residencies</a>
+                         +
                         <span class="sublink">More</span>
                     </div>
                 </div>
-                
+
             </div>
             <div class="option-btn-container">
-                <span style="display: none;" class="option-btn twoline"><a href="/idk">Writing<br>Assistance</a><br></span>
-                
-                <div style="display: none;" class="option-details">
-                    <a class="sublink">Apply</a> 
-                        + 
-                    <a class="sublink">Learn More</a> 
-                </div>
-                <a style="display: none;" class="grant info">+</a>
-
-                <span class="option-btn" style="margin-top: 8px;"><a href="/feedback.html">Give<br>Feedback</a><br></span>
+                <span class="option-btn"><a href="feedback.html">Give<br>Feedback</a><br></span>
             </div>
         </div>
-        
+
+        <!-- Reserved mount point for the future interactive nova mascot (see README). -->
+        <div id="mascot-root"></div>
     </div>
 
     <script src="app.js" defer></script>

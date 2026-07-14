@@ -1,11 +1,7 @@
 :root {
     --gray: #dfdfdf;
     --darkgray: #c0c0c0;
-    --blue: #1fa3fd;
-    --area-box: inset -1px -1px #0a0a0a,inset 1px 1px #dfdfdf,inset -2px -2px grey,inset 2px 2px #fff;
-    --field-box: inset -1px -1px #fff,inset 1px 1px grey,inset -2px -2px #dfdfdf,inset 2px 2px #0a0a0a;
     --sunk-box: inset -1px -1px #fff,inset 1px 1px grey,inset -2px -2px #dfdfdf,inset 2px 2px #0a0a0a;
-    --shallow-box: inset -1px -1px #dfdfdf,inset 1px 1px grey;
 }
 
 * {
@@ -52,7 +48,7 @@ body {
 }
 
 .content-wrapper {
-    border: 2px solid #00ff;
+    border: 2px solid blue;
     border-width: 0 1px 0 1px;
     background: var(--darkgray);
     width: 95%;
@@ -89,9 +85,6 @@ h1.field {
     border-color: threedface;
     border-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='5' height='5' fill='gray' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M0 0h5v5H0V2h2v1h1V2H0' fill='%23fff'/%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M0 0h4v4H0V1h1v2h2V1H0'/%3E%3C/svg%3E") 2;
 }
-.area {
-    box-shadow: var(--area-box);
-}
 
 .title {
     font-weight: normal;
@@ -118,9 +111,6 @@ h1.field {
 }
 .title-option:nth-child(1) {
     border-right: 0;
-}
-.title-option:nth-child(3) {
-    border-left: 0;
 }
 .title-option:hover {
     border-color: black;
@@ -179,22 +169,17 @@ a {
    
 }
 
+/* Reserved for the future interactive nova mascot; empty and invisible until then. */
+#mascot-root {
+    width: 0;
+    height: 0;
+}
+
 .opportunity-group {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 0.0rem;
-}
-
-.sub-options {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.0rem;
-    width: 75%;
-}
-.sub-options > * {
-    width: 100%;
 }
 
 .option-btn-container {
@@ -230,21 +215,9 @@ span.option-btn {
     border-left: 0 !important;
     text-decoration: none !important;
 }
-.grant.info {
-    font-size: clamp(12px, 5vw, 24px);
-    color: blue;
-    border: 1px solid blue;
-    border-left: 1px solid blue !important;
-    border-width: 0 1px 1px 0;
-    padding: 3px 7px;
-}
-
 
 .sublink {
     border: 0;
-}
-span.sublink {
-    
 }
 
 .option-details {
@@ -302,12 +275,7 @@ span.sublink {
     color: blue;
 }
 
-.sub-options.option-btn-container {
-    width: 75%;
-}
-
-.option-btn a:hover,
-a.subbtn:hover {
+.option-btn a:hover {
     color: red;
     border-color: red;
     border-right-color: red !important;
@@ -316,13 +284,8 @@ a.subbtn:hover {
     color: red;
     text-decoration: underline;
 }
-.grant.info:hover {
-    color: red;
-    border-color: red !important;
-}
 
 .option-btn a:active,
-.grant.info:active,
 .option-details a:active{
     background: red;
     color: red;
@@ -336,11 +299,6 @@ a.subbtn:hover {
     padding:10px 8px;
     padding-bottom: 0;
     overflow: visible;
-}
-
-.column-title {
-    text-align: center;
-    margin-bottom: 6px;
 }
 
 .repo {
@@ -358,11 +316,10 @@ a.subbtn:hover {
 }
 
 .repobox {
-    padding: 2px 2px;
     padding: 2px 0px 2px 2px;
     padding-bottom: 10px;
     width: 100%;
-    flex: 1;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
+    flex: 1;
     overflow-y: scroll;
     overflow-x: hidden;
     font-size: 16px;
@@ -372,15 +329,11 @@ a.subbtn:hover {
     position: relative;
 }
 
-table {
-    clip-path: inset(2px 0px);
-    table-layout: fixed;
-    width: 100%;
-}
-
-table tbody {
-  display: table;
-  width: 100%;
+.repo-status-message {
+    margin: auto;
+    padding: 8px;
+    color: black;
+    text-align: center;
 }
 
 .feedback {
@@ -430,59 +383,17 @@ table tbody {
     padding-top: 8px;
 }
 
-tr {
-    border-bottom: 1px solid black;
-    background:var(--darkgray);
-}
-
-
-td {
-    padding: 8px 4px;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    vertical-align: top;
-}
-
-td:nth-child(1) {
-    width: 25%;
-}
-
-td:nth-child(2) {
-    width: 50%;
-    border-left: 1px solid black;
+.form-status {
+    min-height: 1em;
+    margin-top: 8px;
     text-align: center;
+    font-size: 14px;
 }
-
-td:nth-child(3) {
-    width: 25%;
-    border-left: 1px solid black;
-    text-align: center;
-}
-
-td a {
+.form-status-success {
     color: blue;
-    text-decoration: none;
-    padding: 4px 6px;
-    display: inline;
-    word-break: break-word;
-    -webkit-box-decoration-break: clone;
-    box-decoration-break: clone;
 }
-
-td a span {
-    display: inline;
-    white-space: nowrap;
-    margin-left: 4px;
-}
-td a:hover {
-    color: white;
-    text-shadow: 1px 0px 2px blue, -1px -0px 2px blue;
-    text-decoration: underline;
-    outline: 2px solid blue;
-    outline-offset: -2px;
-}
-td a:hover span svg {
-    stroke: white;
+.form-status-error {
+    color: red;
 }
 
 .opportunity-card {
@@ -522,10 +433,6 @@ td a:hover span svg {
     outline: 2px solid blue;
     outline-offset: -2px;
 }
-.opportunity-card:nth-child(even) a:hover .link-text {
-    
-}
-
 .opportunity-card a:hover .link-text span svg {
     stroke: white;
 }
@@ -544,10 +451,6 @@ td a:hover span svg {
     align-items: center;
     text-align: center;
     justify-content: center;
-    
-}
-
-.type-cell {
     
 }
 
@@ -586,7 +489,6 @@ strong {
     min-height: 0;
     /* allow positioning of decorative gutter inside padding */
     position: relative;
-    --filters-padding-right: 10px;
 }
 
 .filters-title {
@@ -678,20 +580,21 @@ strong {
 
 .custom-selected {
     padding: 4px 6px;
-    position: relative;
     /* reserve space for the boxed arrow button on the right */
     padding-right: 46px;
+    position: relative;
     background: var(--gray);
     border: 1px solid black;
     cursor: pointer;
     user-select: none;
     font-family: arial;
-    font-size: 12px;
+    font-size: 14px;
     color: black;
-    display: flex;
-    align-items: center;
+    display: inline-block;
     width: 100%;
+    height: 22px;
     box-sizing: border-box;
+    transform-origin: left center;
 }
 
 .custom-select.open .custom-selected {
@@ -699,19 +602,6 @@ strong {
     outline-offset: -1px;
     color: white !important;
     background: blue !important;
-}
-
-.custom-selected {
-    transform-origin: left center;
-    font-size: 14px;
-    display: inline-block;
-    height: 22px;
-}
-
-/* Only animate font-size when NOT active so pressing is immediate
-   but releasing transitions smoothly back to the normal size. */
-.custom-selected:not(:active) {
-    
 }
 
 .custom-selected:active {
@@ -747,10 +637,6 @@ strong {
     outline: 1px solid white;
     outline-offset: -2px;
     color: white;
-}
-
-.custom-selected:active::after {
-
 }
 
 .custom-options {

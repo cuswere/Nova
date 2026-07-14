@@ -1,0 +1,10 @@
+{
+  "name": "praxis-nova",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "An updating roster of opportunities for artists.",
+  "scripts": {
+    "publish-data": "node publish.js"
+  }
+}
