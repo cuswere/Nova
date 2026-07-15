@@ -1,872 +1,235 @@
 :root {
-    --gray: #dfdfdf;
-    --darkgray: #c0c0c0;
-    --sunk-box: inset -1px -1px #fff,inset 1px 1px grey,inset -2px -2px #dfdfdf,inset 2px 2px #0a0a0a;
+    --face: #c5c5c5;
+    --face-light: #e6e6e1;
+    --field: #e5e4e1;
+    --ink: #101010;
+    --muted: #565656;
+    --blue: #0000c8;
+    --blue-bright: #1010ff;
+    --red: #d90022;
+    --green: #0d6a42;
+    --desktop: #5b7070;
+    --line: #111;
+    --raise: inset -1px -1px #161616, inset 1px 1px #fff, inset -2px -2px #888, inset 2px 2px #ddd;
+    --sink: inset -1px -1px #fff, inset 1px 1px #7b7b7b, inset -2px -2px #ddd, inset 2px 2px #202020;
+    --sink-shallow: inset 1px 0px #777, inset -1px -1px #eee;
+    --mono: monospace;
 }
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+* { box-sizing: border-box; }
+html { min-height: 100%; background: var(--desktop); }
 body {
-    font-family: "arial";
-    line-height: 1;
-    color: #000000;
-    background: black;
-    display: flex;
-    flex-direction: column;
     min-height: 100vh;
-    align-items: center;
+    margin: 0;
+    color: var(--ink);
+    background: var(--desktop);
+    font: 14px/1.35 var(--mono);
+    font-variant-ligatures: none;
+    -webkit-font-smoothing: none;
 }
 
-/* WebKit/Blink scrollbar: 1px black top+bottom on thumb, 1px black left border on gutter */
-::-webkit-scrollbar {
-    width: 16px;
-}
-::-webkit-scrollbar-corner {
-    background: #dfdfdf;
-}
-/* thumb with 1px black top and bottom lines */
-::-webkit-scrollbar-thumb {
-    background-color: var(--gray);
-    border-radius: 0 !important; /* square thumb */
-    border: 1px solid black;
-    border-width: 1px 1px 1px 1px; /* only top and bottom borders */
-}
-/* track (gutter) — keep your existing background-image and add left border */
-::-webkit-scrollbar-track {
-    background: transparent;
-    border-left: 1px solid black;
-    
-}
+a { color: var(--blue); text-decoration: none; }
+a:hover { text-decoration: underline; }
+button, input, textarea, select { font: inherit; }
+button { cursor: pointer; }
+.option-btn,
+.option-btn a,
+.option-details a,
+.custom-select,
+.custom-options,
+.title-option,
+.remove-filter-btn,
+.form-submit { user-select: none; -webkit-user-select: none; }
 
-/* Keep the thinner scrollbar for the applied-filters area as before */
-.applied-filters {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(0,0,0,0.5) transparent;
+/* Short, stepped page-change signal. The cover clears as the new page is
+   refreshed from its top edge down, rather than splitting into shutters. */
+.screen-refresh {
+    position: absolute;
+    z-index: 9999;
+    inset: 0;
+    /* Shown during the 50ms animation delay. */
+    background: var(--face);
+    pointer-events: none;
+    /* Brief full-frame flash, then reveal the new page from top to bottom. */
+    animation: screen-refresh-down 150ms steps(4, end) 100ms forwards;
+}
+.screen-refresh span { display: none; }
+@keyframes screen-refresh-down {
+    from { background: var(--face); clip-path: inset(0 0 0 0); }
+    to { background: var(--face); clip-path: inset(100% 0 0 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .screen-refresh { display: none; }
 }
 
 .content-wrapper {
-    border: 2px solid blue;
-    border-width: 0 1px 0 1px;
-    background: var(--darkgray);
-    width: 95%;
-    max-width: 800px;
-    display: flex;
-    align-items: center;
-    flex-direction: column;
-    height: 100vh;
-}
-
-h1.field {
-    margin: 1rem;
-    text-align: center;
-    font-size: clamp(14px, 5vw, 28px);
-
-    padding: 10px;
-
-    width: min(300px, 95%);
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    align-items: end;
-    justify-content: center;
-}
-
-.home {
-    
-    display: grid !important;
-    grid-template-columns: auto auto !important;
-}
-
-.field {
-    border-width: 2px;
-    border-style: groove;
-    border-color: threedface;
-    border-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='5' height='5' fill='gray' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M0 0h5v5H0V2h2v1h1V2H0' fill='%23fff'/%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M0 0h4v4H0V1h1v2h2V1H0'/%3E%3C/svg%3E") 2;
-}
-
-.title {
-    font-weight: normal;
-    padding:3px 6px;
-    font-size: 24px;
-    display: inline-flex;
-    align-items: center;
-    vertical-align: middle;
-    border: 1px solid black;
-
-    color: black;
-    background: none;
-}
-
-.title + .title {
-    margin-left: -1px;
-}
-.title-option {
-    font-weight: normal;
-    padding:2px 0px;
-    font-size: 18px;
-    color: blue;
-    border: 1px solid black;
-}
-.title-option:nth-child(1) {
-    border-right: 0;
-}
-.title-option:hover {
-    border-color: black;
-    border-right-color: black !important;
-    text-decoration: underline;
-}
-.title-option:active {
-    color: red;
-}
-
-.praxis {
-    color: black;
-    font-weight: normal;
-    background: transparent;
-    text-shadow: none;
-}
-
-.nova {
-    font-weight: normal;
-    margin-left: -1px;
-    background: black;
-
-    color: white;
-    text-shadow: 0 0 4px white;
-}
-
-a {
-    text-decoration: none;
-    cursor: pointer;
-}
-
-.options-container {
-    display: grid;
-    padding: 10px;
-    width: min(600px, 95%);
-    max-height: fit-content;
-    align-content: start;
-    justify-content: center;
-    gap: 4px;
-    min-height: 250px;
-}
-
-
-@media (min-width: 600px) {
-    .columns {
-        grid-template-columns: 2fr 1fr;
-        height: 350px !important;
-        min-height: 0 !important;
-    }
-    .options-container {
-        grid-template-columns: 1fr 1fr;
-    }
-    .repo {
-        min-height: 0 !important;
-    }
-   
-}
-
-/* Reserved for the future interactive nova mascot; empty and invisible until then. */
-#mascot-root {
-    width: 0;
-    height: 0;
-}
-
-.opportunity-group {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.0rem;
-}
-
-.option-btn-container {
-    display: flex;
-    flex-direction: column; 
-    align-items: center;
-    margin-bottom: 0.6rem;
-
-    user-select: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-}
-
-span.option-btn {
-    font-size: 36px;
-    text-align: center;
-    color: blue;
-    background: silver;
-    width: fit-content;
-
-    display: flex;
     position: relative;
-    z-index: 3;
+    width: min(1120px, calc(100% - 28px));
+    min-height: 100vh;
+    margin: 0 auto;
+    padding: 16px;
+    background: var(--face);
+    border-left: 1px solid var(--line);
+    border-right: 1px solid var(--line);
+    box-shadow: 6px 0 0 rgba(0,0,0,.13), -6px 0 0 rgba(0,0,0,.13);
 }
 
-.option-btn a {
-    padding: 6px 10px;
-    border: 1px solid blue;
-    color: blue;
-}
-.info {
-    border-left: 0 !important;
-    text-decoration: none !important;
-}
+.field { background: var(--face); box-shadow: var(--raise); }
 
-.sublink {
-    border: 0;
-}
-
-.option-details {
-    font-size: 18px;
-    border: 1px solid red;
-    border-top: 0;
-    width: 140px;
-    max-width: 100%;
-    color: black;
-    text-align: center;
+/* Shared page-title bar: identity and page name on the left, page actions right. */
+.page-header {
+    width: 100%;
+    min-height: 31px;
+    margin: 0 0 8px;
+    padding: 4px 5px;
     display: flex;
-    justify-content: center;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 6px;
-    cursor: default;
+    gap: 0;
+    color: #fff;
+    background: linear-gradient(90deg, var(--blue), var(--blue-bright));
+    font-size: 13px;
+    font-weight: 600;
+}
+.page-title { display: flex; align-items: center; min-width: 0; margin: 0; font: inherit; }
+.page-title::before { content: "PRAXIS NOVA /"; align-self: stretch; display: flex; align-items: center; padding: 0 3px; margin-right: 6px; letter-spacing: .04em; }
+.title { color: inherit; font-size: 14px; font-weight: 600; letter-spacing: .05em; }
+.title-options { display: flex; gap: 6px; margin-left: auto; }
+.title-option { display: inline-flex; align-items: center; min-height: 23px; padding: 4px 10px; color: var(--ink); background: var(--face); box-shadow: var(--raise); font-size: 12px; }
+.title-option:hover { color: var(--ink); background: var(--face-light); text-decoration: none; }
+.title-option:active { box-shadow: var(--sink); }
 
-    /* Collapsible animation: control height, padding and opacity.
-       We keep `display:flex` so layout is stable; collapse via max-height. */
-    overflow: hidden;
-    max-height: 0;
-    padding: 0 2px;
-    margin-top: -1px; /* small gap so border seam doesn't visually clash */
-    position: relative;
-    z-index: 1;
-    user-select: text;
-    -webkit-user-select: text;
-    -moz-user-select: text;
-    -ms-user-select: text;
-    transition: max-height 200ms steps(4,end);
-}
+.home-wordmark { display: flex; width: fit-content; margin: 0 auto 15px; color: var(--ink); font-size: clamp(30px, 5vw, 50px); font-weight: 600; letter-spacing: -.12em; line-height: 1; }
+.home-wordmark span { padding: 5px 12px; }
+.home-wordmark span + span { margin-left: -1px; color: #fff; background: var(--ink); text-shadow: 0 0 4px #fff; }
 
-/* allow sublinks inside the option-details box to wrap */
-.option-details .sublink,
-.option-details a.sublink {
-    display: inline-block;
-    white-space: normal;
-}
+/* Home */
+.options-container { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding: 12px; min-height: 285px; }
+.opportunity-group, .option-btn-container { display: flex; flex-direction: column; align-items: stretch; }
+.option-btn-container { min-width: 0; }
+span.option-btn { display: flex; background: var(--face); box-shadow: var(--raise); font-family: var(--mono); font-size: clamp(23px, 3.3vw, 37px); line-height: .98; }
+.option-btn a { flex: 1; padding: 12px; color: var(--blue); }
+.option-btn a:hover { color: var(--blue); text-decoration: underline; outline: 3px solid var(--blue); outline-offset: -8px;}
+.option-btn .info { flex: 0 0 46px; display: grid; place-items: center; padding: 0; color: var(--blue); background: none; border: 0; border-left: 1px solid var(--ink); font: inherit; line-height: 1; user-select: none; -webkit-user-select: none; }
+.option-btn .info:hover { text-decoration: none; outline: 3px solid var(--blue); outline-offset: -8px; }
+.option-btn .info:focus-visible { outline: 3px solid var(--blue); outline-offset: -6px; }
 
-/* Open state */
-.option-details.open {
-    padding: 6px 2px;
-    /* JS sets an inline max-height to the content height during expand;
-       avoid a fixed max-height here so the element can grow naturally. */
-    will-change: max-height;
-}
-
-.option-details:has(a) {
-    border: 1px solid blue !important;
-    border-top: 0 !important; 
-}
-.option-details a {
-    padding: 0px;
-    margin-top: 1px;
-    color: blue;
-}
-
-.option-btn a:hover {
-    color: red;
-    border-color: red;
-    border-right-color: red !important;
-}
-.option-details a:hover {
-    color: red;
-    text-decoration: underline;
-}
+.option-details { display: none; padding: 8px; background: var(--field); }
+.option-details.open { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.option-details-row { display: contents; color: var(--ink); font-size: 16px; }
+.option-details a { text-decoration: underline; text-decoration-thickness: 2px; }
+.option-details a:hover { outline: 2px solid var(--blue); outline-offset: 2px;}
 
 .option-btn a:active,
-.option-details a:active{
-    background: red;
-    color: red;
-}
+.option-details a:active,
+.option-btn .info:active { color: var(--red); outline-color: var(--red); }
 
-.columns {
-    display: grid;
-    
-    justify-items: center;
-    width: 95%;
-    padding:10px 8px;
-    padding-bottom: 0;
-    overflow: visible;
-}
+/* Opportunity workspace */
+.columns { display: grid; grid-template-columns: minmax(0, 1fr) 240px; align-items: stretch; }
+.repo { position: relative; min-width: 0; min-height: 520px; padding: 3px; background: var(--face); box-shadow: var(--sink); }
+/* Keep the inner bevel above the scrolling cards. An inset shadow painted on
+   .repobox itself sits behind its children, so the cards conceal it as they
+   scroll. This non-scrolling overlay preserves the double recessed frame. */
+.repo::after { content: ""; position: absolute; z-index: 1; inset: 3px; box-shadow: var(--sink); pointer-events: none; }
+.repobox { height: 100%; max-height: 70vh; min-height: 70vh; overflow: auto; background: var(--field); padding: 4px; }
+.repo-status-message { margin: auto; padding: 20px; color: var(--muted); text-align: center; }
+.opportunity-card { display: grid; grid-template-columns: minmax(0, 1fr) 165px; gap: 10px 14px; padding: 13px; border-bottom: 1px solid #999; background: var(--field); }
+.opportunity-card:hover {  }
+.opportunity-card a { min-width: 0; color: var(--ink); font-size: 15px; font-weight: 600; }
+.link-text { display: inline; }
+.opportunity-card a:hover .link-text { color: var(--blue); text-decoration: underline; text-decoration-thickness: 2px; outline: 2px solid var(--blue); outline-offset: 4px; }
+.opportunity-card a:hover .link-text span svg { stroke: #fff; }
+.top-right-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; align-self: start; min-width: 0; max-width: 100%; }
+.grid-cell, .date-cell { min-width: 0; padding: 4px 5px; text-align: center; background: var(--face); box-shadow: var(--raise); font-size: 14px; text-transform: uppercase; letter-spacing: .04em; }
+.grid-cell { display: flex; align-items: center; justify-content: center; overflow: hidden; overflow-wrap: anywhere; white-space: normal; line-height: 1.15; }
+.fee-cell { color: #fff; background: var(--red); box-shadow: none; }
+.date-cell { grid-column: 1 / -1; width: fit-content; color: var(--muted); text-align: left; box-shadow: none; background: transparent; padding: 0; text-transform: none; letter-spacing: 0; font-size: 14px; }
+.date-cell strong { color: var(--ink); font-weight: 600; }
 
-.repo {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    overflow: hidden;
-    box-shadow: var(--sunk-box);
-    padding-right: 2px;
-    margin-bottom: 10px;
-    min-height: 400px;
-    max-height: 400px;
-    min-width: 0;
-}
-
-.repobox {
-    padding: 2px 0px 2px 2px;
-    padding-bottom: 10px;
-    width: 100%;
-    flex: 1;
-    overflow-y: scroll;
-    overflow-x: hidden;
-    font-size: 16px;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    position: relative;
-}
-
-.repo-status-message {
-    margin: auto;
-    padding: 8px;
-    color: black;
-    text-align: center;
-}
-
-.feedback {
-    width: 95%;
-}
-
-.feedback-intro {
-    color: black;
-    padding: 4px 0;
-    min-width: 50%;
-    text-align: center;
-    border: 1px solid black;
-}
-
-/* Feedback form layout (minimal, no visual styling like fonts or colors) */
-.feedback-form {
-    display: flex;
-    flex-direction: column;
-    align-items: center; /* center the form contents horizontally */
-    width: 100%;
-    padding: 8px;
-}
-.feedback-form .form-row {
-    width: 100%;
-    max-width: 700px; /* constrain form width */
-    display: flex;
-    flex-direction: column; /* put label and control on separate lines */
-    gap: 6px;
-    margin: 8px 0;
-    align-items: center;
-}
-.feedback-form label {
-    display: block;
-}
-.form-input,
-.form-textarea {
-    width: 100%;
-    box-sizing: border-box;
-}
-.form-submit {
-    align-self: center; /* center the button */
-}
-
-.form-row.name {
-    max-width: 200px;
-    border-top: 1px dashed black;
-    padding-top: 8px;
-}
-
-.form-status {
-    min-height: 1em;
-    margin-top: 8px;
-    text-align: center;
-    font-size: 14px;
-}
-.form-status-success {
-    color: blue;
-}
-.form-status-error {
-    color: red;
-}
-
-.opportunity-card {
-    padding: 8px 4px;
-    display: grid;
-    background: var(--gray);
-    grid-template-columns: 1fr 1.5fr;
-    gap: 8px;
-    column-gap: 16px;
-    align-items: start;
-    border: 1px solid black;
-    border-width: 0 0px 1px 0;
-}
-
-.opportunity-card a {
-    color: blue;
-    text-decoration: none;
-}
-
-.link-text {
-    display: inline;
-    word-break: break-word;
-    -webkit-box-decoration-break: clone;
-    box-decoration-break: clone;
-    padding: 4px 6px;
-}
-
-.link-text span {
-    display: inline;
-    white-space: nowrap;
-    margin-left: 4px;
-}
-
-.opportunity-card a:hover .link-text {
-    color: blue;
-    text-decoration: underline;
-    outline: 2px solid blue;
-    outline-offset: -2px;
-}
-.opportunity-card a:hover .link-text span svg {
-    stroke: white;
-}
-
-.top-right-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: auto auto;
-    gap: 4px;
-}
-
-.grid-cell {
-    padding: 4px 4px 2px 4px;
-    background: var(--darkgray);
-    display: flex;
-    align-items: center;
-    text-align: center;
-    justify-content: center;
-    
-}
-
-.fee-cell {
-    color: white;
-    /* don't stretch to fill the grid cell; size to content */
-    justify-self: start;
-    width: auto;
-    display: inline-flex;
-    align-items: center;
-    padding: 2px 6px;
-    color: black;
-    background: yellow;
-}
-
-.date-cell {
-    padding: 4px;
-    background: var(--darkgray);
-    width: 75%;
-    min-width: max-content;
-}
-strong {
-    font-weight: normal;
-    color: black;
-}
-
-.filters {
-    display: flex;
-    flex-direction: column;
-    padding: 10px;
-    width: 100%;
-    box-shadow: var(--sunk-box);
-    margin-bottom: 10px;
-    min-width: 0;
-    /* allow internal children to scroll when they reach their own max-height */
-    min-height: 0;
-    /* allow positioning of decorative gutter inside padding */
-    position: relative;
-}
-
-.filters-title {
-    text-align: center;
-    margin-bottom: 4px;
-}
-
-.applied-filters {
-    padding: 4px 0;
-    min-height: 0;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    row-gap: 4px;
-    /* JS controls height via inline styles for animation */
-    width: 100%;
-    overflow-y: auto;
-    /* hide horizontal scrollbar; only allow vertical scroll */
-    overflow-x: hidden;
-    /* avoid layout shifts when the scrollbar appears (no persistent gutter) */
-    scrollbar-width: thin; /* Firefox */
-    scrollbar-color: rgba(0,0,0,0.45) transparent; /* Firefox thumb/track */
-    overscroll-behavior: contain;
-    box-sizing: border-box;
-     /* extend into the parent's right padding so the scrollbar appears inside
-         that padding (doesn't decenter content). Reserve native gutter to avoid
-         layout shift when it appears. */
-     scrollbar-gutter: stable;
-     --scrollbar-gutter-width: 8px; /* actual scrollbar width */
-     /* extend width into parent padding and cancel the extra space with negative margin */
-     width: calc(100% + var(--scrollbar-gutter-width));
-     margin-right: calc(-1 * var(--scrollbar-gutter-width));
-     padding-right: 0;
-}
-
-/* JS controls collapse/expand now; remove :empty rule to avoid conflicts. */
-
-/* WebKit scrollbar styling for a slimmer, unobtrusive scrollbar */
-.applied-filters::-webkit-scrollbar {
-    width: 8px;
-    background: transparent;
-}
-.applied-filters::-webkit-scrollbar-thumb {
-    background: rgba(0,0,0,0.45);
-    border-radius: 0 !important; /* square thumb */
-}
-.applied-filters::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.filter-item {
-    font-size: 14px;
-    color: blue;
-}
-
-.filters-divider {
-    border-top: 2px dashed blue;
-}
-
-.filter-selectors {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    padding-top: 8px;
-    border-top: 2px dashed blue;
-    /* ensure this section is pushed down when .applied-filters grows */
-    margin-top: 0;
-}
-
-/* visually hide native select but keep it accessible to screen readers */
-.visually-hidden {
-    position: absolute !important;
-    height: 1px; width: 1px;
-    overflow: hidden;
-    clip: rect(1px, 1px, 1px, 1px);
-    white-space: nowrap;
-    border: 0; padding: 0; margin: -1px;
-}
-
-/* Custom dropdown styles */
-.custom-select {
-    position: relative;
-    width: 100%;
-    max-width: 150px;
-}
-
-.custom-selected {
-    padding: 4px 6px;
-    /* reserve space for the boxed arrow button on the right */
-    padding-right: 46px;
-    position: relative;
-    background: var(--gray);
-    border: 1px solid black;
-    cursor: pointer;
-    user-select: none;
-    font-family: arial;
-    font-size: 14px;
-    color: black;
-    display: inline-block;
-    width: 100%;
-    height: 22px;
-    box-sizing: border-box;
-    transform-origin: left center;
-}
-
-.custom-select.open .custom-selected {
-    outline: 2px solid blue;
-    outline-offset: -1px;
-    color: white !important;
-    background: blue !important;
-}
-
-.custom-selected:active {
-    font-size: 13px;
-}
-.custom-selected:hover {
-    background-color: var(--darkgray);
-}
-
-
-/* Arrow glyph: use static glyphs (no rotation) and center on the right */
-.custom-selected::after {
-    content: '▸';
-    position: absolute;
-    right: 0px;
-    top: 50%;
-    transform: translateY(-50%);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 21px;
-    height: 21px;
-    font-size: 14px;
-    border: 1px solid black;
-    border-width: 0 0 0 1px;
-    line-height: 1;
-    color: black;
-    z-index: 2;
-}
-.custom-select.open .custom-selected::after {
-    content: '▾';
-    border-width: 0;
-    outline: 1px solid white;
-    outline-offset: -2px;
-    color: white;
-}
-
-.custom-options {
-    position: absolute;
-    left: 0; right: 0;
-    margin: 4px 0 0 0;
-    padding: 0;
-    list-style: none;
-    background: var(--gray);
-    color: black;
-    overflow: auto;
-    border: 1px solid #333;
-    display: none;
-    z-index: 200;
-}
+/* Filters */
+.filters { align-self: start; padding: 8px; }
+.filters-title { padding: 2px 4px; font-weight: 600; font-size: 12px; letter-spacing: .05em; }
+.filters-divider { border-top: 1px solid #777; padding-top: 8px; }
+.applied-filters { display: flex; flex-wrap: wrap; gap: 5px; min-height: 38px; max-height: 165px; overflow: auto; border: 1px solid var(--ink); padding: 7px; background: var(--field); }
+.filter-item { font-size: 14px; color: var(--muted); }
+.active-filter { display: flex; gap: 5px; align-items: center; padding: 2px 4px; color: #fff; background: var(--blue-bright); }
+.exclude-filter { background: var(--red); }
+.remove-filter-btn { width: 15px; height: 15px; padding: 0; border: 1px solid currentColor; color: inherit; background: transparent; line-height: 1; }
+.remove-filter-btn:hover { color: var(--ink); background: #fff; }
+.filter-selectors { display: flex; flex-direction: column; gap: 9px; padding: 8px 4px; }
+.custom-select { position: relative; width: 100%; }
+.custom-selected { position: relative; width: 100%; min-height: 23px; padding: 4px 29px 4px 7px; color: var(--ink); background: #fff; box-shadow: var(--sink); cursor: pointer; font-size: 12px; line-height: 15px; }
+.custom-selected::after { content: "▼"; position: absolute; top: 2px; right: 2px; bottom: 2px; display: grid; place-items: center; width: 19px; color: var(--ink); background: var(--face); box-shadow: var(--raise); font-size: 9px; line-height: 1; }
+.custom-selected:hover::after { background: var(--face-light); }
+.custom-select.open .custom-selected { color: var(--ink); background: #fff; outline: 1px dotted var(--ink); outline-offset: -4px; }
+.custom-select.open .custom-selected::after { box-shadow: var(--sink); padding-top: 1px; background: var(--face); }
+.custom-options { position: absolute; z-index: 20; top: 100%; right: 0; left: 0; display: none; max-height: 230px; margin: 1px 0 0; padding: 2px; overflow: auto; list-style: none; background: var(--face); border: 1px solid var(--ink); box-shadow: 2px 2px 0 rgba(0,0,0,.5); }
 .custom-options[aria-hidden="false"] { display: block; }
-.custom-options li {
-    position: relative;
-    padding: 8px 10px;
-    cursor: pointer;
-    font-family: arial;
-    font-size: 14px;
-    color: black;
-    background: var(--gray);
-    overflow: visible;
-}
-
-/* static border drawn by a non-scaling pseudo-element so scaling the
-   label doesn't affect border position/size */
-.custom-options li::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    box-sizing: border-box;
-    outline: 1px dashed transparent;
-    outline-offset: -4px;
-    pointer-events: none;
-}
-.custom-options li:hover::after,
-.custom-options li[aria-selected="true"]::after {
-    outline-color: blue;
-}
-
-.custom-options li:active::after {
-    outline-offset: -3px;
-    outline-style: solid;
-}
-.custom-options li:active {
-    background-color: blue;
-}
-
-/* scale only the inner label to avoid layout shifts */
-.custom-options li .opt-label {
-    display: inline-block;
-    transform: scale(1);
-    transform-origin: left center;
-}
-.custom-options li:hover .opt-label,
-.custom-options li[aria-selected="true"] .opt-label {
-    color: blue;
-    transform: scale(1.25);
-}
-.custom-options li:active .opt-label {
-    color: white;
-}
-.custom-options li.disabled {
-    color: #666;
-    cursor: default;
-}
-
-.filter-dropdown {
-    padding: 4px 6px;
-    border: 1px solid black;
-    background: var(--gray);
-    font-family: arial;
-    font-size: 14px;
-    cursor: pointer;
-}
-.filter-dropdown:hover {
-    background-color: var(--darkgray);
-}
-
-.checkbox-label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    height: 24px;
-    transition: color 50ms steps(1, end);
-    user-select: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-}
-.checkbox-label:not(:active) {
-    transition: font-size 150ms steps(1, end), color 50ms steps(1, end);
-}
-.checkbox-label:active {
-    font-size: 12px;
-    color: white !important;
-    background:blue;
-}
+.custom-options li { padding: 4px 6px; cursor: pointer; font-size: 12px; line-height: 16px; }
+.custom-options li:hover, .custom-options li[aria-selected="true"] { color: #fff; background: var(--blue-bright); }
+.custom-options li.clear-filter-option { color: var(--red); }
+.custom-options li.clear-filter-option:hover { color: #fff; background: var(--red); }
+.visually-hidden { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(1px, 1px, 1px, 1px); white-space: nowrap; }
+.checkbox-label { display: flex; align-items: center; gap: 7px; cursor: pointer; font-size: 12px; user-select: none; -webkit-user-select: none; }
 .checkbox-input {
-    margin: 0;
-    font-size: 12px;
-    line-height: 1;
-    width: 16px;
-    height: 16px;
-    border-radius: 0;
-    vertical-align: middle;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    background: white;
-    display: inline-block;
     position: relative;
-    box-shadow: var(--sunk-box);
+    width: 13px;
+    height: 13px;
+    margin: 0;
+    flex: 0 0 13px;
+    appearance: none;
+    -webkit-appearance: none;
+    background: #fff;
+    box-shadow: var(--sink);
     cursor: pointer;
-}
-.checkbox-input:active {
-    background: var(--gray) !important;
-    width: 12px;
-    height: 12px;
-}
-.checkbox-input:checked {
-    background: white;
-    border: none;
 }
 .checkbox-input:checked::after {
     content: "";
     position: absolute;
-    top: 3px;
-    left: 6px;
-    width: 2px;
-    height: 6px;
-    border: solid black;
+    top: 1px;
+    left: 4px;
+    width: 3px;
+    height: 7px;
+    border: solid var(--ink);
     border-width: 0 2px 2px 0;
     transform: rotate(45deg);
 }
-.checkbox-input:active::after {
-    top: 3px;
-    left: 5px;
-    height: 4px;
-    width: 1px;
+.checkbox-input:active,
+.checkbox-label:active .checkbox-input { background: var(--face); }
+.checkbox-input:focus-visible { outline: 1px dotted var(--ink); outline-offset: 2px; }
+
+/* Feedback */
+.feedback { padding: 3px; background: var(--face); box-shadow: var(--raise); }
+.feedback-form { display: flex; flex-direction: column; align-items: flex-start; padding: 20px; background: var(--field); box-shadow: var(--sink); }
+.feedback-intro { width: 100%; margin: 0 0 17px; padding-bottom: 11px; border-bottom: 1px solid #999; font-size: 14px; font-weight: 600; }
+.feedback-form .form-row { width: min(100%, 660px); display: flex; flex-direction: column; gap: 6px; margin: 8px 0; }
+.feedback-form label { font-size: 12px; font-weight: 600; }
+.form-input, .form-textarea { width: 100%; padding: 7px; color: var(--ink); background: #fff; border: 0; border-radius: 0; box-shadow: var(--sink); outline: 0; }
+.form-textarea { min-height: 160px; resize: vertical; }
+.form-input:focus, .form-textarea:focus, .custom-selected:focus-visible { outline: 1px dotted var(--ink); outline-offset: -4px; }
+.form-row.name { max-width: 360px !important; }
+.form-submit { align-self: flex-start; padding: 7px 12px; color: #fff; background: var(--blue); border: 0; box-shadow: var(--raise); font-weight: 600; }
+.form-submit:hover { background: var(--blue-bright); }
+.form-submit:active { box-shadow: var(--sink); }
+.form-status { min-height: 1.35em; margin: 9px 0 0; font-size: 12px; }
+.form-status-success { color: var(--green); }.form-status-error { color: var(--red); }
+
+::-webkit-scrollbar { width: 14px; height: 14px; }
+::-webkit-scrollbar-track { background: var(--face); }
+::-webkit-scrollbar-thumb { background: var(--face); border: 1px solid var(--ink); }
+
+@media (max-width: 700px) {
+    .content-wrapper { width: 100%; padding: 10px; }
+    .options-container { grid-template-columns: 1fr; min-height: 0; }
+    .columns { grid-template-columns: 1fr; }
+    .filters { order: -1; }
+    .filter-selectors { display: grid; grid-template-columns: 1fr 1fr; align-items: center; }
+    .repo, .repobox { min-height: 380px; }
+    .opportunity-card { grid-template-columns: 1fr; }
+    .top-right-grid { width: 100%; grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 
-.filter-dropdown.open-native {
-    outline: 2px solid red;
-    outline-offset: -1px;
-    background: var(--gray);
-    color: red;
-}
-.filter-dropdown option {
-    background: var(--gray);
-    color: black;
-}
-
-.filter-dropdown option:disabled {
-    display: none;
-}
-
-/* Some browsers don't reliably apply attribute selectors to <option>.
-   The JS already adds the class `clear-filter-option` — target that class too. */
-.filter-dropdown option.clear-filter-option {
-    color: #ff0000 !important;
-}
-
-/* Style the custom dropdown's generated list item when it has the same class */
-.custom-options li.clear-filter-option {
-    color: #ff0000 !important;
-}
-
-.custom-options li.clear-filter-option:hover .opt-label,
-.custom-options li.clear-filter-option[aria-selected="true"] .opt-label {
-    color: red !important;
-}
-
-.custom-options li.clear-filter-option:hover::after {
-    outline-color: red;
-}
-
-.custom-options li.clear-filter-option:active {
-    background-color: red !important;
-}
-
-.active-filter {
-    display: flex;
-    gap: 6px;
-    align-items: center;
-    background: transparent;
-    color: blue;
-    border: 2px solid blue;
-    padding: 4px 6px;
-}
-
-.remove-filter-btn {
-    background: transparent;
-    border: none;
-    color: blue;
-    outline: 1px solid blue;
-    outline-offset: -1px;
-    cursor: pointer;
-    padding: 0;
-    width: 14px;
-    height: 14px;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.remove-filter-btn:hover {
-    color: red;
-    outline: 2px solid red;
-}
-.remove-filter-btn:active {
-    outline: 2px solid red !important;
-    outline-offset: -2px;
-}
-
-/* Exclude-style for filters that remove matches (red outline + text) */
-.exclude-filter {
-    color: red;
-    border-color: red !important;
-
-}
-.exclude-filter .remove-filter-btn {
-    color: red;
-    outline: 1px solid red;
-}
-.exclude-filter .remove-filter-btn:hover {
-    outline: 2px solid red;
+@media (max-width: 430px) {
+    .page-title::before { padding: 0 5px; font-size: 10px; }
+    .filter-selectors { grid-template-columns: 1fr; }
+    .feedback-form { padding: 13px; }
 }

@@ -10,11 +10,14 @@
 </head>
 <body>
     <div class="content-wrapper">
+        <div class="screen-refresh" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
 
-        <h1 class="field">
-            <a href="index.html" class="title-option">Home</a>
-            <span class="title">Opportunities</span>
-        </h1>
+        <header class="field page-header">
+            <h1 class="page-title"><span class="title">Opportunities</span></h1>
+            <nav class="title-options" aria-label="Page navigation">
+                <a href="index.html" class="title-option">Home</a>
+            </nav>
+        </header>
 
         <div class="field columns">
             <div class="repo">
@@ -22,11 +25,6 @@
             </div>
             <div class="filters">
                 <div class="filters-title">Filters</div>
-                <div class="filters-divider">
-                    <div class="applied-filters">
-                        <div class="filter-item">none</div>
-                    </div>
-                </div>
                 <div class="filter-selectors">
                     <div class="custom-select" aria-hidden="false">
                         <div class="custom-selected" tabindex="0" aria-haspopup="listbox" aria-expanded="false"><span class="custom-selected-label">Category</span></div>
@@ -41,7 +39,11 @@
                             <span class="checkbox-text">Hide Fees</span>
                         </label>
                     </div>
-                    
+                </div>
+                <div class="filters-divider">
+                    <div class="applied-filters">
+                        <div class="filter-item">none</div>
+                    </div>
                 </div>
             </div>  
         </div>

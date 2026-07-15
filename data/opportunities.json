@@ -1,426 +1,98 @@
 [
   {
-    "name": "The Bogliasco Foundation",
-    "deadline": "3/13/2026",
-    "link": "https://bfny.org/",
+    "name": "TEST — North Star Emerging Artist Grant",
+    "deadline": "7/28/2026",
+    "link": "https://example.com/north-star-grant",
     "type": "Grant",
     "fees": "n",
     "country": "United States"
   },
   {
-    "name": "Momo Distribution Grant 2026",
-    "deadline": "3/13/2026",
-    "link": "https://www.momofilm.co/momo-distribution-grant",
-    "type": "Grant",
-    "fees": "n",
-    "country": "Southeast Asia"
-  },
-  {
-    "name": "Artist Grant - March",
-    "deadline": "3/15/2026",
-    "link": "https://artistgrant.org/",
-    "type": "Grant",
+    "name": "TEST — Open Field Summer Exhibition",
+    "deadline": "8/5/2026",
+    "link": "https://example.com/open-field-exhibition",
+    "type": "Exhibition",
     "fees": "y",
-    "country": "United States"
-  },
-  {
-    "name": "The Image Center - Fellowship",
-    "deadline": "3/15/2026",
-    "link": "https://theimagecentre.ca/fellowship/",
-    "type": "Grant",
-    "fees": "n",
-    "country": "Canada"
-  },
-  {
-    "name": "$1200 Grant for Visual Artists",
-    "deadline": "3/15/2026",
-    "link": "https://artistgrant.org/",
-    "type": "Grant",
-    "fees": "y",
-    "country": "United States"
-  },
-  {
-    "name": "LIFT – Early Career Support for Native Artists",
-    "deadline": "3/19/2026",
-    "link": "https://www.nativeartsandcultures.org/programs/lift",
-    "type": "Grant",
-    "fees": "n",
-    "country": "United States"
-  },
-  {
-    "name": "The Guildhouse Fellowship – Enhanced",
-    "deadline": "3/30/2026",
-    "link": "https://guildhouse.org.au/call-out-the-guildhouse-fellowship-2026/",
-    "type": "Grant",
-    "fees": "n",
-    "country": "South Australia"
-  },
-  {
-    "name": "Massee Arts Grant - promoting the wonderful world of fungi",
-    "deadline": "3/31/2026",
-    "link": "https://www.britmycolsoc.org.uk/massee-arts-grant.html",
-    "type": "Grant",
-    "fees": "n",
-    "country": "uk"
-  },
-  {
-    "name": "2026-27 Franklin Furnace FUND for Performance Art",
-    "deadline": "4/1/2026",
-    "link": "https://franklinfurnace.org/grants-and-funding/the-fund/",
-    "type": "Grant",
-    "fees": "n",
-    "country": "United States"
-  },
-  {
-    "name": "Locust Projects, 2026 WaveMaker Grants",
-    "deadline": "4/1/2026",
-    "link": "https://www.locustprojects.org/for-artists/submissions/2026-wavemaker-grants.html",
-    "type": "Grant",
-    "fees": "n",
-    "country": "United States"
-  },
-  {
-    "name": "Print Residency Of Ohio’s Future (P.R.O.O.F.) Fellowship 2026",
-    "deadline": "4/17/2026",
-    "link": "https://zygotepress.org/awarded-residencies",
-    "type": "Grant",
-    "fees": "n",
-    "country": "United States"
-  },
-  {
-    "name": "William and Isabel Pope Artist’s Residency in Painting at NSCAD",
-    "deadline": "3/6/2026",
-    "link": "https://nscad.ca/william-isabel-pope-residency/",
-    "type": "Residency",
-    "fees": "N",
-    "country": "Canada"
-  },
-  {
-    "name": "PRIX POWERHOUSE – Galerie La Centrale",
-    "deadline": "3/9/2026",
-    "link": "https://www.lacentrale.org/en/prix-powerhouse/2026-prix-powerhouse/",
-    "type": "Award",
-    "fees": "N",
-    "country": "Canada"
-  },
-  {
-    "name": "CCA Emerging Curator Residency Program",
-    "deadline": "3/9/2026",
-    "link": "https://www.cca.qc.ca/en/77873/emerging-curator-residency-program",
-    "type": "Residency",
-    "fees": "N",
-    "country": "Canada"
-  },
-  {
-    "name": "CCA Emerging Curatorial Photography Internship Program",
-    "deadline": "3/9/2026",
-    "link": "https://www.cca.qc.ca/en/93424/curatorial-photography-internship-program",
-    "type": "Internship",
-    "fees": "N",
-    "country": "Canada"
-  },
-  {
-    "name": "CCA Emerging Curatorial Internships Program",
-    "deadline": "3/9/2026",
-    "link": "https://www.cca.qc.ca/en/38803/curatorial-internships-program",
-    "type": "Internship",
-    "fees": "N",
-    "country": "Canada"
-  },
-  {
-    "name": "Lumen Festival – Call for Artist Proposals",
-    "deadline": "3/12/2026",
-    "link": "https://forms.waterloo.ca/Arts-and-Culture/Public-Art-and-Open-Calls/2026-Lumen-Call-for-Artist-Proposals",
-    "type": "Public Art",
-    "fees": "N",
-    "country": "Canada"
-  },
-  {
-    "name": "North Vancouver Public Art Call",
-    "deadline": "3/13/2026",
-    "link": "https://www.nvrc.ca/arts-culture/public-art/public-art-calls/fairborne-lynn-creek",
-    "type": "Public Art",
-    "fees": "N",
-    "country": "Canada"
-  },
-  {
-    "name": "City of Brampton Public Art Call",
-    "deadline": "3/16/2026",
-    "link": "https://www.brampton.ca/EN/Arts-Culture-Tourism/Cultural-Services/Public-Art/Pages/Welcome.aspx",
-    "type": "Public Art",
-    "fees": "N",
-    "country": "Canada"
-  },
-  {
-    "name": "Pointe-Claire Public Art Project (Edgewater Park)",
-    "deadline": "3/18/2026",
-    "link": "https://www.pointe-claire.ca/organisation-municipale/nouvelles-et-medias/actualites/appel-a-projets-en-art-public-oeuvre-dart-public-permanente-dans-le-parc-edgewater",
-    "type": "Public Art",
-    "fees": "N",
-    "country": "Canada"
-  },
-  {
-    "name": "Cambridge Art Galleries – Fibreworks 2026",
-    "deadline": "3/22/2026",
-    "link": "https://cambridgepl.ca/cambridge-art-galleries/artists",
-    "type": "Exhibition",
-    "fees": "N",
-    "country": "Canada"
-  },
-  {
-    "name": "Vector Festival – Exhibition / Performance Call",
-    "deadline": "3/30/2026",
-    "link": "https://www.interaccess.org/vector-festival/vf26/vf26-cfs",
-    "type": "Exhibition",
-    "fees": "N",
-    "country": "Canada"
-  },
-  {
-    "name": "Northeast Mini Galleries 2026–2027",
-    "deadline": "3/24/2026",
-    "link": "https://calgaryartsdevelopment.com/public-art/opportunities/all/northeast-mini-galleries-2026-2027/",
-    "type": "Public Art",
-    "fees": "N",
-    "country": "Canada"
-  },
-  {
-    "name": "City of Ottawa Art Collection – Direct Purchase Program",
-    "deadline": "3/25/2026",
-    "link": "https://ottawa.ca/en/arts-heritage-and-events/public-art-and-city-ottawa-art-collection/city-ottawa-art-collection/2026-direct-purchase-program",
-    "type": "Acquisition",
-    "fees": "N",
-    "country": "Canada"
-  },
-  {
-    "name": "Artist Development Microgrant",
-    "deadline": "3/25/2026",
-    "link": "https://calgaryartsdevelopment.com/grant-investment-programs/programs/all/artist-development-microgrant/",
-    "type": "Grant",
-    "fees": "N",
-    "country": "Canada"
-  },
-  {
-    "name": "Daimon Research / Creation Residency",
-    "deadline": "3/27/2026",
-    "link": "https://daimon.qc.ca/wp-content/uploads/2026/02/Appel-de-projets-Mars-2026-FR.pdf",
-    "type": "Residency",
-    "fees": "N",
-    "country": "Canada"
-  },
-  {
-    "name": "Québec–Belgium Artist Exchange Residencies",
-    "deadline": "3/27/2026",
-    "link": "https://www.calq.gouv.qc.ca/aides/echanges-artistes-ateliers-residences-quebec-belgique",
-    "type": "Residency",
-    "fees": "N",
-    "country": "Canada"
-  },
-  {
-    "name": "Ottawa Public Art – Chief William Commanda Bridge Project",
-    "deadline": "3/30/2026",
-    "link": "https://ottawa.ca/en/arts-heritage-and-events/funding-calls-and-opportunities/calls-and-opportunities-culture/calls-and-opportunities-public-art-program/expression-interest-lead-anishinabe-algonquin-artist-chief-william-commanda-bridge-project",
-    "type": "Public Art",
-    "fees": "N",
-    "country": "Canada"
-  },
-  {
-    "name": "Regarde! Large-Format Video / Digital Works Call",
-    "deadline": "3/30/2026",
-    "link": "https://montreal.ca/programmes/appel-de-dossiers-dartistes-arts-visuels-et-mediatiques",
-    "type": "Exhibition",
-    "fees": "N",
-    "country": "Canada"
-  },
-  {
-    "name": "RECESS Spring Exhibition Call",
-    "deadline": "3/31/2026",
-    "link": "https://www.recessthermalstation.com/expositions",
-    "type": "Exhibition",
-    "fees": "N",
-    "country": "Canada"
-  },
-  {
-    "name": "Admare Residency Call",
-    "deadline": "4/1/2026",
-    "link": "https://www.admare.org/p/appel-de-dossiers.html",
-    "type": "Residency",
-    "fees": "N",
-    "country": "Canada"
-  },
-  {
-    "name": "Arts NB Creation Grants",
-    "deadline": "4/1/2026",
-    "link": "https://artsnb.ca/web/programs/creation/",
-    "type": "Grant",
-    "fees": "N",
-    "country": "Canada"
-  },
-  {
-    "name": "Street Art Toronto – Just Us",
-    "deadline": "4/6/2026",
-    "link": "https://www.streetartoronto.ca/just-us",
-    "type": "Public Art",
-    "fees": "N",
-    "country": "Canada"
-  },
-  {
-    "name": "SAAG Arts Writing Prize",
-    "deadline": "4/7/2026",
-    "link": "https://www.saag.ca/programs/arts-writing-prize",
-    "type": "Award",
-    "fees": "N",
-    "country": "Canada"
-  },
-  {
-    "name": "Calgary Public Art – International Avenue",
-    "deadline": "4/10/2026",
-    "link": "https://calgaryartsdevelopment.com/public-art/opportunities/all/call-to-artists-community-informed-public-art-project-in-east-calgary-international-avenue/",
-    "type": "Public Art",
-    "fees": "N",
-    "country": "Canada"
-  },
-  {
-    "name": "G101 Exhibition Proposals",
-    "deadline": "4/15/2026",
-    "link": "https://g101.ca/CallForProposals",
-    "type": "Exhibition",
-    "fees": "N",
-    "country": "Canada"
-  },
-  {
-    "name": "Polygone Artist Award",
-    "deadline": "4/22/2026",
-    "link": "https://www.artsmontreal.org/en/grants/program/polygone-award/",
-    "type": "Award",
-    "fees": "N",
-    "country": "Canada"
-  },
-  {
-    "name": "Ontario Arts Council Indigenous Arts Projects Grant",
-    "deadline": "4/23/2026",
-    "link": "https://www.arts.on.ca/grants/indigenous-arts-projects",
-    "type": "Grant",
-    "fees": "N",
-    "country": "Canada"
-  },
-  {
-    "name": "Manitoba Arts Council Indigenous 360 Grant",
-    "deadline": "4/25/2026",
-    "link": "https://artscouncil.mb.ca/grants/indigenous-360/",
-    "type": "Grant",
-    "fees": "N",
-    "country": "Canada"
-  },
-  {
-    "name": "Forest City Gallery Exhibition Call",
-    "deadline": "4/30/2026",
-    "link": "https://www.forestcitygallery.com/submissions",
-    "type": "Exhibition",
-    "fees": "N",
-    "country": "Canada"
-  },
-  {
-    "name": "Ontario Arts Council Northern Arts Projects Grant",
-    "deadline": "4/30/2026",
-    "link": "Northern Arts Projects",
-    "type": "Grant",
-    "fees": "N",
-    "country": "Canada"
-  },
-  {
-    "name": "East Gwillimbury Carnaby Park Public Art",
-    "deadline": "4/30/2026",
-    "link": "https://www.eastgwilli mbury.ca/en/living-in-eg/arts-and-culture.aspx",
-    "type": "Public Art",
-    "fees": "N",
-    "country": "Canada"
-  },
-  {
-    "name": "Artcite Mainspace Exhibition Call",
-    "deadline": "4/30/2026",
-    "link": "https://www.artciteinc.ca/sylviebelangergallery",
-    "type": "Exhibition",
-    "fees": "N",
-    "country": "Canada"
-  },
-  {
-    "name": "Superframe Framing Fund",
-    "deadline": "5/1/2026",
-    "link": "https://www.superframe.ca/framingfund25",
-    "type": "Grant",
-    "fees": "N",
-    "country": "Canada"
-  },
-  {
-    "name": "Young Critics Competition (Esse + Hnatyshyn)",
-    "deadline": "5/10/2026",
-    "link": "https://esse.ca/en/young-critics-competition/",
-    "type": "Writing Award",
-    "fees": "N",
-    "country": "Canada"
-  },
-  {
-    "name": "Arts Nova Scotia Grants to Individuals",
-    "deadline": "5/15/2026",
-    "link": "https://artsns.ca/programs/grants-individuals",
-    "type": "Grant",
-    "fees": "N",
-    "country": "Canada"
-  },
-  {
-    "name": "Summer Contemporary 2026 – Britten Pears Arts",
-    "deadline": "3/26/2026",
-    "link": "https://brittenpearsarts.org",
-    "type": "Exhibition",
-    "fees": "Y",
-    "country": "United Kingdom"
-  },
-  {
-    "name": "Ninety Percent of Everything – U-BOOT Lab Residency",
-    "deadline": "4/2/2026",
-    "link": "https://u-bootlab.org",
-    "type": "Residency",
-    "fees": "N",
-    "country": "Europe"
-  },
-  {
-    "name": "Summer Residencies in Kopice 2026 – Nowa Szkoła",
-    "deadline": "4/15/2026",
-    "link": "https://nowaszkola.org",
-    "type": "Residency",
-    "fees": "Y",
-    "country": "Poland"
-  },
-  {
-    "name": "Anna Laudel Open Call – Curated Group Exhibition",
-    "deadline": "4/30/2026",
-    "link": "https://annalaudel.gallery",
-    "type": "Exhibition",
-    "fees": "N",
-    "country": "Türkiye"
-  },
-  {
-    "name": "Fundación Botín Art Grants 2026–2027",
-    "deadline": "5/8/2026",
-    "link": "https://www.centrobotin.org/en/beca/becas-de-arte-2026-2027/",
-    "type": "Grant",
-    "fees": "N",
     "country": "International"
   },
   {
-    "name": "Collaboration and Innovation Grant – Centre for Public Engagement Practice",
-    "deadline": "5/26/2026",
-    "link": "https://www.publicengagement.ac.uk",
-    "type": "Grant",
-    "fees": "N",
+    "name": "TEST — Harbor Studios Residency",
+    "deadline": "8/18/2026",
+    "link": "https://example.com/harbor-residency",
+    "type": "Residency",
+    "fees": "n",
+    "country": "Canada"
+  },
+  {
+    "name": "TEST — Civic Light Public Art Commission",
+    "deadline": "9/1/2026",
+    "link": "https://example.com/civic-light-commission",
+    "type": "Public Art",
+    "fees": "n",
+    "country": "United States"
+  },
+  {
+    "name": "TEST — New Voices Writing Award",
+    "deadline": "9/14/2026",
+    "link": "https://example.com/new-voices-writing-award",
+    "type": "Writing Award",
+    "fees": "y",
     "country": "United Kingdom"
   },
   {
-    "name": "BEERS London Group Exhibition 2026",
-    "deadline": "Not specified",
-    "link": "https://beerslondon.com",
+    "name": "TEST — Moving Image Production Fellowship",
+    "deadline": "9/30/2026",
+    "link": "https://example.com/moving-image-fellowship",
+    "type": "Award",
+    "fees": "n",
+    "country": "Europe"
+  },
+  {
+    "name": "TEST — Longform Curatorial Research and Community Archive Internship",
+    "deadline": "10/12/2026",
+    "link": "https://example.com/curatorial-internship",
+    "type": "Internship",
+    "fees": "n",
+    "country": "Australia"
+  },
+  {
+    "name": "TEST — Meridian Materials Grant",
+    "deadline": "10/31/2026",
+    "link": "https://example.com/meridian-materials-grant",
+    "type": "Grant",
+    "fees": "y",
+    "country": "International"
+  },
+  {
+    "name": "TEST — Winter Print Lab Residency",
+    "deadline": "11/16/2026",
+    "link": "https://example.com/winter-print-lab",
+    "type": "Residency",
+    "fees": "n",
+    "country": "Japan"
+  },
+  {
+    "name": "TEST — Small Works Open Call",
+    "deadline": "12/4/2026",
+    "link": "https://example.com/small-works-open-call",
     "type": "Exhibition",
-    "fees": "Y",
-    "country": "United Kingdom"
+    "fees": "y",
+    "country": "Mexico"
+  },
+  {
+    "name": "TEST — Year-End Artist Support Fund",
+    "deadline": "12/18/2026",
+    "link": "https://example.com/year-end-support-fund",
+    "type": "Grant",
+    "fees": "n",
+    "country": "International"
+  },
+  {
+    "name": "TEST — Rolling Community Mural Roster",
+    "deadline": "Rolling",
+    "link": "https://example.com/community-mural-roster",
+    "type": "Public Art",
+    "fees": "n",
+    "country": "United States"
   }
 ]

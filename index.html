@@ -10,27 +10,36 @@
 </head>
 <body>
     <div class="content-wrapper">
+        <div class="screen-refresh" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
 
-        <h1 class="field home"><span class="title praxis">Praxis</span><span class="title nova">nova</span></h1>
+        <header class="field page-header">
+            <h1 class="page-title"><span class="title">Home</span></h1>
+        </header>
+
+        <div class="home-wordmark" aria-hidden="true"><span>Praxis</span><span>nova</span></div>
 
         <div class="field options-container">
             <div class="opportunity-group">
                 <div class="option-btn-container">
-                    <span class="option-btn"><a href="opportunities.html">Opportunities</a><a class="info">+</a></span>
-                    <div class="option-details">
-                        <a class="sublink" href="opportunities.html?type=grant">Grants </a>
-                         +
-                        <a class="sublink" href="opportunities.html?type=exhibition">Exhibitions</a>
-                         +
-                        <a class="sublink" href="opportunities.html?type=residency">Residencies</a>
-                         +
-                        <span class="sublink">More</span>
+                    <span class="option-btn">
+                        <a href="opportunities.html">Opportunities</a>
+                        <button class="info" type="button" aria-expanded="false" aria-controls="opportunities-details">+</button>
+                    </span>
+                    <div class="option-details" id="opportunities-details">
+                        <div class="option-details-row">
+                            <a class="sublink" href="opportunities.html?type=grant">Grants</a>
+                            <span class="sep" aria-hidden="true">+</span>
+                            <a class="sublink" href="opportunities.html?type=exhibition">Exhibitions</a>
+                            <span class="sep" aria-hidden="true">+</span>
+                            <a class="sublink" href="opportunities.html?type=residency">Residencies</a>
+                            <span class="sep" aria-hidden="true">+</span>
+                            <span class="sublink">More</span>
+                        </div>
                     </div>
                 </div>
-
             </div>
             <div class="option-btn-container">
-                <span class="option-btn"><a href="feedback.html">Give<br>Feedback</a><br></span>
+                <span class="option-btn"><a href="feedback.html">Give<br>Feedback</a></span>
             </div>
         </div>
 

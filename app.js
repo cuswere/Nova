@@ -12,6 +12,18 @@ const FEEDBACK_FORM_ACTION = '';
 const FEEDBACK_ENTRY_NAME = '';
 const FEEDBACK_ENTRY_SUGGESTION = '';
 
+// A short stepped wipe marks a new document without delaying interaction.
+// Removing the overlay after its final staggered frame keeps it out of the
+// accessibility tree and avoids retaining a composited full-screen layer.
+function finishScreenRefresh() {
+    const refresh = document.querySelector('.screen-refresh');
+    if (!refresh || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        if (refresh) refresh.remove();
+        return;
+    }
+    window.setTimeout(() => refresh.remove(), 380);
+}
+
 // Animate the `.applied-filters` container when filters are added/removed.
 function animateFilterArea(container, startingHeight) {
     if (!container) return;
@@ -157,9 +169,9 @@ function populateTypeDropdown() {
     const dropdown = document.querySelector('select[name="type"]');
     if (!dropdown) return;
 
-    // Extract unique types from the currently visible pool (respecting
-    // expiration and the hide-fees toggle) so expired opportunities don't
-    // contribute categories.
+    // Extract types from the current catalogue window, independent of the
+    // fee toggle. A filter control must remain usable even when another
+    // active filter temporarily leaves it with no matching records.
     const source = getVisibleOpportunities();
     const types = [...new Set(source.map(opp => opp.type).filter(Boolean))].sort();
 
@@ -360,17 +372,14 @@ function syncCustomSelectFromNative(nativeSelect) {
     });
 }
 
-// Return the current set of opportunities that should be visible to the
-// user based on expiration and the hide-fees toggle. This deliberately
-// does NOT apply the `type` filter because the dropdown shows available
-// types to choose from.
+// Return the current catalogue window for category choices. This deliberately
+// ignores both active filters: the category menu must not disappear merely
+// because the fee toggle (or an existing category) has no matching records.
 function getVisibleOpportunities() {
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
 
     return opportunities.filter(opp => {
-        // hide by fees if requested
-        if (activeFilters.hideFees && ((opp.fees || '').toLowerCase() === 'y')) return false;
         // hide expired
         const d = new Date(opp.deadline);
         if (!isNaN(d) && d < todayStart) return false;
@@ -714,145 +723,32 @@ function setupFeedbackForm() {
     });
 }
 
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-        if (document.querySelector('.repobox')) loadOpportunities();
-        setupFilterListeners();
-        setupFeedbackForm();
+// Home page: the "+" button next to an option expands its details panel. The
+// animation itself is entirely CSS (see .option-details); this only flips a class.
+function setupOptionDetails() {
+    document.querySelectorAll('.option-btn .info').forEach(toggle => {
+        const details = document.getElementById(toggle.getAttribute('aria-controls'));
+        if (!details) return;
+
+        toggle.addEventListener('click', () => {
+            const isOpen = details.classList.toggle('open');
+            toggle.setAttribute('aria-expanded', String(isOpen));
+            toggle.textContent = isOpen ? '−' : '+';
+        });
     });
-} else {
+}
+
+function init() {
     if (document.querySelector('.repobox')) loadOpportunities();
     setupFilterListeners();
     setupFeedbackForm();
+    setupOptionDetails();
 }
 
-document.querySelectorAll('a.info').forEach(infoLink => {
-    const optionBtnContainer = infoLink.closest('.option-btn-container');
-    if (!optionBtnContainer) return;
-    const optionDetails = optionBtnContainer.querySelector('.option-details');
-    const prevLink = infoLink.previousElementSibling;
-    if (!optionDetails) return;
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    init();
+}
 
-    // Determine whether details are initially hidden (computed display none)
-    const initiallyHidden = window.getComputedStyle(optionDetails).display === 'none';
-    // Remove any inline display so CSS controls layout (we'll manage max-height)
-    optionDetails.style.display = '';
-
-    // helper to hide/restore only the inner content nodes (keep container border visible)
-    // Use opacity + pointer-events so layout/scrollHeight is unaffected.
-    const setInnerContentHidden = (hide) => {
-        Array.from(optionDetails.children).forEach((ch) => {
-            try {
-                ch.style.transition = 'opacity 0ms linear';
-                ch.style.opacity = hide ? '0' : '';
-                ch.style.pointerEvents = hide ? 'none' : '';
-            } catch (err) { /* ignore */ }
-        });
-    };
-
-    if (initiallyHidden) {
-        // Start collapsed: keep the container present but hide its inner text
-        optionDetails.classList.remove('open');
-        optionDetails.style.maxHeight = '0px';
-        optionDetails.style.overflow = 'hidden';
-        // hide only the content so the border/background remains visible
-        setInnerContentHidden(true);
-        infoLink.textContent = '+';
-        infoLink.setAttribute('aria-expanded', 'false');
-    } else {
-        // Start visible: reveal immediately without animation and avoid clipping
-        optionDetails.classList.add('open');
-        const prevTransition = optionDetails.style.transition;
-        optionDetails.style.transition = 'none';
-        // set explicit maxHeight with a small buffer so the bottom won't clip
-        optionDetails.style.maxHeight = (optionDetails.scrollHeight + 8) + 'px';
-        optionDetails.style.overflow = '';
-        // ensure inner content is visible when starting open
-        setInnerContentHidden(false);
-        // Force layout then restore transition so future toggles animate
-        optionDetails.getBoundingClientRect();
-        requestAnimationFrame(() => { optionDetails.style.transition = prevTransition; });
-        infoLink.textContent = '−';
-        infoLink.setAttribute('aria-expanded', 'true');
-    }
-
-    infoLink.setAttribute('role', 'button');
-
-    infoLink.addEventListener('click', (e) => {
-        e.preventDefault();
-        const isOpen = infoLink.getAttribute('aria-expanded') === 'true';
-
-        if (isOpen) {
-            // close: hide inner text during collapse so border stays visible
-            setInnerContentHidden(true);
-            optionDetails.style.overflow = 'hidden';
-            optionDetails.style.maxHeight = (optionDetails.scrollHeight + 8) + 'px';
-            requestAnimationFrame(() => {
-                optionDetails.classList.remove('open');
-                optionDetails.style.maxHeight = '0px';
-            });
-            infoLink.textContent = '+';
-            infoLink.setAttribute('aria-expanded', 'false');
-
-            optionDetails.addEventListener('transitionend', function onClose(e) {
-                if (e.propertyName !== 'max-height' && e.propertyName !== 'maxHeight') return;
-                optionDetails.style.overflow = '';
-                optionDetails.removeEventListener('transitionend', onClose);
-            }, { once: true });
-        } else {
-            // open: hide inner text until expand animation finishes
-            setInnerContentHidden(true);
-            optionDetails.classList.add('open');
-            optionDetails.style.overflow = 'hidden';
-            optionDetails.style.maxHeight = '0px';
-            requestAnimationFrame(() => {
-                optionDetails.style.maxHeight = (optionDetails.scrollHeight + 8) + 'px';
-            });
-            infoLink.textContent = '−';
-            infoLink.setAttribute('aria-expanded', 'true');
-
-            // Restore inner content when the expand transition finishes. Accept
-            // multiple propertyName variants and use a timeout fallback. Wait an
-            // extra frame before clearing maxHeight to avoid a bounce where the
-            // element shrinks and cuts off content.
-            (function() {
-                const DURATION = 240; // ms — slightly longer than CSS 200ms
-                let timer = null;
-                const cleanup = (fromEvent) => {
-                    // reveal inner text
-                    setInnerContentHidden(false);
-                    // measure the new content height and lock maxHeight to avoid
-                    // an instantaneous shrink/bounce when we clear the inline
-                    // maxHeight. Then clear it after a short delay so the
-                    // element becomes auto-sized.
-                    const newH = optionDetails.scrollHeight;
-                    optionDetails.style.maxHeight = newH + 'px';
-                    optionDetails.style.overflow = '';
-                    // give browser a moment to reflow with revealed content,
-                    // then clear the fixed maxHeight so natural layout resumes.
-                    requestAnimationFrame(() => {
-                        window.setTimeout(() => {
-                            // use 'none' so the element is not constrained by max-height
-                            // (clearing to '' would fall back to the stylesheet's
-                            // `max-height: 0` and cause a shrink)
-                            optionDetails.style.maxHeight = 'none';
-                        }, 40);
-                    });
-                    if (timer) { clearTimeout(timer); timer = null; }
-                };
-
-                const onOpen = (e) => {
-                    if (!e || !e.propertyName || e.propertyName === 'max-height' || e.propertyName === 'maxHeight') {
-                        cleanup(true);
-                    }
-                };
-
-                optionDetails.addEventListener('transitionend', onOpen, { once: true });
-                timer = window.setTimeout(() => { cleanup(false); }, DURATION);
-            })();
-        }
-    });
-
-    infoLink.addEventListener('mouseenter', () => { if (prevLink) prevLink.style.borderRightColor = 'red'; });
-    infoLink.addEventListener('mouseleave', () => { if (prevLink) prevLink.style.borderRightColor = 'blue'; });
-});
+finishScreenRefresh();
