@@ -4,6 +4,19 @@ on:
   schedule:
     - cron: '0 14 * * 2,5'
   workflow_dispatch:
+    inputs:
+      source:
+        description: 'Source to refresh (scheduled runs always refresh all sources)'
+        required: true
+        default: all
+        type: choice
+        options:
+          - all
+          - artwork_archive
+          - creative_capital
+          - creative_west
+          - hyperallergic
+          - transartists
 
 permissions:
   contents: write
@@ -21,6 +34,7 @@ jobs:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       OPENAI_MODEL: gpt-5.4-nano
       AI_ENRICH_LIMIT: '30'
+      OPPORTUNITY_SOURCE: ${{ inputs.source || 'all' }}
     steps:
       - uses: actions/checkout@v4
         with:

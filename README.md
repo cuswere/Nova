@@ -38,6 +38,8 @@ The scheduled GitHub workflow runs at 14:00 UTC every Tuesday and Friday and can
 
 The workflow uses `gpt-5.4-nano` with a strict Structured Outputs schema and enriches at most 30 candidates per run by default. Override `AI_ENRICH_LIMIT` to change that cap.
 
+To test one source at a time, open the workflow in GitHub Actions, click **Run workflow**, and choose its source from the `source` dropdown. Scheduled runs continue to refresh all enabled sources. The same filter works locally with `OPPORTUNITY_SOURCE=artwork_archive npm run dry-run-opportunities`.
+
 The Sheet's first six columns are the public site contract: `name`, `deadline`, `link`, `type`, `fees`, and `country`. New candidates arrive with `status=review`; set complete rows to `publish` or `reject`. The `fees` field means application/submission fee only, while `country` means applicant eligibility rather than host location.
 
 ## Feedback form setup

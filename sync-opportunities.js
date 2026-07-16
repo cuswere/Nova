@@ -8,10 +8,16 @@ import { upsertCandidates } from './opportunity-pipeline/sheets.js';
 
 const dryRun = process.argv.includes('--dry-run');
 const aiLimit = Math.max(0, Number(process.env.AI_ENRICH_LIMIT || 30));
+const requestedSource = process.env.OPPORTUNITY_SOURCE || 'all';
 const now = new Date();
 
 async function main() {
-    const enabled = SOURCE_DEFINITIONS.filter((definition) => definition.enabled);
+    const enabled = SOURCE_DEFINITIONS.filter((definition) => definition.enabled &&
+        (requestedSource === 'all' || definition.id === requestedSource));
+    if (requestedSource !== 'all' && !SOURCE_DEFINITIONS.some((definition) => definition.id === requestedSource)) {
+        throw new Error(`Unknown opportunity source: ${requestedSource}`);
+    }
+    if (!enabled.length) throw new Error(`Opportunity source is disabled: ${requestedSource}`);
     const settled = await Promise.allSettled(enabled.map(async (definition) => ({
         definition,
         rows: await discoverSource(definition)
