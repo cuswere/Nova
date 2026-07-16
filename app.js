@@ -471,7 +471,7 @@ function populateOpportunitiesMainTable() {
         iconSpan.style.marginLeft = '0px';
 
         const icon = document.createElement('span');
-        icon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 20 20" fill="none" style="margin-left:4px;display:inline;vertical-align:middle"><path d="M14.5 2.5H17.5V5.5" stroke="blue" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 10L17.5 2.5" stroke="blue" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><path d="M17.5 10.5V17.5H2.5V2.5H9.5" stroke="blue" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+        icon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 20 20" fill="none" style="margin-left:4px;display:inline;vertical-align:middle"><path d="M14.5 2.5H17.5V5.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 10L17.5 2.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M17.5 10.5V17.5H2.5V2.5H9.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 
         iconSpan.appendChild(icon);
         linkContent.appendChild(iconSpan);
@@ -479,7 +479,7 @@ function populateOpportunitiesMainTable() {
         titleColumnDiv.appendChild(link);
         card.appendChild(titleColumnDiv);
 
-        // Type and Fee grid (top right 2x2 grid)
+        // Static metadata badges (type, country, and fee status)
         const topRightGrid = document.createElement('div');
         topRightGrid.className = 'top-right-grid';
 

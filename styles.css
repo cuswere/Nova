@@ -7,12 +7,14 @@
     --blue: #0000c8;
     --blue-bright: #1010ff;
     --red: #d90022;
+    --amber: #ffc962;
     --green: #0d6a42;
     --desktop: #5b7070;
     --line: #111;
     --raise: inset -1px -1px #161616, inset 1px 1px #fff, inset -2px -2px #888, inset 2px 2px #ddd;
     --sink: inset -1px -1px #fff, inset 1px 1px #7b7b7b, inset -2px -2px #ddd, inset 2px 2px #202020;
     --sink-shallow: inset 1px 0px #777, inset -1px -1px #eee;
+    --label-bevel: inset -1px -1px #888, inset 1px 1px #eee;
     --mono: monospace;
 }
 
@@ -28,7 +30,7 @@ body {
     -webkit-font-smoothing: none;
 }
 
-a { color: var(--blue); text-decoration: none; }
+a { color: var(--blue-bright); text-decoration: none; }
 a:hover { text-decoration: underline; }
 button, input, textarea, select { font: inherit; }
 button { cursor: pointer; }
@@ -107,24 +109,24 @@ button { cursor: pointer; }
 .opportunity-group, .option-btn-container { display: flex; flex-direction: column; align-items: stretch; }
 .option-btn-container { min-width: 0; }
 span.option-btn { display: flex; background: var(--face); box-shadow: var(--raise); font-family: var(--mono); font-size: clamp(23px, 3.3vw, 37px); line-height: .98; }
-.option-btn a { flex: 1; padding: 12px; color: var(--blue); }
-.option-btn a:hover { color: var(--blue); text-decoration: underline; outline: 3px solid var(--blue); outline-offset: -8px;}
-.option-btn .info { flex: 0 0 46px; display: grid; place-items: center; padding: 0; color: var(--blue); background: none; border: 0; border-left: 1px solid var(--ink); font: inherit; line-height: 1; user-select: none; -webkit-user-select: none; }
-.option-btn .info:hover { text-decoration: none; outline: 3px solid var(--blue); outline-offset: -8px; }
-.option-btn .info:focus-visible { outline: 3px solid var(--blue); outline-offset: -6px; }
+.option-btn a { flex: 1; padding: 12px; color: }
+.option-btn a:hover { text-decoration: underline; outline: 3px solid var(--blue-bright); outline-offset: -8px;}
+.option-btn .info { flex: 0 0 46px; display: grid; place-items: center; padding: 0; color: var(--blue-bright); background: none; border: 0; border-left: 1px solid var(--ink); font: inherit; line-height: 1; user-select: none; -webkit-user-select: none; }
+.option-btn .info:hover { text-decoration: none; outline: 3px solid var(--blue-bright); outline-offset: -8px; }
+.option-btn .info:focus-visible { outline: 3px solid var(--blue-bright); outline-offset: -6px; }
 
 .option-details { display: none; padding: 8px; background: var(--field); }
 .option-details.open { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
 .option-details-row { display: contents; color: var(--ink); font-size: 16px; }
 .option-details a { text-decoration: underline; text-decoration-thickness: 2px; }
-.option-details a:hover { outline: 2px solid var(--blue); outline-offset: 2px;}
+.option-details a:hover { outline: 2px solid var(--blue-bright); outline-offset: 2px;}
 
 .option-btn a:active,
 .option-details a:active,
 .option-btn .info:active { color: var(--red); outline-color: var(--red); }
 
 /* Opportunity workspace */
-.columns { display: grid; grid-template-columns: minmax(0, 1fr) 240px; align-items: stretch; }
+.columns { display: grid; grid-template-columns: minmax(0, 1fr) 240px; align-items: stretch; box-shadow: none; }
 .repo { position: relative; min-width: 0; min-height: 520px; padding: 3px; background: var(--face); box-shadow: var(--sink); }
 /* Keep the inner bevel above the scrolling cards. An inset shadow painted on
    .repobox itself sits behind its children, so the cards conceal it as they
@@ -132,16 +134,17 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
 .repo::after { content: ""; position: absolute; z-index: 1; inset: 3px; box-shadow: var(--sink); pointer-events: none; }
 .repobox { height: 100%; max-height: 70vh; min-height: 70vh; overflow: auto; background: var(--field); padding: 4px; }
 .repo-status-message { margin: auto; padding: 20px; color: var(--muted); text-align: center; }
-.opportunity-card { display: grid; grid-template-columns: minmax(0, 1fr) 165px; gap: 10px 14px; padding: 13px; border-bottom: 1px solid #999; background: var(--field); }
+.opportunity-card { display: grid; grid-template-columns: minmax(0, 1.5fr) 1fr; gap: 10px 14px; padding: 13px; border-bottom: 1px solid #999; background: var(--field); }
 .opportunity-card:hover {  }
-.opportunity-card a { min-width: 0; color: var(--ink); font-size: 15px; font-weight: 600; }
+.opportunity-card a { display: inline-block; min-width: 0; max-width: 100%; padding: 8px; background: var(--desktop); color: var(--field); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 2px; vertical-align: top; font-size: 15px; font-weight: 600; }
 .link-text { display: inline; }
-.opportunity-card a:hover .link-text { color: var(--blue); text-decoration: underline; text-decoration-thickness: 2px; outline: 2px solid var(--blue); outline-offset: 4px; }
-.opportunity-card a:hover .link-text span svg { stroke: #fff; }
-.top-right-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; align-self: start; min-width: 0; max-width: 100%; }
-.grid-cell, .date-cell { min-width: 0; padding: 4px 5px; text-align: center; background: var(--face); box-shadow: var(--raise); font-size: 14px; text-transform: uppercase; letter-spacing: .04em; }
-.grid-cell { display: flex; align-items: center; justify-content: center; overflow: hidden; overflow-wrap: anywhere; white-space: normal; line-height: 1.15; }
-.fee-cell { color: #fff; background: var(--red); box-shadow: none; }
+.opportunity-card a .link-text svg { fill: none; stroke: currentColor; }
+.opportunity-card a:hover .link-text { text-decoration-thickness: 2px; outline: 2px solid var(--blue-bright); outline-offset: 6px; }
+.opportunity-card a:hover { color: var(--blue-bright); background: var(--field);}
+.top-right-grid { border: 1px solid var(--ink); padding: 8px; display: flex; flex-wrap: wrap; justify-content: center; align-content: flex-start; gap: 4px; align-self: start; min-width: 0; max-width: 100%; }
+.grid-cell, .date-cell { min-width: 0; padding: 4px 5px; text-align: center; font-size: 14px; text-transform: uppercase; letter-spacing: .04em; }
+.grid-cell { background: none; border: 1px solid var(--ink); flex: 0 1 auto; display: flex; align-items: center; justify-content: center; max-width: 100%; overflow: hidden; overflow-wrap: anywhere; line-height: 1.15; box-shadow: none; }
+.fee-cell { min-height: 20px; padding: 3px 5px; color: var(--ink); background: var(--amber); box-shadow: none; }
 .date-cell { grid-column: 1 / -1; width: fit-content; color: var(--muted); text-align: left; box-shadow: none; background: transparent; padding: 0; text-transform: none; letter-spacing: 0; font-size: 14px; }
 .date-cell strong { color: var(--ink); font-weight: 600; }
 
@@ -225,7 +228,7 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
     .filter-selectors { display: grid; grid-template-columns: 1fr 1fr; align-items: center; }
     .repo, .repobox { min-height: 380px; }
     .opportunity-card { grid-template-columns: 1fr; }
-    .top-right-grid { width: 100%; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .top-right-grid { width: 100%; }
 }
 
 @media (max-width: 430px) {
