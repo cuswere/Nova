@@ -98,7 +98,7 @@ button { cursor: pointer; }
 .title-options { display: flex; gap: 6px; margin-left: auto; }
 .title-option { display: inline-flex; align-items: center; min-height: 23px; padding: 4px 10px; color: var(--ink); background: var(--face); box-shadow: var(--raise); font-size: 12px; }
 .title-option:hover { color: var(--ink); background: var(--face-light); text-decoration: none; }
-.title-option:active { box-shadow: var(--sink); }
+.title-option:active, .title-option.is-navigating { box-shadow: var(--sink); }
 
 .home-wordmark { display: flex; width: fit-content; margin: 0 auto 15px; color: var(--ink); font-size: clamp(30px, 5vw, 50px); font-weight: 600; letter-spacing: -.12em; line-height: 1; }
 .home-wordmark span { padding: 5px 12px; }
@@ -123,6 +123,8 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
 
 .option-btn a:active,
 .option-details a:active,
+.option-btn a.is-navigating,
+.option-details a.is-navigating,
 .option-btn .info:active { color: var(--red); outline-color: var(--red); }
 
 /* Opportunity workspace */

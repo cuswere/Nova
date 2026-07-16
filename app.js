@@ -24,6 +24,26 @@ function finishScreenRefresh() {
     window.setTimeout(() => refresh.remove(), 380);
 }
 
+// Keep the pressed state visible between mouse-up and a same-tab navigation.
+// New-tab/external links deliberately retain their normal browser behavior.
+function setupNavigationState() {
+    document.addEventListener('click', (event) => {
+        if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+
+        const link = event.target.closest('a[href]');
+        if (!link || link.hasAttribute('download') || (link.target && link.target !== '_self')) return;
+
+        const destination = new URL(link.href, window.location.href);
+        const isSameDocument = destination.origin === window.location.origin
+            && destination.pathname === window.location.pathname
+            && destination.search === window.location.search;
+        if (destination.origin !== window.location.origin || isSameDocument) return;
+
+        link.classList.add('is-navigating');
+        window.setTimeout(() => link.classList.remove('is-navigating'), 1000);
+    });
+}
+
 // Track the active resize so rapid clicks continue from the currently visible
 // height rather than competing with a stale delay or transition.
 const filterAreaAnimations = new WeakMap();
@@ -791,6 +811,7 @@ function setupOptionDetails() {
 
 function init() {
     if (document.querySelector('.repobox')) loadOpportunities();
+    setupNavigationState();
     setupFilterListeners();
     setupFeedbackForm();
     setupOptionDetails();
