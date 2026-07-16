@@ -1,6 +1,8 @@
-import { USER_AGENT } from './config.js';
-
 const sleep = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds));
+const BROWSER_HEADERS = {
+    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/131.0.0.0 Safari/537.36',
+    'accept-language': 'en-US,en;q=0.9'
+};
 
 export async function fetchText(url, { retries = 2, delayMs = 0, timeoutMs = 25_000 } = {}) {
     if (delayMs > 0) await sleep(delayMs);
@@ -14,7 +16,7 @@ export async function fetchText(url, { retries = 2, delayMs = 0, timeoutMs = 25_
                 redirect: 'follow',
                 signal: controller.signal,
                 headers: {
-                    'user-agent': USER_AGENT,
+                    ...BROWSER_HEADERS,
                     accept: 'text/html,application/xhtml+xml,application/rss+xml,application/xml;q=0.9,*/*;q=0.8'
                 }
             });

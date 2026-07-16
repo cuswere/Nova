@@ -44,7 +44,7 @@ export function parseArtworkArchive(html, definition = source('artwork_archive')
             confidence: 0.68
         });
     });
-    return uniqueByLinkAndName(rows).slice(0, definition.limit);
+    return uniqueByLinkAndName(rows);
 }
 
 export function parseCreativeCapital(html, definition = source('creative_capital')) {
@@ -188,12 +188,22 @@ export async function discoverSource(definition) {
 
 async function discoverArtworkArchive(definition) {
     const rows = [];
-    for (let page = 1; page <= (definition.pages || 1); page += 1) {
-        const url = page === 1 ? definition.url : `${definition.url}?page=${page}`;
-        const result = await fetchText(url, { delayMs: page === 1 ? 0 : definition.delayMs || 0 });
+    const visited = new Set();
+    let url = definition.url;
+    while (url && !visited.has(url)) {
+        visited.add(url);
+        const result = await fetchText(url, { delayMs: visited.size === 1 ? 0 : definition.delayMs || 0 });
         rows.push(...parseArtworkArchive(result.text, definition));
+        url = nextArtworkArchivePage(result.text, result.finalUrl || url);
     }
-    return uniqueByLinkAndName(rows).slice(0, definition.limit);
+    return uniqueByLinkAndName(rows);
+}
+
+function nextArtworkArchivePage(html, currentUrl) {
+    const $ = cheerio.load(html);
+    const currentPage = Number(new URL(currentUrl).searchParams.get('page') || 1);
+    const candidates = $('a[href*="page="]').map((_, element) => absoluteUrl($(element).attr('href'), currentUrl)).get();
+    return candidates.find((candidate) => Number(new URL(candidate).searchParams.get('page')) === currentPage + 1) || '';
 }
 
 function mapCreativeWestType(type, name) {
