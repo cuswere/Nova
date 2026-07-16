@@ -24,92 +24,72 @@ function finishScreenRefresh() {
     window.setTimeout(() => refresh.remove(), 380);
 }
 
-// Animate the `.applied-filters` container when filters are added/removed.
-function animateFilterArea(container, startingHeight) {
-    if (!container) return;
-    const duration = 200; // ms (matches CSS)
-    const MAX = 165; // px - same as CSS
+// Track the active resize so rapid clicks continue from the currently visible
+// height rather than competing with a stale delay or transition.
+const filterAreaAnimations = new WeakMap();
 
-    // compute current content height after DOM updates
-    const contentHeight = container.scrollHeight;
+function cancelFilterAreaAnimation(container) {
+    const state = filterAreaAnimations.get(container);
+    if (!state) return;
 
-    // Check if we're transitioning between filter states or truly expanding from nothing
-    const isTransition = startingHeight && startingHeight > 0;
+    window.clearTimeout(state.delayTimer);
+    window.clearTimeout(state.fallbackTimer);
+    if (state.frame) window.cancelAnimationFrame(state.frame);
+    container.removeEventListener('transitionend', state.onTransitionEnd);
+    filterAreaAnimations.delete(container);
+}
 
-    // clamp startingHeight so we never momentarily expand past MAX when overflowing
-    const startingClamped = isTransition ? Math.min(startingHeight, MAX) : 0;
+function animateFilterArea(container, fromHeight, targetHeight) {
+    const isExpansion = targetHeight > fromHeight + 0.5;
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    const target = Math.min(contentHeight, MAX);
+    // Collapsing is immediate; the delayed stepped motion is specifically a
+    // reveal for new space opening beneath the existing filter row.
+    if (!isExpansion || reducedMotion) {
+        container.style.height = '';
+        container.style.overflow = '';
+        container.style.transition = '';
+        return;
+    }
+
+    const delay = 120;
+    const duration = 200;
+    const state = {
+        delayTimer: null,
+        fallbackTimer: null,
+        frame: null,
+        onTransitionEnd: null
+    };
+
+    const finish = () => {
+        if (filterAreaAnimations.get(container) !== state) return;
+        window.clearTimeout(state.fallbackTimer);
+        container.removeEventListener('transitionend', state.onTransitionEnd);
+        container.style.height = '';
+        container.style.overflow = '';
+        container.style.transition = '';
+        filterAreaAnimations.delete(container);
+    };
+
+    state.onTransitionEnd = (event) => {
+        if (event.target === container && event.propertyName === 'height') finish();
+    };
+
+    // These are both border-box measurements. The previous scrollHeight and
+    // max-height pairing counted padding differently, causing the final snap.
+    container.style.height = `${fromHeight}px`;
     container.style.overflow = 'hidden';
-
-    // Only animate padding when expanding from nothing, not during transitions
-    const transitionStr = isTransition 
-        ? `max-height ${duration}ms steps(4,end)`
-        : `max-height ${duration}ms steps(3,end), padding ${Math.max(120, duration - 20)}ms steps(3,end)`;
-    // add a short JS delay before starting the expand animation when truly expanding from nothing
-    const expandDelay = isTransition ? 0 : 120; // ms
-    // start with no transition so the element can stay collapsed during the delay
     container.style.transition = 'none';
-    
-    if (isTransition) {
-        // Transitioning between filter states - smooth resize from current height
-        // ensure we don't start larger than MAX (prevents divider jumping down past max)
-        container.style.maxHeight = startingClamped + 'px';
-        // Don't change padding for transitions
-    } else {
-        // Truly expanding from nothing
-        container.style.paddingTop = '0px';
-        container.style.paddingBottom = '0px';
-        container.style.maxHeight = '0px';
-    }
-    
-    // force layout
-    container.getBoundingClientRect();
-    
-    // start the transition only after the user releases pointer (pointerup),
-    // with a timeout fallback so it still runs if pointerup doesn't fire.
-    let cleanupTimer = null;
-    const scheduleCleanup = () => {
-        // cleanup after the transition duration
-        cleanupTimer = window.setTimeout(() => {
-            if (contentHeight > MAX) {
-                container.style.overflow = 'auto';
-                container.style.maxHeight = MAX + 'px';
-            } else {
-                container.style.overflow = '';
-                container.style.maxHeight = contentHeight + 'px';
-            }
-            container.style.transition = '';
-        }, duration + 20);
-    };
+    filterAreaAnimations.set(container, state);
 
-    const startExpand = () => {
-        // avoid double-start
-        if (startExpand._started) return;
-        startExpand._started = true;
-        // enable the transition then set the target height to animate
-        container.style.transition = transitionStr;
-        requestAnimationFrame(() => {
-            container.style.maxHeight = target + 'px';
-            if (!isTransition) {
-                container.style.paddingTop = '4px';
-                container.style.paddingBottom = '4px';
-            }
+    state.delayTimer = window.setTimeout(() => {
+        container.addEventListener('transitionend', state.onTransitionEnd);
+        container.style.transition = `height ${duration}ms steps(4, end)`;
+        state.frame = window.requestAnimationFrame(() => {
+            container.style.height = `${targetHeight}px`;
         });
-        scheduleCleanup();
-    };
-
-    if (isTransition) {
-        // Transitioning between filter states - run immediately with transition enabled
-        container.style.transition = transitionStr;
-        // start from the clamped starting height so we don't visually exceed MAX
-        container.style.maxHeight = startingClamped + 'px';
-        requestAnimationFrame(() => { container.style.maxHeight = target + 'px'; });
-        scheduleCleanup();
-    } else {
-        // Truly expanding from nothing: wait a fixed post-click delay, then enable transition and expand
-        window.setTimeout(() => { startExpand(); }, expandDelay);
-    }
+        state.fallbackTimer = window.setTimeout(finish, duration + 50);
+    }, delay);
 }
 
 // Load opportunities from static JSON file
@@ -544,44 +524,67 @@ function updateAppliedFiltersDisplay() {
     const container = document.querySelector('.applied-filters');
     if (!container) return;
 
-    // Capture current height before modifying DOM (for smooth expand transitions)
-    const startingHeight = container.scrollHeight;
+    // Freeze the currently rendered border-box before replacing the tokens.
+    // During a rapid second click, this captures the visible animation step.
+    const startingHeight = container.getBoundingClientRect().height;
+    cancelFilterAreaAnimation(container);
+    container.style.transition = 'none';
+    container.style.height = `${startingHeight}px`;
+    container.style.overflow = 'hidden';
 
     // If no filters (including hideFees), show "no filters"
     const hasFilters = (activeFilters.type && activeFilters.type.length > 0) || activeFilters.hideFees;
-    
+
+    container.innerHTML = '';
+
     if (!hasFilters) {
-        // Just collapse instantly without animation
-        // Clear any leftover inline styles from previous animation
-        container.style.transition = '';
-        container.style.maxHeight = '';
-        container.style.overflow = '';
-        container.innerHTML = '';
         const noFiltersItem = document.createElement('div');
         noFiltersItem.className = 'filter-item';
         noFiltersItem.textContent = 'none';
         container.appendChild(noFiltersItem);
-        return;
-    }
+    } else {
+        // Display active type filters with remove button
+        if (activeFilters.type && activeFilters.type.length > 0) {
+            activeFilters.type.forEach(typeValue => {
+                const filterItem = document.createElement('div');
+                filterItem.className = 'filter-item active-filter';
 
-    // For the hasFilters case, update DOM and animate expansion
-    container.innerHTML = '';
+                const filterText = document.createElement('span');
+                filterText.textContent = typeValue.charAt(0).toUpperCase() + typeValue.slice(1);
 
-    // Display active type filters with remove button
-    if (activeFilters.type && activeFilters.type.length > 0) {
-        activeFilters.type.forEach(typeValue => {
+                const removeBtn = document.createElement('button');
+                removeBtn.textContent = '×';
+                removeBtn.className = 'remove-filter-btn';
+                removeBtn.setAttribute('aria-label', `Remove ${typeValue} filter`);
+                removeBtn.onclick = () => {
+                    activeFilters.type = activeFilters.type.filter(t => t !== typeValue);
+                    populateTypeDropdown();  // Refresh dropdown options
+                    updateAppliedFiltersDisplay();
+                    populateOpportunitiesMainTable();
+                };
+
+                filterItem.appendChild(filterText);
+                filterItem.appendChild(removeBtn);
+                container.appendChild(filterItem);
+            });
+        }
+
+        // Display hide-fees active filter (rendered as an exclusion token)
+        if (activeFilters.hideFees) {
             const filterItem = document.createElement('div');
-            filterItem.className = 'filter-item active-filter';
+            filterItem.className = 'filter-item active-filter exclude-filter';
 
             const filterText = document.createElement('span');
-            filterText.textContent = typeValue.charAt(0).toUpperCase() + typeValue.slice(1);
+            filterText.textContent = 'Fee';
 
             const removeBtn = document.createElement('button');
             removeBtn.textContent = '×';
             removeBtn.className = 'remove-filter-btn';
+            removeBtn.setAttribute('aria-label', 'Remove fee filter');
             removeBtn.onclick = () => {
-                activeFilters.type = activeFilters.type.filter(t => t !== typeValue);
-                populateTypeDropdown();  // Refresh dropdown options
+                activeFilters.hideFees = false;
+                const cb = document.querySelector('#hide-fees-toggle');
+                if (cb) cb.checked = false;
                 updateAppliedFiltersDisplay();
                 populateOpportunitiesMainTable();
             };
@@ -589,43 +592,16 @@ function updateAppliedFiltersDisplay() {
             filterItem.appendChild(filterText);
             filterItem.appendChild(removeBtn);
             container.appendChild(filterItem);
-        });
+        }
     }
 
-    // Display hide-fees active filter (rendered as an exclusion token)
-    if (activeFilters.hideFees) {
-        const filterItem = document.createElement('div');
-        filterItem.className = 'filter-item active-filter exclude-filter';
-
-        const filterText = document.createElement('span');
-        filterText.textContent = 'Fee';
-
-        const removeBtn = document.createElement('button');
-        removeBtn.textContent = '×';
-        removeBtn.className = 'remove-filter-btn';
-        removeBtn.onclick = () => {
-            activeFilters.hideFees = false;
-            const cb = document.querySelector('#hide-fees-toggle');
-            if (cb) cb.checked = false;
-            updateAppliedFiltersDisplay();
-            populateOpportunitiesMainTable();
-        };
-
-        filterItem.appendChild(filterText);
-        filterItem.appendChild(removeBtn);
-        container.appendChild(filterItem);
-    }
-    // animate expand, passing startingHeight for smooth transitions
-    // preserve the previous height immediately so the surrounding divider doesn't jump
-    if (startingHeight) {
-        const MAX = 165; // keep in sync with animateFilterArea
-        const startClamped = Math.min(startingHeight, MAX);
-        container.style.transition = 'none';
-        container.style.maxHeight = startClamped + 'px';
-        container.style.overflow = 'hidden';
-    }
-    // add a short delay so the animation begins after the user interaction finishes
-    window.setTimeout(() => { animateFilterArea(container, startingHeight); }, 120);
+    // Measure the final natural border-box synchronously, then return to the
+    // frozen size before the browser can paint. The delayed stepped animation
+    // reveals any newly wrapped line by expanding the frame downward.
+    container.style.height = 'auto';
+    const targetHeight = container.getBoundingClientRect().height;
+    container.style.height = `${startingHeight}px`;
+    animateFilterArea(container, startingHeight, targetHeight);
 }
 
 // Setup filter event listeners

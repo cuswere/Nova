@@ -132,9 +132,9 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
    .repobox itself sits behind its children, so the cards conceal it as they
    scroll. This non-scrolling overlay preserves the double recessed frame. */
 .repo::after { content: ""; position: absolute; z-index: 1; inset: 3px; box-shadow: var(--sink); pointer-events: none; }
-.repobox { height: 100%; max-height: 70vh; min-height: 70vh; overflow: auto; background: var(--field); padding: 4px; }
+.repobox { height: 100%; max-height: 70vh; min-height: 70vh; overflow-x: hidden; overflow-y: scroll; scrollbar-gutter: stable; background: var(--field); padding: 4px; }
 .repo-status-message { margin: auto; padding: 20px; color: var(--muted); text-align: center; }
-.opportunity-card { display: grid; grid-template-columns: minmax(0, 1.5fr) 1fr; gap: 10px 14px; padding: 13px; border-bottom: 1px solid #999; background: var(--field); }
+.opportunity-card { display: grid; grid-template-columns: minmax(0, 1.5fr) 1fr; gap: 8px 14px; padding: 12px; border-bottom: 1px solid #999; background: var(--field); }
 .opportunity-card:hover {  }
 .opportunity-card a { display: inline-block; min-width: 0; max-width: 100%; padding: 8px; background: var(--desktop); color: var(--field); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 2px; vertical-align: top; font-size: 15px; font-weight: 600; }
 .link-text { display: inline; }
@@ -152,25 +152,39 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
 .filters { align-self: start; padding: 8px; }
 .filters-title { padding: 2px 4px; font-weight: 600; font-size: 12px; letter-spacing: .05em; }
 .filters-divider { border-top: 1px solid #777; padding-top: 8px; }
-.applied-filters { display: flex; flex-wrap: wrap; gap: 5px; min-height: 38px; max-height: 165px; overflow: auto; border: 1px solid var(--ink); padding: 7px; background: var(--field); }
+.applied-filters { display: flex; flex-wrap: wrap; gap: 4px; min-height: 38px; overflow: visible; border: 1px solid var(--ink); padding: 6px; background: var(--field); }
 .filter-item { font-size: 14px; color: var(--muted); }
 .active-filter { display: flex; gap: 5px; align-items: center; padding: 2px 4px; color: #fff; background: var(--blue-bright); }
 .exclude-filter { background: var(--red); }
-.remove-filter-btn { width: 15px; height: 15px; padding: 0; border: 1px solid currentColor; color: inherit; background: transparent; line-height: 1; }
+.remove-filter-btn { position: relative; flex: 0 0 15px; width: 15px; height: 15px; padding: 0; border: 0; color: inherit; background: transparent; font-size: 0; }
+.remove-filter-btn::before { content: ""; position: absolute; top: 4px; left: 4px; width: 1px; height: 1px; background: currentColor; box-shadow: 6px 0 currentColor, 1px 1px currentColor, 5px 1px currentColor, 2px 2px currentColor, 4px 2px currentColor, 3px 3px currentColor, 2px 4px currentColor, 4px 4px currentColor, 1px 5px currentColor, 5px 5px currentColor, 0 6px currentColor, 6px 6px currentColor; }
 .remove-filter-btn:hover { color: var(--ink); background: #fff; }
+.remove-filter-btn:focus-visible { outline: 1px dotted currentColor; outline-offset: 1px; }
 .filter-selectors { display: flex; flex-direction: column; gap: 9px; padding: 8px 4px; }
 .custom-select { position: relative; width: 100%; }
 .custom-selected { position: relative; width: 100%; min-height: 23px; padding: 4px 29px 4px 7px; color: var(--ink); background: #fff; box-shadow: var(--sink); cursor: pointer; font-size: 12px; line-height: 15px; }
 .custom-selected::after { content: "▼"; position: absolute; top: 2px; right: 2px; bottom: 2px; display: grid; place-items: center; width: 19px; color: var(--ink); background: var(--face); box-shadow: var(--raise); font-size: 9px; line-height: 1; }
-.custom-selected:hover::after { background: var(--face-light); }
-.custom-select.open .custom-selected { color: var(--ink); background: #fff; outline: 1px dotted var(--ink); outline-offset: -4px; }
-.custom-select.open .custom-selected::after { box-shadow: var(--sink); padding-top: 1px; background: var(--face); }
-.custom-options { position: absolute; z-index: 20; top: 100%; right: 0; left: 0; display: none; max-height: 230px; margin: 1px 0 0; padding: 2px; overflow: auto; list-style: none; background: var(--face); border: 1px solid var(--ink); box-shadow: 2px 2px 0 rgba(0,0,0,.5); }
+.custom-selected:hover::after {  }
+.custom-selected:active { background: var(--face); }
+.custom-selected:active::after { box-shadow: var(--sink); padding-top: 1px; }
+.custom-selected:focus-visible { outline: none; }
+.custom-selected:focus-visible::before,
+.custom-select.open .custom-selected::before { content: ""; position: absolute; top: 4px; right: 23px; bottom: 4px; left: 4px; border: 1px dotted var(--ink); pointer-events: none; }
+.custom-select.open .custom-selected { color: #fff; background: #fff; outline: none; }
+.custom-select.open .custom-selected:active { background: var(--face); }
+.custom-options { position: absolute; z-index: 20; top: 100%; right: 0; left: 0; display: none; max-height: 230px; margin: 1px 0 0; padding: 2px; overflow: auto; list-style: none; background: var(--field); border: 1px solid var(--ink); box-shadow: 2px 2px 0 rgba(0,0,0,.5); }
 .custom-options[aria-hidden="false"] { display: block; }
-.custom-options li { padding: 4px 6px; cursor: pointer; font-size: 12px; line-height: 16px; }
-.custom-options li:hover, .custom-options li[aria-selected="true"] { color: #fff; background: var(--blue-bright); }
+.custom-options li { position: relative; padding: 4px 6px; cursor: pointer; font-size: 12px; line-height: 16px; }
+.custom-options li::after { content: ""; position: absolute; inset: 2px; pointer-events: none; }
+.custom-options li:hover, .custom-options li[aria-selected="true"] { color: var(--ink); background: var(--face-light); }
+.custom-options li:hover::after { border: 1px dotted var(--ink); }
+.custom-options li[aria-selected="true"]::after { border: 1px solid var(--ink); }
+.custom-options li:active { color: var(--ink); background: var(--face-light); }
+.custom-options li:active .opt-label { display: inline-block; transform: translate(1px, 1px); }
 .custom-options li.clear-filter-option { color: var(--red); }
-.custom-options li.clear-filter-option:hover { color: #fff; background: var(--red); }
+.custom-options li.clear-filter-option:hover, .custom-options li.clear-filter-option[aria-selected="true"], .custom-options li.clear-filter-option:active { color: var(--red); }
+.custom-options li.clear-filter-option:hover::after { border-color: var(--red); }
+.custom-options li.clear-filter-option[aria-selected="true"]::after { border-color: var(--red); }
 .visually-hidden { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(1px, 1px, 1px, 1px); white-space: nowrap; }
 .checkbox-label { display: flex; align-items: center; gap: 7px; cursor: pointer; font-size: 12px; user-select: none; -webkit-user-select: none; }
 .checkbox-input {
@@ -208,7 +222,7 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
 .feedback-form label { font-size: 12px; font-weight: 600; }
 .form-input, .form-textarea { width: 100%; padding: 7px; color: var(--ink); background: #fff; border: 0; border-radius: 0; box-shadow: var(--sink); outline: 0; }
 .form-textarea { min-height: 160px; resize: vertical; }
-.form-input:focus, .form-textarea:focus, .custom-selected:focus-visible { outline: 1px dotted var(--ink); outline-offset: -4px; }
+.form-input:focus, .form-textarea:focus { outline: 1px dotted var(--ink); outline-offset: -4px; }
 .form-row.name { max-width: 360px !important; }
 .form-submit { align-self: flex-start; padding: 7px 12px; color: #fff; background: var(--blue); border: 0; box-shadow: var(--raise); font-weight: 600; }
 .form-submit:hover { background: var(--blue-bright); }
