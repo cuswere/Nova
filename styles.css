@@ -136,23 +136,31 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
 .repo-status-message { margin: auto; padding: 20px; color: var(--muted); text-align: center; }
 .opportunity-card { display: grid; grid-template-columns: minmax(0, 1.5fr) 1fr; gap: 8px 14px; padding: 12px; border-bottom: 1px solid #999; background: var(--field); }
 .opportunity-card:hover {  }
-.opportunity-card a { display: inline-block; min-width: 0; max-width: 100%; padding: 8px; background: var(--desktop); color: var(--field); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 2px; vertical-align: top; font-size: 15px; font-weight: 600; }
+.opportunity-card a { position: relative; isolation: isolate; display: inline-block; min-width: 0; max-width: 100%; padding: 8px; background: var(--desktop); color: var(--field); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 2px; vertical-align: top; font-size: 15px; font-weight: 600; }
 .link-text { display: inline; }
+.link-line-backgrounds { position: absolute; z-index: -1; inset: 0; pointer-events: none; }
+.link-line-background { position: absolute; display: block; background: var(--desktop); pointer-events: none; }
+.opportunity-card a.line-background-ready { background: transparent; pointer-events: none; }
+.opportunity-card a.line-background-ready .link-text { pointer-events: auto; }
 .opportunity-card a .link-text svg { fill: none; stroke: currentColor; }
-.opportunity-card a:hover .link-text { text-decoration-thickness: 2px; outline: 2px solid var(--blue-bright); outline-offset: 6px; }
-.opportunity-card a:hover { color: var(--blue-bright); background: var(--field);}
+.opportunity-card a:not(.line-background-ready):hover .link-text,
+.opportunity-card a.line-background-ready .link-text:hover { text-decoration-thickness: 2px; outline: 2px solid var(--blue-bright); outline-offset: 6px; }
+.opportunity-card a:not(.line-background-ready):hover { color: var(--blue-bright); background: var(--field); }
+.opportunity-card a.line-background-ready .link-text:hover { color: var(--blue-bright); text-decoration-color: var(--blue-bright); }
+.opportunity-card a.line-background-ready:has(.link-text:hover) { text-decoration-color: var(--blue-bright); }
+.opportunity-card a.line-background-ready .link-text:hover + .link-line-backgrounds { visibility: hidden; }
 .top-right-grid { border: 1px solid var(--ink); padding: 8px; display: flex; flex-wrap: wrap; justify-content: center; align-content: flex-start; gap: 4px; align-self: start; min-width: 0; max-width: 100%; }
 .grid-cell, .date-cell { min-width: 0; padding: 4px 5px; text-align: center; font-size: 14px; text-transform: uppercase; letter-spacing: .04em; }
 .grid-cell { background: none; border: 1px solid var(--ink); flex: 0 1 auto; display: flex; align-items: center; justify-content: center; max-width: 100%; overflow: hidden; overflow-wrap: anywhere; line-height: 1.15; box-shadow: none; }
 .fee-cell { min-height: 20px; padding: 3px 5px; color: var(--ink); background: var(--amber); box-shadow: none; }
-.date-cell { grid-column: 1 / -1; width: fit-content; color: var(--muted); text-align: left; box-shadow: none; background: transparent; padding: 0; text-transform: none; letter-spacing: 0; font-size: 14px; }
+.date-cell { grid-column: 1 / -1; width: fit-content; color: var(--ink); text-align: left; box-shadow: none; background: transparent; padding: 0; text-transform: none; letter-spacing: 0; font-size: 14px; }
 .date-cell strong { color: var(--ink); font-weight: 600; }
 
 /* Filters */
 .filters { align-self: start; padding: 8px; }
 .filters-title { padding: 2px 4px; font-weight: 600; font-size: 12px; letter-spacing: .05em; }
 .filters-divider { border-top: 1px solid #777; padding-top: 8px; }
-.applied-filters { display: flex; flex-wrap: wrap; gap: 4px; min-height: 38px; overflow: visible; border: 1px solid var(--ink); padding: 6px; background: var(--field); }
+.applied-filters { display: flex; flex-wrap: wrap; align-items: flex-start; align-content: flex-start; gap: 4px; min-height: 38px; overflow: visible; border: 1px solid var(--ink); padding: 6px; background: var(--field); }
 .filter-item { font-size: 14px; color: var(--muted); }
 .active-filter { display: flex; gap: 5px; align-items: center; padding: 2px 4px; color: #fff; background: var(--blue-bright); }
 .exclude-filter { background: var(--red); }
@@ -162,7 +170,7 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
 .remove-filter-btn:focus-visible { outline: 1px dotted currentColor; outline-offset: 1px; }
 .filter-selectors { display: flex; flex-direction: column; gap: 9px; padding: 8px 4px; }
 .custom-select { position: relative; width: 100%; }
-.custom-selected { position: relative; width: 100%; min-height: 23px; padding: 4px 29px 4px 7px; color: var(--ink); background: #fff; box-shadow: var(--sink); cursor: pointer; font-size: 12px; line-height: 15px; }
+.custom-selected { position: relative; width: 100%; min-height: 23px; padding: 4px 29px 4px 7px; color: var(--ink); background: #fff; box-shadow: var(--sink); cursor: pointer; font-size: 14px; line-height: 15px; }
 .custom-selected::after { content: "▼"; position: absolute; top: 2px; right: 2px; bottom: 2px; display: grid; place-items: center; width: 19px; color: var(--ink); background: var(--face); box-shadow: var(--raise); font-size: 9px; line-height: 1; }
 .custom-selected:hover::after {  }
 .custom-selected:active { background: var(--face); }
@@ -174,17 +182,12 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
 .custom-select.open .custom-selected:active { background: var(--face); }
 .custom-options { position: absolute; z-index: 20; top: 100%; right: 0; left: 0; display: none; max-height: 230px; margin: 1px 0 0; padding: 2px; overflow: auto; list-style: none; background: var(--field); border: 1px solid var(--ink); box-shadow: 2px 2px 0 rgba(0,0,0,.5); }
 .custom-options[aria-hidden="false"] { display: block; }
-.custom-options li { position: relative; padding: 4px 6px; cursor: pointer; font-size: 12px; line-height: 16px; }
-.custom-options li::after { content: ""; position: absolute; inset: 2px; pointer-events: none; }
-.custom-options li:hover, .custom-options li[aria-selected="true"] { color: var(--ink); background: var(--face-light); }
-.custom-options li:hover::after { border: 1px dotted var(--ink); }
-.custom-options li[aria-selected="true"]::after { border: 1px solid var(--ink); }
-.custom-options li:active { color: var(--ink); background: var(--face-light); }
+.custom-options li { position: relative; padding: 4px 6px; cursor: pointer; font-size: 14px; line-height: 16px; }
+.custom-options li:hover, .custom-options li[aria-selected="true"] { color: var(--field); background: var(--blue-bright); outline: 0px solid var(--ink); }
+.custom-options li:active { }
 .custom-options li:active .opt-label { display: inline-block; transform: translate(1px, 1px); }
 .custom-options li.clear-filter-option { color: var(--red); }
-.custom-options li.clear-filter-option:hover, .custom-options li.clear-filter-option[aria-selected="true"], .custom-options li.clear-filter-option:active { color: var(--red); }
-.custom-options li.clear-filter-option:hover::after { border-color: var(--red); }
-.custom-options li.clear-filter-option[aria-selected="true"]::after { border-color: var(--red); }
+.custom-options li.clear-filter-option:hover, .custom-options li.clear-filter-option[aria-selected="true"], .custom-options li.clear-filter-option:active { color: var(--field); background: var(--red); }
 .visually-hidden { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(1px, 1px, 1px, 1px); white-space: nowrap; }
 .checkbox-label { display: flex; align-items: center; gap: 7px; cursor: pointer; font-size: 12px; user-select: none; -webkit-user-select: none; }
 .checkbox-input {

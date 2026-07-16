@@ -52,8 +52,8 @@ function animateFilterArea(container, fromHeight, targetHeight) {
         return;
     }
 
-    const delay = 120;
-    const duration = 200;
+    const delay = 50;
+    const duration = 400;
     const state = {
         delayTimer: null,
         fallbackTimer: null,
@@ -367,6 +367,73 @@ function getVisibleOpportunities() {
     });
 }
 
+// Paint a separate background rectangle behind each wrapped title line. The
+// rectangles overlap slightly, so the fill reads as one stepped silhouette,
+// while the text and its native inline outline remain untouched.
+function refreshOpportunityLinkBackground(link, content) {
+    const layer = link.querySelector('.link-line-backgrounds');
+    if (!layer) return;
+
+    const range = document.createRange();
+    range.selectNodeContents(content);
+    const linkRect = link.getBoundingClientRect();
+    const fragments = Array.from(range.getClientRects()).filter(rect => rect.width && rect.height);
+    const lines = [];
+
+    fragments.forEach(rect => {
+        const existing = lines.find(line => Math.abs(line.top - rect.top) < 1);
+        if (existing) {
+            existing.left = Math.min(existing.left, rect.left);
+            existing.right = Math.max(existing.right, rect.right);
+            existing.top = Math.min(existing.top, rect.top);
+            existing.bottom = Math.max(existing.bottom, rect.bottom);
+        } else {
+            lines.push({ left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom });
+        }
+    });
+
+    layer.innerHTML = '';
+    lines.forEach(line => {
+        const background = document.createElement('span');
+        background.className = 'link-line-background';
+        background.setAttribute('aria-hidden', 'true');
+        background.style.left = `${line.left - linkRect.left - 8}px`;
+        background.style.top = `${line.top - linkRect.top - 8}px`;
+        background.style.width = `${line.right - line.left + 16}px`;
+        background.style.height = `${line.bottom - line.top + 16}px`;
+        layer.appendChild(background);
+    });
+
+    link.classList.toggle('line-background-ready', lines.length > 0);
+}
+
+function refreshOpportunityLinkBackgrounds(container) {
+    container.querySelectorAll('.opportunity-card a').forEach(link => {
+        const content = link.querySelector('.link-text');
+        if (content) refreshOpportunityLinkBackground(link, content);
+    });
+}
+
+let opportunityBackgroundFrame = null;
+let opportunityBackgroundObserver = null;
+let observedOpportunityContainer = null;
+
+function observeOpportunityLinkLayout(container) {
+    if (!window.ResizeObserver || observedOpportunityContainer === container) return;
+    if (opportunityBackgroundObserver) opportunityBackgroundObserver.disconnect();
+    opportunityBackgroundObserver = new ResizeObserver(() => scheduleOpportunityLinkBackgrounds(container));
+    opportunityBackgroundObserver.observe(container);
+    observedOpportunityContainer = container;
+}
+
+function scheduleOpportunityLinkBackgrounds(container) {
+    if (opportunityBackgroundFrame) window.cancelAnimationFrame(opportunityBackgroundFrame);
+    opportunityBackgroundFrame = window.requestAnimationFrame(() => {
+        opportunityBackgroundFrame = null;
+        refreshOpportunityLinkBackgrounds(container);
+    });
+}
+
 // Populate opportunities table
 function populateOpportunitiesMainTable() {
     const container = document.querySelector('.repobox');
@@ -432,6 +499,10 @@ function populateOpportunitiesMainTable() {
         link.target = '_blank';
         link.rel = 'noopener noreferrer';
 
+        const backgroundLayer = document.createElement('span');
+        backgroundLayer.className = 'link-line-backgrounds';
+        backgroundLayer.setAttribute('aria-hidden', 'true');
+
         // Create wrapper span for link content to allow proper outline
         const linkContent = document.createElement('span');
         linkContent.className = 'link-text';
@@ -456,6 +527,7 @@ function populateOpportunitiesMainTable() {
         iconSpan.appendChild(icon);
         linkContent.appendChild(iconSpan);
         link.appendChild(linkContent);
+        link.appendChild(backgroundLayer);
         titleColumnDiv.appendChild(link);
         card.appendChild(titleColumnDiv);
 
@@ -517,6 +589,9 @@ function populateOpportunitiesMainTable() {
 
         container.appendChild(card);
     });
+
+    observeOpportunityLinkLayout(container);
+    scheduleOpportunityLinkBackgrounds(container);
 }
 
 // Update applied filters display
