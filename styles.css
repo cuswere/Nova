@@ -93,7 +93,7 @@ button { cursor: pointer; }
     font-weight: 600;
 }
 .page-title { display: flex; align-items: center; min-width: 0; margin: 0; font: inherit; }
-.page-title::before { content: "PRAXIS NOVA /"; align-self: stretch; display: flex; align-items: center; padding: 0 3px; margin-right: 6px; letter-spacing: .04em; }
+.page-title::before { content: "PRAXIS NOVA /"; align-self: stretch; display: flex; align-items: center; padding: 0 3px; margin-right: 6px; font-size: 14px; font-weight: 600; letter-spacing: .05em; }
 .title { color: inherit; font-size: 14px; font-weight: 600; letter-spacing: .05em; }
 .title-options { display: flex; gap: 6px; margin-left: auto; }
 .title-option { display: inline-flex; align-items: center; min-height: 23px; padding: 4px 10px; color: var(--ink); background: var(--face); box-shadow: var(--raise); font-size: 12px; }
@@ -138,7 +138,7 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
 .repo-status-message { margin: auto; padding: 20px; color: var(--muted); text-align: center; }
 .opportunity-card { display: grid; grid-template-columns: minmax(0, 1.5fr) 1fr; gap: 8px 14px; padding: 12px; border-bottom: 1px solid #999; background: var(--field); }
 .opportunity-card:hover {  }
-.opportunity-card a { position: relative; isolation: isolate; display: inline-block; min-width: 0; max-width: 100%; padding: 8px; background: var(--desktop); color: var(--field); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 2px; vertical-align: top; font-size: 15px; font-weight: 600; }
+.opportunity-card a { position: relative; isolation: isolate; display: inline-block; min-width: 0; max-width: 100%; padding: 8px; background: var(--desktop); color: #fff; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 2px; vertical-align: top; font-size: 15px; font-weight: 600; }
 .link-text { display: inline; }
 .link-line-backgrounds { position: absolute; z-index: -1; inset: 0; pointer-events: none; }
 .link-line-background { position: absolute; display: block; background: var(--desktop); pointer-events: none; }
@@ -174,7 +174,6 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
 .custom-select { position: relative; width: 100%; }
 .custom-selected { position: relative; width: 100%; min-height: 23px; padding: 4px 29px 4px 7px; color: var(--ink); background: #fff; box-shadow: var(--sink); cursor: pointer; font-size: 14px; line-height: 15px; }
 .custom-selected::after { content: "▼"; position: absolute; top: 2px; right: 2px; bottom: 2px; display: grid; place-items: center; width: 19px; color: var(--ink); background: var(--face); box-shadow: var(--raise); font-size: 9px; line-height: 1; }
-.custom-selected:hover::after {  }
 .custom-selected:active { background: var(--face); }
 .custom-selected:active::after { box-shadow: var(--sink); padding-top: 1px; }
 .custom-selected:focus-visible { outline: none; }
@@ -186,12 +185,11 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
 .custom-options[aria-hidden="false"] { display: block; }
 .custom-options li { position: relative; padding: 4px 6px; cursor: pointer; font-size: 14px; line-height: 16px; }
 .custom-options li:hover, .custom-options li[aria-selected="true"] { color: var(--field); background: var(--blue-bright); outline: 0px solid var(--ink); }
-.custom-options li:active { }
 .custom-options li:active .opt-label { display: inline-block; transform: translate(1px, 1px); }
 .custom-options li.clear-filter-option { color: var(--red); }
 .custom-options li.clear-filter-option:hover, .custom-options li.clear-filter-option[aria-selected="true"], .custom-options li.clear-filter-option:active { color: var(--field); background: var(--red); }
 .visually-hidden { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(1px, 1px, 1px, 1px); white-space: nowrap; }
-.checkbox-label { display: flex; align-items: center; gap: 7px; cursor: pointer; font-size: 12px; user-select: none; -webkit-user-select: none; }
+.checkbox-label { display: flex; align-items: center; gap: 7px; cursor: pointer; font-size: 14px; user-select: none; -webkit-user-select: none; }
 .checkbox-input {
     position: relative;
     width: 13px;
@@ -222,7 +220,7 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
 /* Feedback */
 .feedback { padding: 3px; background: var(--face); box-shadow: var(--raise); }
 .feedback-form { display: flex; flex-direction: column; align-items: flex-start; padding: 20px; background: var(--field); box-shadow: var(--sink); }
-.feedback-intro { width: 100%; margin: 0 0 17px; padding-bottom: 11px; border-bottom: 1px solid #999; font-size: 14px; font-weight: 600; }
+.feedback-intro { width: 100%; margin: 0 0 17px; padding-bottom: 11px; border-bottom: 1px solid var(--ink); font-size: 14px; font-weight: 600; }
 .feedback-form .form-row { width: min(100%, 660px); display: flex; flex-direction: column; gap: 6px; margin: 8px 0; }
 .feedback-form label { font-size: 12px; font-weight: 600; }
 .form-input, .form-textarea { width: 100%; padding: 7px; color: var(--ink); background: #fff; border: 0; border-radius: 0; box-shadow: var(--sink); outline: 0; }
@@ -251,7 +249,7 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
 }
 
 @media (max-width: 430px) {
-    .page-title::before { padding: 0 5px; font-size: 10px; }
+    .page-title::before { padding: 0 5px; }
     .filter-selectors { grid-template-columns: 1fr; }
     .feedback-form { padding: 13px; }
 }

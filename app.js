@@ -73,7 +73,7 @@ function animateFilterArea(container, fromHeight, targetHeight) {
     }
 
     const delay = 50;
-    const duration = 400;
+    const duration = 200;
     const state = {
         delayTimer: null,
         fallbackTimer: null,
