@@ -5,6 +5,17 @@
   "type": "module",
   "description": "An updating roster of opportunities for artists.",
   "scripts": {
-    "publish-data": "node publish.js"
+    "publish-data": "node publish.js",
+    "sync-opportunities": "node sync-opportunities.js",
+    "dry-run-opportunities": "node sync-opportunities.js --dry-run",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "cheerio": "^1.2.0",
+    "googleapis": "^173.0.0",
+    "openai": "^6.47.0"
   }
 }

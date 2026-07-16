@@ -1,100 +1,52 @@
 #!/usr/bin/env node
 
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import https from 'https';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { pathToFileURL } from 'node:url';
+import { PUBLIC_FIELDS } from './opportunity-pipeline/config.js';
+import { formatPublicDeadline, normalizeDeadline, validatePublishable } from './opportunity-pipeline/normalize.js';
+import { readRows } from './opportunity-pipeline/sheets.js';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const directory = path.dirname(fileURLToPath(import.meta.url));
+const outputFile = path.join(directory, 'data', 'opportunities.json');
 
-const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSoZVQ-s36NtRxydHagCtc3zbAf3pLmOKoYGa0533yyhebTL0Xuogz7FzunHMI6vVE2Xu_ZnCzuB4oM/pub?gid=0&single=true&output=csv";
-const DATA_DIR = path.join(__dirname, 'data');
-const OUTPUT_FILE = path.join(DATA_DIR, 'opportunities.json');
-
-// Parse CSV string into array of objects, handling quoted fields
-function parseCSV(csvText) {
-    function parseCSVRow(row) {
-        const result = [];
-        let current = '';
-        let insideQuotes = false;
-        
-        for (let i = 0; i < row.length; i++) {
-            const char = row[i];
-            const nextChar = row[i + 1];
-            
-            if (char === '"') {
-                if (insideQuotes && nextChar === '"') {
-                    current += '"';
-                    i++;
-                } else {
-                    insideQuotes = !insideQuotes;
-                }
-            } else if (char === ',' && !insideQuotes) {
-                result.push(current.trim());
-                current = '';
-            } else {
-                current += char;
-            }
+export function buildPublishedRows(rows, now = new Date()) {
+    const published = [];
+    const rejected = [];
+    for (const row of rows) {
+        if (String(row.status).toLowerCase() !== 'publish') continue;
+        const normalized = { ...row, deadline: normalizeDeadline(row.deadline), fees: String(row.fees).toLowerCase() };
+        const errors = validatePublishable(normalized, now);
+        if (errors.length) {
+            rejected.push({ name: row.name || '(unnamed)', errors });
+            continue;
         }
-        result.push(current.trim());
-        return result;
+        normalized.deadline = formatPublicDeadline(normalized.deadline);
+        published.push(Object.fromEntries(PUBLIC_FIELDS.map((field) => [field, normalized[field]])));
     }
-    
-    const rows = csvText.trim().split('\n');
-    if (rows.length < 2) return [];
-    
-    const headers = parseCSVRow(rows[0]).map(h => h.toLowerCase());
-    
-    const data = [];
-    for (let i = 1; i < rows.length; i++) {
-        const values = parseCSVRow(rows[i]);
-        if (values.length > 0 && values[0]) {
-            const row = {};
-            headers.forEach((header, index) => {
-                row[header] = values[index] || '';
-            });
-            data.push(row);
-        }
-    }
-    return data;
+    published.sort((left, right) => {
+        if (left.deadline === 'Rolling') return 1;
+        if (right.deadline === 'Rolling') return -1;
+        return new Date(left.deadline) - new Date(right.deadline) || left.name.localeCompare(right.name);
+    });
+    return { published, rejected };
 }
 
-// Fetch CSV and save to JSON
-async function publishOpportunities() {
-    try {
-        console.log('Fetching from Google Sheet...');
-        const csvText = await new Promise((resolve, reject) => {
-            function fetchWithRedirects(url) {
-                https.get(url, (res) => {
-                    // Handle redirects
-                    if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-                        fetchWithRedirects(res.headers.location);
-                        return;
-                    }
-                    
-                    let data = '';
-                    res.on('data', chunk => data += chunk);
-                    res.on('end', () => resolve(data));
-                }).on('error', reject);
-            }
-            fetchWithRedirects(CSV_URL);
-        });
-        
-        const opportunities = parseCSV(csvText);
-        
-        // Create data directory if it doesn't exist
-        if (!fs.existsSync(DATA_DIR)) {
-            fs.mkdirSync(DATA_DIR, { recursive: true });
-        }
-        
-        // Write to JSON file
-        fs.writeFileSync(OUTPUT_FILE, JSON.stringify(opportunities, null, 2));
-        
-        console.log(`✓ Published ${opportunities.length} opportunities to ${OUTPUT_FILE}`);
-    } catch (error) {
-        console.error('❌ Error publishing opportunities:', error.message);
-        process.exit(1);
-    }
+export async function publish({ rows, destination = outputFile, now = new Date() } = {}) {
+    const sourceRows = rows || await readRows();
+    const result = buildPublishedRows(sourceRows, now);
+    fs.mkdirSync(path.dirname(destination), { recursive: true });
+    fs.writeFileSync(destination, `${JSON.stringify(result.published, null, 2)}\n`);
+    return result;
 }
 
-publishOpportunities();
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+    publish().then(({ published, rejected }) => {
+        console.log(`Published ${published.length} opportunities to ${outputFile}`);
+        if (rejected.length) console.warn(`Skipped ${rejected.length} invalid publish rows: ${JSON.stringify(rejected)}`);
+    }).catch((error) => {
+        console.error(`Publishing failed: ${error.stack || error.message}`);
+        process.exitCode = 1;
+    });
+}

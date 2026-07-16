@@ -20,15 +20,25 @@ then open the printed local URL.
 
 ## Data pipeline
 
-Opportunities are curated in a Google Sheet and published to the site as static JSON — no database, no server.
+Opportunities are discovered twice weekly, reviewed in the [Nova Sources Google Sheet](https://docs.google.com/spreadsheets/d/120ZqG_0qZR76b4kYHdzPK-4OKecjk7MaZcKuQRRLcbI/edit), and published to the site as static JSON. The website still has no database or application server.
 
+```text
+source boards -> deterministic extraction -> optional AI enrichment -> Sheet review -> static JSON
 ```
-node publish.js
-```
 
-(or `npm run publish-data`) downloads the sheet as CSV and writes `data/opportunities.json`, which `app.js` fetches at page load. Edit the source URL in `publish.js` if the sheet changes. Commit the regenerated JSON to deploy new listings.
+- `npm run dry-run-opportunities` fetches enabled sources and prints a summary without changing the Sheet.
+- `npm run sync-opportunities` upserts candidates into the Sheet. Existing `publish` and `reject` decisions and their six public fields are preserved.
+- `npm run publish-data` validates approved rows and regenerates `data/opportunities.json`.
+- `npm test` runs parser, normalization, review-preservation, and publishing tests.
 
-Each entry has: `name`, `deadline`, `link`, `type`, `fees` (`y`/`n`), `country`.
+The scheduled GitHub workflow runs at 14:00 UTC every Tuesday and Friday and can also be started manually. Configure these repository secrets before enabling it:
+
+1. `GOOGLE_SERVICE_ACCOUNT_JSON`: raw single-line or base64-encoded service-account JSON. Share the Sheet with its `client_email` as an editor.
+2. `OPENAI_API_KEY`: used only to fill missing or ambiguous fields from canonical opportunity pages. Without it, discovery still works and unresolved candidates remain in `review`.
+
+The workflow uses `gpt-5.4-nano` with a strict Structured Outputs schema and enriches at most 30 candidates per run by default. Override `AI_ENRICH_LIMIT` to change that cap.
+
+The Sheet's first six columns are the public site contract: `name`, `deadline`, `link`, `type`, `fees`, and `country`. New candidates arrive with `status=review`; set complete rows to `publish` or `reject`. The `fees` field means application/submission fee only, while `country` means applicant eligibility rather than host location.
 
 ## Feedback form setup
 
