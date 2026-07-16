@@ -20,26 +20,25 @@ function locationFromText(text) {
 export function parseArtworkArchive(html, definition = source('artwork_archive')) {
     const $ = cheerio.load(html);
     const rows = [];
-    $('a.group.mt-4.block[href*="/call-for-entry/"]').each((_, element) => {
-        const anchor = $(element);
-        const name = cleanText(anchor.find('h3').text() || anchor.text());
-        let container = anchor.parent();
-        for (let level = 0; level < 4 && !/Deadline\s*:/i.test(container.text()); level += 1) {
-            container = container.parent();
-        }
-        const text = cleanText(container.text());
-        const fee = text.match(/Entry Fee\s*:\s*([^|]{1,50})/i)?.[1] || '';
-        const eligibility = text.match(/Eligibility\s*:\s*([^|]{1,80})/i)?.[1] || '';
+    $('article').each((_, element) => {
+        const card = $(element);
+        const anchor = card.find('a[href*="/call-for-entry/"]').first();
+        const name = cleanText(card.find('h3').first().text());
+        const field = (label) => cleanText(card.find('dt').filter((__, term) => cleanText($(term).text()) === label).first().next('dd').text());
+        const deadline = field('Deadline:');
+        if (!name || !anchor.attr('href') || !deadline) return;
+        const fee = field('Entry Fee:');
+        const eligibility = field('Eligibility:');
         rows.push({
             name,
-            deadline: dateFromText(text),
+            deadline,
             link: absoluteUrl(anchor.attr('href'), definition.url),
-            type: text.match(/Type\s*:\s*(.*?)(?=Eligibility\s*:|Location\s*:|Entry Fee\s*:|$)/i)?.[1]?.trim() || '',
+            type: field('Type:'),
             fees: inferFee(`Entry Fee: ${fee}`),
             country: /international/i.test(eligibility) ? 'International' : '',
-            hostLocation: locationFromText(text),
+            hostLocation: field('Location:'),
             feeDetails: fee,
-            description: cleanText(container.find('p').first().text()),
+            description: cleanText(card.find('p').first().text()),
             source: definition.name,
             sourceUrl: definition.url,
             confidence: 0.68
@@ -169,9 +168,9 @@ export function parseTransArtists(html, definition = source('transartists')) {
 }
 
 export async function discoverSource(definition) {
+    if (definition.id === 'artwork_archive') return discoverArtworkArchive(definition);
     const { text } = await fetchText(definition.url, { delayMs: definition.delayMs || 0 });
     switch (definition.id) {
-        case 'artwork_archive': return parseArtworkArchive(text, definition);
         case 'creative_capital': return parseCreativeCapital(text, definition);
         case 'creative_west': return parseCreativeWest(text, definition);
         case 'transartists': return parseTransArtists(text, definition);
@@ -185,6 +184,16 @@ export async function discoverSource(definition) {
         }
         default: return [];
     }
+}
+
+async function discoverArtworkArchive(definition) {
+    const rows = [];
+    for (let page = 1; page <= (definition.pages || 1); page += 1) {
+        const url = page === 1 ? definition.url : `${definition.url}?page=${page}`;
+        const result = await fetchText(url, { delayMs: page === 1 ? 0 : definition.delayMs || 0 });
+        rows.push(...parseArtworkArchive(result.text, definition));
+    }
+    return uniqueByLinkAndName(rows).slice(0, definition.limit);
 }
 
 function mapCreativeWestType(type, name) {

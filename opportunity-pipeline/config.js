@@ -40,7 +40,9 @@ export const SOURCE_DEFINITIONS = [
         name: 'Artwork Archive',
         url: 'https://www.artworkarchive.com/call-for-entry',
         enabled: true,
-        limit: 20
+        limit: 160,
+        pages: 8,
+        delayMs: 750
     },
     {
         id: 'creative_capital',
