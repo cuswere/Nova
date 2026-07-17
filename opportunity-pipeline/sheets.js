@@ -2,6 +2,25 @@ import { google } from 'googleapis';
 import { SHEET_HEADERS, SHEET_NAME, SPREADSHEET_ID } from './config.js';
 import { canonicalizeUrl, isExpired, normalizeDeadline } from './normalize.js';
 
+export function columnLetter(columnNumber) {
+    let value = columnNumber;
+    let result = '';
+    while (value > 0) {
+        const remainder = (value - 1) % 26;
+        result = String.fromCharCode(65 + remainder) + result;
+        value = Math.floor((value - 1) / 26);
+    }
+    return result;
+}
+
+const LAST_COLUMN = columnLetter(SHEET_HEADERS.length);
+const FORMULA_PREFIX = /^[=+\-@]/;
+
+export function escapeSheetValue(value) {
+    const text = String(value ?? '');
+    return FORMULA_PREFIX.test(text) ? `'${text}` : text;
+}
+
 export function getCredentials() {
     const raw = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
     if (!raw) throw new Error('GOOGLE_SERVICE_ACCOUNT_JSON is required');
@@ -24,7 +43,7 @@ export function createSheetsClient(credentials = getCredentials()) {
 export async function readRows({ sheets = createSheetsClient(), spreadsheetId = SPREADSHEET_ID, sheetName = SHEET_NAME } = {}) {
     const response = await sheets.spreadsheets.values.get({
         spreadsheetId,
-        range: `'${sheetName.replaceAll("'", "''")}'!A:Q`,
+        range: `'${sheetName.replaceAll("'", "''")}'!A:${LAST_COLUMN}`,
         valueRenderOption: 'FORMATTED_VALUE'
     });
     const values = response.data.values || [];
@@ -71,7 +90,7 @@ export async function upsertCandidates(candidates, options = {}) {
         }
         const merged = mergeCandidate(current, candidate);
         updates.push({
-            range: `'${sheetName.replaceAll("'", "''")}'!A${current._rowNumber}:Q${current._rowNumber}`,
+            range: `'${sheetName.replaceAll("'", "''")}'!A${current._rowNumber}:${LAST_COLUMN}${current._rowNumber}`,
             values: [rowValues(merged)]
         });
         updated += 1;
@@ -86,7 +105,7 @@ export async function upsertCandidates(candidates, options = {}) {
     if (appends.length) {
         await sheets.spreadsheets.values.append({
             spreadsheetId,
-            range: `'${sheetName.replaceAll("'", "''")}'!A:Q`,
+            range: `'${sheetName.replaceAll("'", "''")}'!A:${LAST_COLUMN}`,
             valueInputOption: 'USER_ENTERED',
             insertDataOption: 'INSERT_ROWS',
             requestBody: { values: appends }
@@ -142,6 +161,6 @@ function fingerprint(row) {
     return `${canonicalizeUrl(row.link)}|${String(row.name || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()}|${row.deadline || ''}`;
 }
 
-function rowValues(row) {
-    return SHEET_HEADERS.map((header) => row[header] ?? '');
+export function rowValues(row) {
+    return SHEET_HEADERS.map((header) => escapeSheetValue(row[header]));
 }

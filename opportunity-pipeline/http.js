@@ -54,6 +54,42 @@ export async function fetchText(url, { retries = 2, delayMs = 0, timeoutMs = 25_
     throw new Error(`Unable to fetch ${url}: ${lastError?.message || 'unknown error'}`);
 }
 
+export async function postJson(url, body, { retries = 2, delayMs = 0, timeoutMs = 25_000, fetcher = fetch } = {}) {
+    if (delayMs > 0) await sleep(delayMs);
+
+    let lastError;
+    for (let attempt = 0; attempt <= retries; attempt += 1) {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), timeoutMs);
+        try {
+            const response = await fetcher(url, {
+                method: 'POST',
+                redirect: 'follow',
+                signal: controller.signal,
+                headers: {
+                    ...REQUEST_HEADERS,
+                    accept: 'application/json',
+                    'content-type': 'application/json'
+                },
+                body: JSON.stringify(body)
+            });
+            if (!response.ok) throw new HttpStatusError(response.status, response.statusText, url);
+            try {
+                return await response.json();
+            } catch (error) {
+                throw new Error(`Invalid JSON response: ${error.message}`);
+            }
+        } catch (error) {
+            lastError = error;
+            if (!isRetryable(error)) break;
+            if (attempt < retries) await sleep(750 * (attempt + 1));
+        } finally {
+            clearTimeout(timer);
+        }
+    }
+    throw new Error(`Unable to POST JSON to ${url}: ${lastError?.message || 'unknown error'}`);
+}
+
 export function absoluteUrl(value, base) {
     try {
         return new URL(value, base).toString();

@@ -131,9 +131,10 @@ export function normalizeCandidate(raw, now = new Date()) {
         last_seen: formatDate(now),
         checked_at: now.toISOString(),
         issue: '',
-        description
+        description,
+        eligibility_details: String(raw.eligibilityDetails || raw.eligibility_details || '').trim()
     };
-    const issues = [];
+    const issues = String(raw.issue || '').split(';').map((issue) => issue.trim()).filter(Boolean);
     if (!name) issues.push('missing name');
     if (!link) issues.push('invalid link');
     if (!deadline) issues.push('missing deadline');

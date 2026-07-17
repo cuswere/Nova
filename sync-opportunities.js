@@ -38,7 +38,8 @@ async function main() {
 
     const initial = deduplicate(raw.map((row) => normalizeCandidate(row, now)));
     const needsEnrichment = initial.filter((candidate) =>
-        !candidate.deadline || !candidate.fees || !candidate.country || /artworkarchive|wearecreativewest|transartists/i.test(candidate.link)
+        candidate.source !== 'Creative West Art Opps' &&
+        (!candidate.deadline || !candidate.fees || !candidate.country || /artworkarchive|transartists/i.test(candidate.link))
     );
     const selectedIds = new Set(needsEnrichment.slice(0, aiLimit).map((candidate) => candidate.id));
     const enriched = [];
@@ -50,7 +51,8 @@ async function main() {
                     ...result,
                     sourceUrl: result.source_url,
                     hostLocation: result.host_location,
-                    feeDetails: result.fee_details
+                    feeDetails: result.fee_details,
+                    eligibilityDetails: result.eligibility_details
                 }, now));
             } catch (error) {
                 enriched.push({ ...candidate, issue: [candidate.issue, `AI enrichment failed: ${error.message}`].filter(Boolean).join('; ') });

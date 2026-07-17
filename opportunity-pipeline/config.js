@@ -13,7 +13,8 @@ export const WORKFLOW_FIELDS = [
     'last_seen',
     'checked_at',
     'issue',
-    'description'
+    'description',
+    'eligibility_details'
 ];
 export const SHEET_HEADERS = [...PUBLIC_FIELDS, ...WORKFLOW_FIELDS];
 
@@ -49,15 +50,17 @@ export const SOURCE_DEFINITIONS = [
         url: 'https://creative-capital.org/artist-resources/artist-opportunities/',
         enabled: true,
         delayMs: 2_000,
-        minExpectedResults: 100,
+        minExpectedResults: 60,
         typeValues: ['commission', 'exhibition', 'fellowship', 'grant', 'job', 'prize', 'residency']
     },
     {
         id: 'creative_west',
         name: 'Creative West Art Opps',
         url: 'https://opportunities.wearecreativewest.org',
+        apiUrl: 'https://opportunities-api.wearecreativewest.org/graphql',
         enabled: true,
-        limit: 20
+        pageSize: 100,
+        maxPages: 10
     },
     {
         id: 'hyperallergic',
