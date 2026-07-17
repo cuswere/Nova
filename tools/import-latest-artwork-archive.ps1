@@ -1,0 +1,38 @@
+param(
+    [string]$ExportPath,
+    [switch]$DryRun,
+    [switch]$Pause
+)
+
+$ErrorActionPreference = 'Stop'
+$downloads = Join-Path ([Environment]::GetFolderPath('UserProfile')) 'Downloads'
+
+if (-not $ExportPath) {
+    Write-Host "Looking for the latest Artwork Archive export in $downloads..."
+    $ExportPath = Get-ChildItem -LiteralPath $downloads -Filter 'nova-artwork-archive-*.json' -File |
+        Sort-Object LastWriteTime -Descending |
+        Select-Object -First 1 -ExpandProperty FullName
+}
+if (-not $ExportPath) { throw "No Nova Artwork Archive export was found in $downloads" }
+if (-not (Test-Path -LiteralPath $ExportPath)) { throw "Export not found: $ExportPath" }
+
+Write-Host "Importing: $ExportPath"
+
+if (-not $env:GOOGLE_SERVICE_ACCOUNT_JSON) {
+    $keyPath = Join-Path $downloads 'nova-opportunities-aab1e980a6bd.json'
+    if (-not (Test-Path -LiteralPath $keyPath)) { throw "Service-account key not found: $keyPath" }
+    $env:GOOGLE_SERVICE_ACCOUNT_JSON = Get-Content -Raw -LiteralPath $keyPath
+}
+
+Push-Location (Join-Path $PSScriptRoot '..')
+try {
+    $arguments = @('run', 'import-artwork-archive', '--', $ExportPath)
+    if ($DryRun) { $arguments += '--dry-run' }
+    & npm.cmd @arguments
+    if ($LASTEXITCODE -ne 0) { throw "Nova import failed with exit code $LASTEXITCODE" }
+} finally {
+    Pop-Location
+}
+
+Write-Host "Imported $ExportPath" -ForegroundColor Green
+if ($Pause) { Read-Host 'Press Enter to close' }

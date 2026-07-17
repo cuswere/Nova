@@ -31,14 +31,36 @@ source boards -> deterministic extraction -> optional AI enrichment -> Sheet rev
 - `npm run publish-data` validates approved rows and regenerates `data/opportunities.json`.
 - `npm test` runs parser, normalization, review-preservation, and publishing tests.
 
-The scheduled GitHub workflow runs at 14:00 UTC every Tuesday and Friday and can also be started manually. Configure these repository secrets before enabling it:
+The scheduled GitHub workflow runs at 14:00 UTC every Tuesday and Friday and can also be started manually. It refreshes the HTTP-friendly sources; Artwork Archive is collected manually from a normal browser session. Configure these repository secrets before enabling it:
 
 1. `GOOGLE_SERVICE_ACCOUNT_JSON`: raw single-line or base64-encoded service-account JSON. Share the Sheet with its `client_email` as an editor.
 2. `OPENAI_API_KEY`: used only to fill missing or ambiguous fields from canonical opportunity pages. Without it, discovery still works and unresolved candidates remain in `review`.
 
 The workflow uses `gpt-5.4-nano` with a strict Structured Outputs schema and enriches at most 30 candidates per run by default. Override `AI_ENRICH_LIMIT` to change that cap.
 
-To test one source at a time, open the workflow in GitHub Actions, click **Run workflow**, and choose its source from the `source` dropdown. Scheduled runs continue to refresh all enabled sources. The same filter works locally with `OPPORTUNITY_SOURCE=artwork_archive npm run dry-run-opportunities`.
+To test one HTTP source at a time, open the workflow in GitHub Actions, click **Run workflow**, and choose its source from the `source` dropdown. Scheduled runs continue to refresh all enabled HTTP sources.
+
+### Artwork Archive browser collection
+
+Artwork Archive is intentionally excluded from GitHub Actions. Open its call-for-entry page normally in Vivaldi, then open DevTools (`F12`) and create a reusable **Sources > Snippets** snippet containing [tools/artwork-archive-collector.js](tools/artwork-archive-collector.js). Run the snippet with `Ctrl+Enter`. It uses the current browser session to collect every results page, follows each Artwork Archive detail page, and saves the external **Learn More** destination as the opportunity `link` in a dated `nova-artwork-archive-*.json` download. The existing `source_url` field is set to that individual Artwork Archive detail page for investigation. It also prefers the detail page's deadline, type, entry fee, eligibility, location, and richer description (including organization, award, categories, and event dates). Entries without an external Learn More link are reported and skipped.
+
+Check the downloaded file without changing the Sheet:
+
+```
+npm run import-artwork-archive -- "C:\path\to\nova-artwork-archive-YYYY-MM-DD.json" --dry-run
+```
+
+Then upsert it into Nova Sources:
+
+```
+npm run import-artwork-archive -- "C:\path\to\nova-artwork-archive-YYYY-MM-DD.json"
+```
+
+The importing Windows account needs `GOOGLE_SERVICE_ACCOUNT_JSON` set as a user environment variable. The browser export contains only listing-card HTML and is parsed, normalized, deduplicated, and written by Nova's existing pipeline.
+
+For a two-click manual flow, run the Vivaldi collector and then double-click [Import Latest Artwork Archive.cmd](tools/Import%20Latest%20Artwork%20Archive.cmd). The launcher selects the newest `nova-artwork-archive-*.json` file in Downloads, loads the service-account key from Downloads only when the environment variable is absent, and imports it. Add `-DryRun` to the accompanying PowerShell script when you want to validate an export without writing to the Sheet.
+
+DevTools Snippets cannot be launched by a desktop shortcut. To avoid DevTools, run [Copy Artwork Archive Collector Bookmarklet.cmd](tools/Copy%20Artwork%20Archive%20Collector%20Bookmarklet.cmd) once, create a Vivaldi bookmark named `Nova Collect`, and paste the copied value in its URL field. Clicking that bookmark while on the call-for-entry page runs the same collector in the normal Vivaldi session.
 
 The Sheet's first six columns are the public site contract: `name`, `deadline`, `link`, `type`, `fees`, and `country`. New candidates arrive with `status=review`; set complete rows to `publish` or `reject`. The `fees` field means application/submission fee only, while `country` means applicant eligibility rather than host location.
 

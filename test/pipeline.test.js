@@ -16,6 +16,7 @@ import {
 } from '../opportunity-pipeline/normalize.js';
 import { mergeCandidate } from '../opportunity-pipeline/sheets.js';
 import { buildPublishedRows } from '../publish.js';
+import { candidatesFromArtworkArchiveExport } from '../import-artwork-archive.js';
 
 const fixtures = path.join(path.dirname(fileURLToPath(import.meta.url)), 'fixtures');
 const fixture = (name) => fs.readFileSync(path.join(fixtures, name), 'utf8');
@@ -34,9 +35,38 @@ test('normalizes URLs, dates, countries, and application fees', () => {
 test('parses Artwork Archive fixture', () => {
     const [row] = parseArtworkArchive(fixture('artwork-archive.html'));
     assert.equal(row.name, 'Test Studio Residency');
-    assert.equal(row.deadline, 'August 10, 2026');
-    assert.equal(row.type, 'Residency');
+    assert.equal(row.deadline, 'August 11, 2026');
+    assert.equal(row.type, 'Fellowship');
     assert.equal(row.country, 'International');
+    assert.equal(row.hostLocation, 'Seattle, United States');
+    assert.equal(row.feeDetails, '$35');
+    assert.match(row.description, /Test Arts Council/);
+});
+
+test('imports a browser-collected Artwork Archive export', () => {
+    const rows = candidatesFromArtworkArchiveExport({
+        source: 'artwork_archive',
+        pages: [{ url: 'https://www.artworkarchive.com/call-for-entry', html: fixture('artwork-archive.html') }]
+    }, today);
+    assert.equal(rows.length, 1);
+    assert.equal(rows[0].name, 'Test Studio Residency');
+    assert.equal(rows[0].link, 'https://example.org/apply/test-studio-residency');
+    assert.equal(rows[0].source_url, 'https://artworkarchive.com/call-for-entry/test-residency-2026');
+    assert.equal(rows[0].source, 'Artwork Archive');
+});
+
+test('keeps Artwork Archive detail URLs as identity while using Learn More links', () => {
+    const html = fixture('artwork-archive.html');
+    const oldExport = candidatesFromArtworkArchiveExport({
+        source: 'artwork_archive',
+        pages: [{ url: 'https://www.artworkarchive.com/call-for-entry', html: html.replace(/ data-nova-(?:link|source-link)="[^"]+"/g, '') }]
+    }, today);
+    const correctedExport = candidatesFromArtworkArchiveExport({
+        source: 'artwork_archive',
+        pages: [{ url: 'https://www.artworkarchive.com/call-for-entry', html }]
+    }, today);
+    assert.equal(correctedExport[0].id, oldExport[0].id);
+    assert.equal(correctedExport[0].link, 'https://example.org/apply/test-studio-residency');
 });
 
 test('parses Creative Capital fixture', () => {

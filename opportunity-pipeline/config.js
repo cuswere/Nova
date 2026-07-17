@@ -39,7 +39,7 @@ export const SOURCE_DEFINITIONS = [
         id: 'artwork_archive',
         name: 'Artwork Archive',
         url: 'https://www.artworkarchive.com/call-for-entry',
-        enabled: true,
+        enabled: false,
         delayMs: 750
     },
     {

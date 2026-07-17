@@ -24,23 +24,27 @@ export function parseArtworkArchive(html, definition = source('artwork_archive')
         const card = $(element);
         const anchor = card.find('a[href*="/call-for-entry/"]').first();
         const name = cleanText(card.find('h3').first().text());
+        const detail = (key) => cleanText(card.attr(`data-nova-${key}`));
         const field = (label) => cleanText(card.find('dt').filter((__, term) => cleanText($(term).text()) === label).first().next('dd').text());
-        const deadline = field('Deadline:');
-        if (!name || !anchor.attr('href') || !deadline) return;
-        const fee = field('Entry Fee:');
-        const eligibility = field('Eligibility:');
+        const deadline = detail('deadline') || field('Deadline:');
+        const listingUrl = absoluteUrl(anchor.attr('href'), definition.url);
+        const canonicalUrl = absoluteUrl(card.attr('data-nova-link') || listingUrl, definition.url);
+        if (!name || !listingUrl || !canonicalUrl || !deadline) return;
+        const fee = detail('fee-details') || field('Entry Fee:');
+        const eligibility = detail('eligibility') || field('Eligibility:');
         rows.push({
             name,
             deadline,
-            link: absoluteUrl(anchor.attr('href'), definition.url),
-            type: field('Type:'),
+            link: canonicalUrl,
+            sourceListingUrl: absoluteUrl(card.attr('data-nova-source-link') || listingUrl, definition.url),
+            type: detail('type') || field('Type:'),
             fees: inferFee(`Entry Fee: ${fee}`),
             country: /international/i.test(eligibility) ? 'International' : '',
-            hostLocation: field('Location:'),
+            hostLocation: detail('location') || field('Location:'),
             feeDetails: fee,
-            description: cleanText(card.find('p').first().text()),
+            description: detail('description') || cleanText(card.find('p').first().text()),
             source: definition.name,
-            sourceUrl: definition.url,
+            sourceUrl: absoluteUrl(card.attr('data-nova-source-link') || definition.url, definition.url),
             confidence: 0.68
         });
     });
