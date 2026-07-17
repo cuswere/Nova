@@ -69,7 +69,8 @@ function classifyClause(clause) {
     if (/\b(?:not open to|excluding|except(?: for)?|ineligible)\b/i.test(clause)) return 'exclusion';
     if (/\b(?:preference|priority|encouraged|strong consideration)\b/i.test(clause)) return 'preference';
     if (/\b(?:w-?8ben|tax forms?|contract|payment|shipping|venue|gallery|project location|site location|environmental requirements?|weather|hurricane|heat|sun)\b/i.test(clause)) return 'administrative';
-    if (/\b(?:only|limited to|must\s+(?:reside|live|work|be based)|eligible applicants?|open to\s+(?:artists?|applicants?)\s+(?:from|in|based in)|artists?\s+(?:from|in).{0,40}\bmay apply|residents?\s+only|based artists?|authorized to work)\b/i.test(clause)) return 'restriction';
+    if (/\b(?:only|limited to|must\s+(?:reside|live|work|be based)|eligible applicants?|open to\s+(?:artists?|applicants?)\s+(?:from|in|based in)|artists?\s+(?:from|in).{0,40}\bmay apply|residents?\s+only|based artists?|authorized to work)\b/i.test(clause) ||
+        /\b(?:nyc|new york city)[- ]based\b[^.!?]{0,50}\b(?:artists?|applicants?|residents?|participants?)\b/i.test(clause)) return 'restriction';
     return 'other';
 }
 
@@ -89,6 +90,9 @@ function applicantLocationInClause(clause, label) {
 function hardRestriction(text) {
     for (const clause of clausesFromDetails(text)) {
         if (classifyClause(clause) !== 'restriction') continue;
+        if (/\b(?:nyc|new york city)[- ]based\b[^.!?]{0,50}\b(?:artists?|applicants?|residents?|participants?)\b|\b(?:artists?|applicants?|residents?|participants?)\b[^.!?]{0,55}\b(?:based|reside|live|work)\s+(?:in\s+)?(?:nyc|new york city)\b/i.test(clause)) {
+            return { country: 'United States', label: 'New York City' };
+        }
         const state = clause.match(STATE_PATTERN)?.[1];
         if (state && applicantLocationInClause(clause, state)) return { country: 'United States', label: state };
         if (/\b(?:artists?|applicants?|residents?|participants?)\b[^.!?]{0,70}\b(?:united states|u\.?s\.?a?)\b|\b(?:united states|u\.?s\.?a?)[- ]?(?:based|resident|citizen)s?\b|\bauthorized to work in (?:the )?united states\b/i.test(clause)) {
@@ -115,6 +119,21 @@ function excludesInternational(text) {
         /(?:not open to|excluding|except)\s+(?:international|worldwide|artists? from outside)/i.test(clause));
 }
 
+// Source-neutral eligibility from free prose. Conservative by design: a country is
+// only resolved on a clear applicant restriction or explicit worldwide eligibility;
+// conflicting signals resolve to blank with an issue, and everything else stays blank.
+export function resolveProseEligibility(text = '') {
+    const value = String(text || '');
+    const restriction = hardRestriction(value);
+    const worldwide = explicitWorldwide(value);
+    if (restriction && worldwide) {
+        return { country: '', issue: `eligibility conflict: text restricts applicants to ${restriction.label} and allows applicants worldwide` };
+    }
+    if (restriction) return { country: restriction.country, issue: '' };
+    if (worldwide) return { country: 'International', issue: '' };
+    return { country: '', issue: '' };
+}
+
 export function resolveEligibility({ sourceId = '', eligibilityRegion = '', eligibilityLocation = '', details = '' } = {}) {
     if (sourceId !== 'creative_west') return { country: '', issue: '' };
     const region = normalizeRegion(eligibilityRegion || eligibilityLocation);
@@ -138,7 +157,5 @@ export function resolveEligibility({ sourceId = '', eligibilityRegion = '', elig
         if (restriction) return { country: restriction.country, issue: '' };
         return { country: '', issue: `eligibility ambiguous: region=${region}; text does not establish United States` };
     }
-    if (restriction) return { country: restriction.country, issue: '' };
-    if (worldwide) return { country: 'International', issue: '' };
-    return { country: '', issue: '' };
+    return resolveProseEligibility(text);
 }

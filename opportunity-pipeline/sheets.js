@@ -1,5 +1,5 @@
 import { google } from 'googleapis';
-import { SHEET_HEADERS, SHEET_NAME, SPREADSHEET_ID } from './config.js';
+import { PUBLIC_FIELDS, SHEET_HEADERS, SHEET_NAME, SPREADSHEET_ID } from './config.js';
 import { canonicalizeUrl, isExpired, normalizeDeadline } from './normalize.js';
 
 export function columnLetter(columnNumber) {
@@ -14,6 +14,7 @@ export function columnLetter(columnNumber) {
 }
 
 const LAST_COLUMN = columnLetter(SHEET_HEADERS.length);
+const STATUS_COLUMN = columnLetter(SHEET_HEADERS.indexOf('status') + 1);
 const FORMULA_PREFIX = /^[=+\-@]/;
 
 export function escapeSheetValue(value) {
@@ -61,8 +62,8 @@ export async function assertSchema({ sheets = createSheetsClient(), spreadsheetI
         range: `'${sheetName.replaceAll("'", "''")}'!1:1`
     });
     const headers = (response.data.values?.[0] || []).map((value) => String(value).trim().toLowerCase());
-    const missing = SHEET_HEADERS.filter((header) => !headers.includes(header));
-    if (missing.length) throw new Error(`Sheet ${sheetName} is missing headers: ${missing.join(', ')}`);
+    const matches = headers.length === SHEET_HEADERS.length && SHEET_HEADERS.every((header, index) => headers[index] === header);
+    if (!matches) throw new Error(`Sheet ${sheetName} header sequence mismatch. Expected: ${SHEET_HEADERS.join(', ')}; found: ${headers.join(', ') || '(empty)'}`);
 }
 
 export async function upsertCandidates(candidates, options = {}) {
@@ -76,7 +77,7 @@ export async function upsertCandidates(candidates, options = {}) {
     const updates = existing
         .filter((row) => ['review', 'publish'].includes(row.status) && isExpired(normalizeDeadline(row.deadline)))
         .map((row) => ({
-            range: `'${sheetName.replaceAll("'", "''")}'!H${row._rowNumber}`,
+            range: `'${sheetName.replaceAll("'", "''")}'!${STATUS_COLUMN}${row._rowNumber}`,
             values: [['expired']]
         }));
     const appends = [];
@@ -151,7 +152,7 @@ export function mergeCandidate(current, candidate) {
     const preservePublic = ['publish', 'reject'].includes(manualStatus);
     const merged = { ...current, ...candidate, status: manualStatus };
     if (preservePublic) {
-        for (const field of ['name', 'deadline', 'link', 'type', 'fees', 'country']) merged[field] = current[field];
+        for (const field of PUBLIC_FIELDS) merged[field] = current[field];
     }
     if (candidate.status === 'expired' && manualStatus !== 'reject') merged.status = 'expired';
     return merged;

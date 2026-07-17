@@ -9,13 +9,14 @@ import {
     creativeWestDeadline,
     creativeWestFeeSummary,
     discoverCreativeWest,
+    discoverHyperallergic,
     mapCreativeWestItem,
     parseArtworkArchive,
     parseCreativeCapital,
     parseHyperallergicArticle
 } from '../opportunity-pipeline/adapters.js';
 import { enrichCandidate } from '../opportunity-pipeline/enrich.js';
-import { htmlToText, resolveEligibility } from '../opportunity-pipeline/eligibility.js';
+import { htmlToText, resolveEligibility, resolveProseEligibility } from '../opportunity-pipeline/eligibility.js';
 import { postJson } from '../opportunity-pipeline/http.js';
 import {
     canonicalizeUrl,
@@ -127,6 +128,123 @@ test('parses Hyperallergic fixture', () => {
     assert.equal(row.country, 'International');
 });
 
+test('interprets Hyperallergic roundup sections, awards, fees, rolling deadlines, eligibility, and link rules', () => {
+    const rows = parseHyperallergicArticle(fixture('hyperallergic-roundup.html'), undefined, 'https://hyperallergic.com/opportunities-in-july-2026/');
+    const byName = Object.fromEntries(rows.map((row) => [row.name, row]));
+    assert.deepEqual(rows.map((row) => row.name).sort(), [
+        'Big Prize',
+        'Budget Only Grant',
+        'Hyundai Motor Group – The 7th VH Award',
+        'New York Fellowship',
+        'Tuition Trap Grant',
+        'Vermont Studio Center Residency'
+    ]);
+
+    // Section-derived type: residency section, name without "fellowship" -> Residency.
+    const vermont = byName['Vermont Studio Center Residency'];
+    assert.equal(vermont.type, 'Residency');
+    assert.equal(vermont.country, 'International');
+    assert.equal(normalizeDeadline(vermont.deadline), '2026-10-01');
+    assert.equal(vermont.awardInfo, '');
+
+    // Named fellowship in the same section -> Fellowship; US restriction; rolling deadline.
+    const fellowship = byName['New York Fellowship'];
+    assert.equal(fellowship.type, 'Fellowship');
+    assert.equal(fellowship.country, 'United States');
+    assert.equal(normalizeDeadline(fellowship.deadline), 'Rolling');
+    assert.match(fellowship.awardInfo, /\$5,000 stipend/);
+
+    // The source's Grants & Awards section drives the category.
+    assert.equal(byName['Hyundai Motor Group – The 7th VH Award'].type, 'Award');
+
+    // Bare "Fee:" label -> fee y; award line captured; same-month range -> end date;
+    // external host valid even with "hyperallergic.com" inside the query string.
+    const prize = byName['Big Prize'];
+    assert.equal(prize.type, 'Award');
+    assert.equal(prize.fees, 'y');
+    assert.equal(prize.awardInfo, 'Up to $90,000 awarded to winners.');
+    assert.equal(normalizeDeadline(prize.deadline), '2026-10-29');
+    assert.equal(prize.link, 'https://bigprize.org/enter?ref=hyperallergic.com');
+
+    // Ambiguous currency remains in the row description and is flagged for review.
+    assert.equal(byName['Budget Only Grant'].awardInfo, '');
+    assert.match(byName['Budget Only Grant'].issue, /ambiguous award amount/);
+    assert.equal(byName['Tuition Trap Grant'].awardInfo, '');
+    assert.match(byName['Tuition Trap Grant'].issue, /ambiguous award amount/);
+
+    // Entries without an independent external link (missing / internal) are dropped.
+    assert.ok(!rows.some((row) => row.name === 'No Link Award'));
+    assert.ok(!rows.some((row) => row.name === 'Internal Only'));
+});
+
+test('discoverHyperallergic reads the latest roundups newest-first, skips non-roundups, and dedupes', async () => {
+    const feedXml = fixture('hyperallergic-feed.xml');
+    const article = fixture('hyperallergic-roundup.html');
+    const fetched = [];
+    const fetcher = async (url) => {
+        fetched.push(url);
+        if (url.includes('/feed/')) return { text: feedXml, finalUrl: url };
+        if (url.includes('july')) return { text: article, finalUrl: url };
+        const variant = article
+            .replace('<strong>Big Prize</strong>', '<strong>BIG   PRIZE</strong>')
+            .replace('https://bigprize.org/enter?ref=hyperallergic.com', 'https://www.bigprize.org/enter/?utm_source=older');
+        return { text: variant, finalUrl: url };
+    };
+    const definition = { id: 'hyperallergic', name: 'Hyperallergic', url: 'https://hyperallergic.com/tag/opportunities/feed/', roundupMonths: 3 };
+    const rows = await discoverHyperallergic(definition, { fetcher });
+
+    // One feed request plus exactly three roundup articles, valid pubDates newest-first;
+    // the pubDate-less "May" roundup sorts last and is excluded, the non-roundup item is skipped.
+    assert.deepEqual(fetched, [
+        'https://hyperallergic.com/tag/opportunities/feed/',
+        'https://hyperallergic.com/opportunities-in-july-2026/',
+        'https://hyperallergic.com/opportunities-in-june-2026/',
+        'https://hyperallergic.com/opportunities-in-april-2026/'
+    ]);
+    // Canonical URL/name variants across roundups collapse with the newest row winning.
+    assert.deepEqual(rows.map((row) => row.name).sort(), [
+        'Big Prize',
+        'Budget Only Grant',
+        'Hyundai Motor Group – The 7th VH Award',
+        'New York Fellowship',
+        'Tuition Trap Grant',
+        'Vermont Studio Center Residency'
+    ]);
+    assert.equal(rows.find((row) => row.name === 'Big Prize').sourceUrl, 'https://hyperallergic.com/opportunities-in-july-2026/');
+});
+
+test('normalizeDeadline resolves ranges to the end date and rejects impossible dates', () => {
+    assert.equal(normalizeDeadline('October 29, 2026'), '2026-10-29');
+    assert.equal(normalizeDeadline('2026-10-29'), '2026-10-29');
+    assert.equal(normalizeDeadline('October 1-29, 2026'), '2026-10-29');
+    assert.equal(normalizeDeadline('October 1 to 29, 2026'), '2026-10-29');
+    assert.equal(normalizeDeadline('October 1–29, 2026'), '2026-10-29');
+    assert.equal(normalizeDeadline('between February 16 and March 6, 2026'), '2026-03-06');
+    assert.equal(normalizeDeadline('October 1, 2026 - November 5, 2026'), '2026-11-05');
+    assert.equal(normalizeDeadline('February 29, 2028'), '2028-02-29');
+    assert.equal(normalizeDeadline('February 29, 2026'), '');
+    assert.equal(normalizeDeadline('2026-02-31'), '');
+    assert.equal(normalizeDeadline('8/1/2026'), '2026-08-01');
+    assert.equal(normalizeDeadline('02/31/2026'), '');
+    assert.equal(normalizeDeadline('rolling'), 'Rolling');
+});
+
+test('inferFee recognizes bare fee labels and free applications without misreading awards', () => {
+    assert.equal(inferFee('Fee: $40'), 'y');
+    assert.equal(inferFee('The application fee is $40.'), 'y');
+    assert.equal(inferFee('$10 application fee'), 'y');
+    assert.equal(inferFee('Free to enter.'), 'n');
+    assert.equal(inferFee('No fee.'), 'n');
+    assert.equal(inferFee('Six artists will receive $1,800 stipends.'), '');
+});
+
+test('resolveProseEligibility resolves country conservatively and flags conflicts', () => {
+    assert.deepEqual(resolveProseEligibility('Open to artists worldwide.'), { country: 'International', issue: '' });
+    assert.deepEqual(resolveProseEligibility('Open only to artists based in New York.'), { country: 'United States', issue: '' });
+    assert.deepEqual(resolveProseEligibility('Critics may submit essays.'), { country: '', issue: '' });
+    assert.match(resolveProseEligibility('Only Colorado residents are eligible. Artists from any country may apply.').issue, /eligibility conflict/);
+});
+
 test('normalization records unresolved fields instead of guessing', () => {
     const row = normalizeCandidate({
         name: 'Test Exhibition',
@@ -196,13 +314,13 @@ test('AI enrichment uses structured evidence without inventing unsupported costs
 
 test('publisher exports only valid approved rows and keeps browser-safe dates', () => {
     const result = buildPublishedRows([
-        { name: 'Good Grant', deadline: '2026-08-01', link: 'https://example.org/good', type: 'Grant', fees: 'n', country: 'International', status: 'publish' },
+        { name: 'Good Grant', deadline: '2026-08-01', link: 'https://example.org/good', type: 'Grant', fees: 'n', country: 'International', award_info: 'Up to $10,000', status: 'publish' },
         { name: 'Future Job Listing', deadline: '2026-08-02', link: 'https://example.org/job', type: 'Job', fees: 'n', country: 'International', status: 'publish' },
         { name: 'Needs Review', deadline: '2026-08-02', link: 'https://example.org/review', type: 'Grant', fees: 'n', country: 'International', status: 'review' },
         { name: 'Bad Fee', deadline: '2026-08-03', link: 'https://example.org/bad', type: 'Grant', fees: '', country: 'International', status: 'publish' },
         { name: 'Expired', deadline: '2026-07-01', link: 'https://example.org/expired', type: 'Grant', fees: 'n', country: 'International', status: 'publish' }
     ], today);
-    assert.deepEqual(result.published, [{ name: 'Good Grant', deadline: '8/1/2026', link: 'https://example.org/good', type: 'Grant', fees: 'n', country: 'International' }]);
+    assert.deepEqual(result.published, [{ name: 'Good Grant', deadline: '8/1/2026', link: 'https://example.org/good', type: 'Grant', fees: 'n', country: 'International', award_info: 'Up to $10,000' }]);
     assert.equal(result.rejected.length, 3);
     assert.deepEqual(result.rejected.find((row) => row.name === 'Future Job Listing')?.errors, ['type is not yet public']);
 });
@@ -333,7 +451,7 @@ test('Creative West eligibility classifies applicant restrictions separately fro
     assert.equal(mapped.country, 'International');
 });
 
-test('normalization retains specific eligibility issues and Sheet values follow the derived 18-column schema safely', () => {
+test('normalization retains specific eligibility issues and Sheet values follow the derived 19-column schema safely', () => {
     const row = normalizeCandidate({
         name: 'Conflicted Eligibility', deadline: 'August 1, 2026', link: 'https://example.org/conflict', type: 'Grant', fees: 'n',
         issue: 'eligibility conflict: region=INTERNATIONAL; text restricts applicants to Colorado', eligibilityDetails: 'Colorado only'
@@ -341,17 +459,17 @@ test('normalization retains specific eligibility issues and Sheet values follow 
     assert.match(row.issue, /eligibility conflict/);
     assert.match(row.issue, /unresolved eligibility/);
     assert.equal(row.eligibility_details, 'Colorado only');
-    assert.equal(SHEET_HEADERS.length, 18);
-    assert.equal(columnLetter(18), 'R');
+    assert.equal(SHEET_HEADERS.length, 19);
+    assert.equal(columnLetter(19), 'S');
     assert.equal(columnLetter(27), 'AA');
     assert.equal(escapeSheetValue('=HYPERLINK("https://bad")'), "'=HYPERLINK(\"https://bad\")");
     assert.equal(escapeSheetValue('plain text'), 'plain text');
     const values = rowValues({ ...Object.fromEntries(SHEET_HEADERS.map((header) => [header, 'x'])), name: '=danger' });
-    assert.equal(values.length, 18);
+    assert.equal(values.length, 19);
     assert.equal(values[0], "'=danger");
 });
 
-test('Sheet writes use the schema-derived R column and keep manual public values', async () => {
+test('Sheet writes use the schema-derived S column and keep manual public values', async () => {
     const calls = { updates: [], appends: [] };
     const sheet = {
         spreadsheets: {
@@ -367,8 +485,8 @@ test('Sheet writes use the schema-derived R column and keep manual public values
     await upsertCandidates([{ ...Object.fromEntries(SHEET_HEADERS.map((header) => [header, 'value'])), id: 'new-id', name: '=formula' }], {
         sheets: sheet, spreadsheetId: 'test', sheetName: 'Opportunities'
     });
-    assert.equal(calls.appends[0].range, "'Opportunities'!A:R");
-    assert.equal(calls.appends[0].requestBody.values[0].length, 18);
+    assert.equal(calls.appends[0].range, "'Opportunities'!A:S");
+    assert.equal(calls.appends[0].requestBody.values[0].length, 19);
     assert.equal(calls.appends[0].requestBody.values[0][0], "'=formula");
     const current = { name: 'Editor title', deadline: '2026-08-01', link: 'https://example.org/editor', type: 'Grant', fees: 'n', country: 'United States', status: 'publish' };
     assert.equal(mergeCandidate(current, { ...current, name: 'Crawler title', status: 'review' }).name, 'Editor title');

@@ -23,21 +23,46 @@ export function canonicalizeUrl(value) {
     }
 }
 
+// Returns 'YYYY-MM-DD' only when the components form a real calendar date;
+// rejects impossible values (e.g. 2026-02-31) instead of silently rolling them over.
+export function validCalendarDate(year, monthIndex, day) {
+    if (!Number.isInteger(year) || !Number.isInteger(monthIndex) || !Number.isInteger(day)) return '';
+    const date = new Date(year, monthIndex, day);
+    if (date.getFullYear() !== year || date.getMonth() !== monthIndex || date.getDate() !== day) return '';
+    return formatDate(date);
+}
+
 export function normalizeDeadline(value) {
     const text = String(value || '').replace(/^deadline\s*:\s*/i, '').trim();
     if (!text) return '';
     if (/rolling|ongoing|no deadline/i.test(text)) return 'Rolling';
+
     const iso = text.match(/^(20\d{2})-(\d{2})-(\d{2})$/);
-    if (iso) return `${iso[1]}-${iso[2]}-${iso[3]}`;
+    if (iso) return validCalendarDate(Number(iso[1]), Number(iso[2]) - 1, Number(iso[3]));
 
-    const native = new Date(text);
-    if (!Number.isNaN(native.getTime())) return formatDate(native);
+    const numeric = text.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](20\d{2})$/);
+    if (numeric) return validCalendarDate(Number(numeric[3]), Number(numeric[1]) - 1, Number(numeric[2]));
 
-    const match = text.match(/\b([A-Za-z]+)\s+(\d{1,2})(?:st|nd|rd|th)?[,]?\s+(20\d{2})\b/);
-    if (!match) return '';
-    const month = MONTHS.get(match[1].toLowerCase());
-    if (month === undefined) return '';
-    return formatDate(new Date(Number(match[3]), month, Number(match[2])));
+    // Date ranges resolve to the end date. Handle these before the general parser,
+    // which would otherwise misread strings such as "October 1-29, 2026".
+    // Same-month day range: "October 1-29, 2026" -> October 29, 2026.
+    const sameMonth = text.match(/\b([A-Za-z]+)\s+\d{1,2}(?:st|nd|rd|th)?\s*(?:-|–|—|to)\s*(\d{1,2})(?:st|nd|rd|th)?,?\s+(20\d{2})\b/i);
+    if (sameMonth) {
+        const month = MONTHS.get(sameMonth[1].toLowerCase());
+        // A recognized month-name range is authoritative: reject impossible days rather
+        // than letting the general parser roll them over into the next month.
+        if (month !== undefined) return validCalendarDate(Number(sameMonth[3]), month, Number(sameMonth[2]));
+    }
+
+    // Any full "Month day, year" dates (covers cross-month ranges); the last one wins.
+    const fullDates = [...text.matchAll(/\b([A-Za-z]+)\s+(\d{1,2})(?:st|nd|rd|th)?,?\s+(20\d{2})\b/gi)];
+    if (fullDates.length) {
+        const last = fullDates.at(-1);
+        const month = MONTHS.get(last[1].toLowerCase());
+        if (month !== undefined) return validCalendarDate(Number(last[3]), month, Number(last[2]));
+    }
+
+    return '';
 }
 
 export function formatDate(date) {
@@ -82,8 +107,12 @@ export function normalizeType(value, name = '', description = '') {
 }
 
 export function inferFee(text = '') {
-    if (/\b(no|zero) (application|entry|submission) fee\b|application fee\s*:\s*\$?0\b|free to apply/i.test(text)) return 'n';
-    if (/\b(application|entry|submission) fee\b[^.\n]{0,40}(\$|€|£|CAD|USD|EUR)\s?\d|application fee\s*:\s*(?!\$?0\b)/i.test(text)) return 'y';
+    if (/\b(no|zero)\s+(?:application|entry|submission)?\s*fee\b|(?:application|entry|submission)?\s*fee\s*:\s*\$?0\b|free to (?:apply|enter|submit)/i.test(text)) return 'n';
+    // Anchored to the word "fee" so award/stipend amounts are never read as a fee.
+    if (/\b(?:application|entry|submission)\s+fee\b[^.\n]{0,40}(?:\$|€|£|CAD|USD|EUR)\s?\d/i.test(text) ||
+        /\b(?:application|entry|submission)?\s*fee\s*:?\s*(?:\$|€|£|CAD|USD|EUR)\s?\d/i.test(text) ||
+        /(?:\$|€|£)\s?\d[\d,]*\s*(?:application|entry|submission)?\s*fee\b/i.test(text) ||
+        /\bfee\b[^.\n]{0,20}(?:\$|€|£)\s?\d/i.test(text)) return 'y';
     return '';
 }
 
@@ -122,6 +151,7 @@ export function normalizeCandidate(raw, now = new Date()) {
         type: normalizeType(raw.type, name, description),
         fees: ['y', 'n'].includes(String(raw.fees || '').toLowerCase()) ? String(raw.fees).toLowerCase() : inferFee(`${description} ${raw.feeDetails || ''}`),
         country: normalizeCountry(raw.country),
+        award_info: String(raw.awardInfo || raw.award_info || '').replace(/\s+/g, ' ').trim().slice(0, 200),
         status: 'review',
         source: raw.source || '',
         source_url: canonicalizeUrl(raw.sourceUrl || raw.link),

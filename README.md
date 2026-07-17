@@ -27,7 +27,7 @@ source boards -> deterministic extraction -> optional AI enrichment -> Sheet rev
 ```
 
 - `npm run dry-run-opportunities` fetches enabled sources and prints a summary without changing the Sheet.
-- `npm run sync-opportunities` upserts candidates into the Sheet. Existing `publish` and `reject` decisions and their six public fields are preserved.
+- `npm run sync-opportunities` upserts candidates into the Sheet. Existing `publish` and `reject` decisions and their seven public fields are preserved.
 - `npm run publish-data` validates approved rows and regenerates `data/opportunities.json`.
 - `npm test` runs parser, normalization, review-preservation, and publishing tests.
 

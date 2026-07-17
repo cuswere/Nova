@@ -1,7 +1,7 @@
 export const SPREADSHEET_ID = '120ZqG_0qZR76b4kYHdzPK-4OKecjk7MaZcKuQRRLcbI';
 export const SHEET_NAME = 'Opportunities';
 
-export const PUBLIC_FIELDS = ['name', 'deadline', 'link', 'type', 'fees', 'country'];
+export const PUBLIC_FIELDS = ['name', 'deadline', 'link', 'type', 'fees', 'country', 'award_info'];
 export const WORKFLOW_FIELDS = [
     'id',
     'status',
@@ -67,7 +67,8 @@ export const SOURCE_DEFINITIONS = [
         name: 'Hyperallergic',
         url: 'https://hyperallergic.com/tag/opportunities/feed/',
         enabled: true,
-        limit: 20
+        roundupMonths: 3,
+        delayMs: 1_000
     },
     {
         id: 'transartists',

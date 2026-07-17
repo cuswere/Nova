@@ -1,8 +1,8 @@
 import * as cheerio from 'cheerio';
 import { SOURCE_DEFINITIONS } from './config.js';
 import { absoluteUrl, cleanText, fetchText, postJson } from './http.js';
-import { htmlToText, resolveEligibility } from './eligibility.js';
-import { inferFee, inferType } from './normalize.js';
+import { htmlToText, resolveEligibility, resolveProseEligibility } from './eligibility.js';
+import { canonicalizeUrl, inferFee, inferType } from './normalize.js';
 
 const CREATIVE_WEST_QUERY = `
 query GetSearchOpportunities($input: SearchOpportunitiesInput!) {
@@ -193,42 +193,136 @@ export function mapCreativeWestItem(item, definition = source('creative_west')) 
     };
 }
 
+function hyperallergicType(section, name, description) {
+    if (/residenc|fellowship|workshop/i.test(section)) {
+        if (/fellowship/i.test(name)) return 'Fellowship';
+        if (/workshop/i.test(name)) return 'Workshop';
+        return 'Residency';
+    }
+    if (/grants?\s*&\s*awards?/i.test(section)) {
+        if (/award|prize|competition/i.test(name)) return 'Award';
+        if (/grant|fund/i.test(name)) return 'Grant';
+        if (/grant|funding|microgrant/i.test(description)) return 'Grant';
+        if (/award|prize|competition/i.test(description)) return 'Award';
+        return '';
+    }
+    return inferType(name, description);
+}
+
+// The opportunity link must be an absolute HTTP(S) URL on an independent host.
+// Hyperallergic's own domain (and its subdomains) is never a valid destination, and
+// we never fall back to the roundup URL. A URL that merely mentions "hyperallergic.com"
+// in a query string (e.g. a ref parameter) is still valid because we test the hostname.
+function hyperallergicOpportunityLink(hrefs, base) {
+    const urls = hrefs.map((href) => absoluteUrl(href, base)).filter(Boolean);
+    for (const url of [...urls].reverse()) {
+        let parsed;
+        try { parsed = new URL(url); } catch { continue; }
+        if (!/^https?:$/.test(parsed.protocol)) continue;
+        const host = parsed.hostname.toLowerCase().replace(/^www\./, '');
+        if (host === 'hyperallergic.com' || host.endsWith('.hyperallergic.com')) continue;
+        return url;
+    }
+    return '';
+}
+
+// Award value as a display string. Scans sentence by sentence and returns the first
+// that pairs a currency amount with award-oriented language (or an "Up to $…"
+// construction). Fee sentences and generic budgets/tuition/reimbursements are excluded,
+// and the recurring "Read more on Hyperallergic" boilerplate is trimmed.
+function hyperallergicAwardInfo(lines) {
+    const sentences = lines.flatMap((line) => line.split(/(?<=[.!?])\s+/));
+    let ambiguous = false;
+    for (const raw of sentences) {
+        const sentence = cleanText(raw).replace(/\s*Read more on Hyperallergic\.?$/i, '');
+        if (/\bfee\b/i.test(sentence) || !/(?:\$|€|£)\s?\d/.test(sentence)) continue;
+        if (/\b(?:tuition|membership|dues?|budgets?|reimburse\w*|costs?)\b/i.test(sentence)) {
+            ambiguous = true;
+            continue;
+        }
+        if (/\b(?:award|prize|stipend|grant|honorarium|funding|receiv)/i.test(sentence) || /up to\s*(?:\$|€|£)/i.test(sentence)) {
+            return { awardInfo: sentence.slice(0, 200), issue: '' };
+        }
+        ambiguous = true;
+    }
+    return { awardInfo: '', issue: ambiguous ? 'ambiguous award amount' : '' };
+}
+
 export function parseHyperallergicArticle(html, definition = source('hyperallergic'), articleUrl = definition.url) {
     const $ = cheerio.load(html);
     const rows = [];
-    $('p').filter((_, element) => /Deadline\s*:/i.test($(element).text())).each((_, paragraph) => {
+    const isEntryParagraph = (element) => /Deadline\s*:/i.test($(element).text()) || /\b(?:rolling|ongoing|no deadline)\b/i.test($(element).text());
+    $('p').filter((_, element) => isEntryParagraph(element)).each((_, paragraph) => {
+        const section = cleanText($(paragraph).prevAll('h2, h3').first().text());
         const fragment = cheerio.load(`<div>${$(paragraph).html() || ''}</div>`);
         const strongs = fragment('strong').filter((__, element) => !/^\s*$/.test(fragment(element).text()) && !/Deadline/i.test(fragment(element).text()));
         strongs.each((index, strong) => {
             const name = cleanText(fragment(strong).text());
+            if (!name) return;
             const startHtml = fragment.html(strong);
             const nextStrong = strongs.get(index + 1);
             const wholeHtml = fragment('div').html() || '';
             const start = wholeHtml.indexOf(startHtml);
             const end = nextStrong ? wholeHtml.indexOf(fragment.html(nextStrong), start + startHtml.length) : wholeHtml.length;
-            const segment = cheerio.load(`<div>${wholeHtml.slice(start, end)}</div>`);
+            const segmentHtml = wholeHtml.slice(start, end);
+            const segment = cheerio.load(`<div>${segmentHtml}</div>`);
             const text = cleanText(segment.text());
-            const deadline = text.match(/Deadline\s*:\s*([^|]{2,60})/i)?.[1]?.trim() || '';
-            const links = segment('a').map((__, link) => absoluteUrl(segment(link).attr('href'), articleUrl)).get();
-            const canonical = [...links].reverse().find((url) => url && !url.includes('hyperallergic.com')) || links.at(-1) || articleUrl;
+            const lines = htmlToText(segmentHtml).text.split('\n').map((line) => line.trim()).filter(Boolean);
+
+            const link = hyperallergicOpportunityLink(segment('a').map((__, anchor) => segment(anchor).attr('href')).get(), articleUrl);
+            if (!link) return;
+
+            const deadline = text.match(/Deadline\s*:\s*([^|]{2,60})/i)?.[1]?.trim() ||
+                (/\b(?:rolling|ongoing|no deadline)\b/i.test(text) ? 'Rolling' : '');
             const description = cleanText(text.replace(name, '').replace(/Deadline\s*:.*/i, ''));
+            const eligibility = resolveProseEligibility(text);
+            const award = hyperallergicAwardInfo(lines);
             rows.push({
                 name,
                 deadline,
-                link: canonical,
-                type: inferType(name, description),
-                fees: inferFee(description),
-                country: /international|worldwide|anywhere in the world/i.test(description) ? 'International' : '',
+                link,
+                type: hyperallergicType(section, name, description),
+                fees: inferFee(text),
+                country: eligibility.country,
                 hostLocation: '',
-                feeDetails: description.match(/(?:application|entry|submission) fee[^.]{0,70}/i)?.[0] || '',
+                feeDetails: text.match(/(?:application|entry|submission)?\s*fee\b[^.]{0,70}/i)?.[0]?.trim() || '',
+                awardInfo: award.awardInfo,
                 description,
                 source: definition.name,
                 sourceUrl: articleUrl,
-                confidence: 0.78
+                confidence: 0.78,
+                issue: [eligibility.issue, award.issue].filter(Boolean).join('; ')
             });
         });
     });
-    return uniqueByLinkAndName(rows).slice(0, definition.limit);
+    return uniqueByLinkAndName(rows);
+}
+
+export async function discoverHyperallergic(definition = source('hyperallergic'), { fetcher = fetchText } = {}) {
+    const { text } = await fetcher(definition.url, { delayMs: definition.delayMs || 0 });
+    const feed = cheerio.load(text, { xmlMode: true });
+    const roundups = feed('item')
+        .filter((_, element) => /^Opportunities in /i.test(cleanText(feed(element).find('title').text())))
+        .map((index, element) => {
+            const time = Date.parse(cleanText(feed(element).find('pubDate').text()));
+            return { link: cleanText(feed(element).find('link').text()), index, time: Number.isNaN(time) ? null : time };
+        })
+        .get()
+        .filter((item) => item.link)
+        .sort((a, b) => {
+            if (a.time === null && b.time === null) return a.index - b.index;
+            if (a.time === null) return 1;
+            if (b.time === null) return -1;
+            return b.time - a.time || a.index - b.index;
+        })
+        .slice(0, definition.roundupMonths || 3);
+
+    const rows = [];
+    for (const item of roundups) {
+        const article = await fetcher(item.link, { delayMs: definition.delayMs || 0 });
+        rows.push(...parseHyperallergicArticle(article.text, definition, article.finalUrl || item.link));
+    }
+    return uniqueByLinkAndName(rows);
 }
 
 export function parseTransArtists(html, definition = source('transartists')) {
@@ -261,17 +355,10 @@ export async function discoverSource(definition) {
     if (definition.id === 'artwork_archive') return discoverArtworkArchive(definition);
     if (definition.id === 'creative_capital') return discoverCreativeCapital(definition);
     if (definition.id === 'creative_west') return discoverCreativeWest(definition);
+    if (definition.id === 'hyperallergic') return discoverHyperallergic(definition);
     const { text } = await fetchText(definition.url, { delayMs: definition.delayMs || 0 });
     switch (definition.id) {
         case 'transartists': return parseTransArtists(text, definition);
-        case 'hyperallergic': {
-            const feed = cheerio.load(text, { xmlMode: true });
-            const item = feed('item').filter((_, element) => /^Opportunities in /i.test(cleanText(feed(element).find('title').text()))).first();
-            const articleUrl = cleanText(item.find('link').text());
-            if (!articleUrl) return [];
-            const article = await fetchText(articleUrl);
-            return parseHyperallergicArticle(article.text, definition, article.finalUrl);
-        }
         default: return [];
     }
 }
@@ -416,7 +503,8 @@ function mapCreativeWestType(type, name) {
 function uniqueByLinkAndName(rows) {
     const seen = new Set();
     return rows.filter((row) => {
-        const key = `${row.link}|${row.name.toLowerCase()}`;
+        const name = String(row.name || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+        const key = `${canonicalizeUrl(row.link) || row.link}|${name}`;
         if (seen.has(key)) return false;
         seen.add(key);
         return true;
