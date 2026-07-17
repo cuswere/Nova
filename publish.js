@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { pathToFileURL } from 'node:url';
-import { PUBLIC_FIELDS } from './opportunity-pipeline/config.js';
+import { NON_PUBLIC_TYPES, PUBLIC_FIELDS } from './opportunity-pipeline/config.js';
 import { formatPublicDeadline, normalizeDeadline, validatePublishable } from './opportunity-pipeline/normalize.js';
 import { readRows } from './opportunity-pipeline/sheets.js';
 
@@ -17,6 +17,10 @@ export function buildPublishedRows(rows, now = new Date()) {
     for (const row of rows) {
         if (String(row.status).toLowerCase() !== 'publish') continue;
         const normalized = { ...row, deadline: normalizeDeadline(row.deadline), fees: String(row.fees).toLowerCase() };
+        if (NON_PUBLIC_TYPES.some((type) => type.toLowerCase() === String(normalized.type || '').toLowerCase())) {
+            rejected.push({ name: row.name || '(unnamed)', errors: ['type is not yet public'] });
+            continue;
+        }
         const errors = validatePublishable(normalized, now);
         if (errors.length) {
             rejected.push({ name: row.name || '(unnamed)', errors });

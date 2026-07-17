@@ -21,18 +21,19 @@ export const ALLOWED_TYPES = [
     'Grant',
     'Residency',
     'Exhibition',
+    'Commission',
     'Award',
     'Fellowship',
-    'Public Art',
     'Acquisition',
     'Internship',
+    'Job',
     'Competition',
     'Open Call',
     'Art Fair',
-    'Workshop',
-    'Other'
+    'Workshop'
 ];
 export const ALLOWED_STATUSES = ['review', 'publish', 'reject', 'expired'];
+export const NON_PUBLIC_TYPES = ['Job'];
 
 export const SOURCE_DEFINITIONS = [
     {
@@ -47,8 +48,8 @@ export const SOURCE_DEFINITIONS = [
         name: 'Creative Capital',
         url: 'https://creative-capital.org/artist-resources/artist-opportunities/',
         enabled: true,
-        limit: 24,
-        delayMs: 10_000
+        delayMs: 2_000,
+        typeValues: ['commission', 'exhibition', 'fellowship', 'grant', 'job', 'prize', 'residency']
     },
     {
         id: 'creative_west',

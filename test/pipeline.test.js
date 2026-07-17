@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
-import { parseArtworkArchive, parseCreativeCapital, parseHyperallergicArticle } from '../opportunity-pipeline/adapters.js';
+import { nextCreativeCapitalPage, parseArtworkArchive, parseCreativeCapital, parseHyperallergicArticle } from '../opportunity-pipeline/adapters.js';
 import { enrichCandidate } from '../opportunity-pipeline/enrich.js';
 import {
     canonicalizeUrl,
@@ -30,6 +30,28 @@ test('normalizes URLs, dates, countries, and application fees', () => {
     assert.equal(inferFee('There is no application fee.'), 'n');
     assert.equal(inferFee('The residency costs $900, but applications are free to apply.'), 'n');
     assert.equal(isExpired('2026-07-15', today), true);
+});
+
+test('uses Commission as the public-art category and flags unknown types for review', () => {
+    const commission = normalizeCandidate({
+        name: 'Downtown Public Art RFQ',
+        deadline: 'August 1, 2026',
+        link: 'https://example.org/rfq',
+        fees: 'n',
+        country: 'United States'
+    }, today);
+    assert.equal(commission.type, 'Commission');
+
+    const unknown = normalizeCandidate({
+        name: 'Unclassified opportunity',
+        deadline: 'August 1, 2026',
+        link: 'https://example.org/unknown',
+        type: 'Public Art & Proposals',
+        fees: 'n',
+        country: 'United States'
+    }, today);
+    assert.equal(unknown.type, '');
+    assert.match(unknown.issue, /unresolved type/);
 });
 
 test('parses Artwork Archive fixture', () => {
@@ -74,6 +96,18 @@ test('parses Creative Capital fixture', () => {
     assert.equal(row.name, 'Visual Artist Project Grant');
     assert.equal(row.fees, 'n');
     assert.equal(row.country, 'International');
+});
+
+test('finds the next Creative Capital pagination page', () => {
+    const html = '<nav><a href="/artist-resources/artist-opportunities/?page=2">2</a><a href="/artist-resources/artist-opportunities/?page=6">6</a></nav>';
+    assert.equal(
+        nextCreativeCapitalPage(html, 'https://creative-capital.org/artist-resources/artist-opportunities/'),
+        'https://creative-capital.org/artist-resources/artist-opportunities/?page=2'
+    );
+    assert.equal(
+        nextCreativeCapitalPage(html, 'https://creative-capital.org/artist-resources/artist-opportunities/?page=2'),
+        'https://creative-capital.org/artist-resources/artist-opportunities/?page=6'
+    );
 });
 
 test('parses Hyperallergic fixture', () => {
@@ -154,10 +188,12 @@ test('AI enrichment uses structured evidence without inventing unsupported costs
 test('publisher exports only valid approved rows and keeps browser-safe dates', () => {
     const result = buildPublishedRows([
         { name: 'Good Grant', deadline: '2026-08-01', link: 'https://example.org/good', type: 'Grant', fees: 'n', country: 'International', status: 'publish' },
+        { name: 'Future Job Listing', deadline: '2026-08-02', link: 'https://example.org/job', type: 'Job', fees: 'n', country: 'International', status: 'publish' },
         { name: 'Needs Review', deadline: '2026-08-02', link: 'https://example.org/review', type: 'Grant', fees: 'n', country: 'International', status: 'review' },
         { name: 'Bad Fee', deadline: '2026-08-03', link: 'https://example.org/bad', type: 'Grant', fees: '', country: 'International', status: 'publish' },
         { name: 'Expired', deadline: '2026-07-01', link: 'https://example.org/expired', type: 'Grant', fees: 'n', country: 'International', status: 'publish' }
     ], today);
     assert.deepEqual(result.published, [{ name: 'Good Grant', deadline: '8/1/2026', link: 'https://example.org/good', type: 'Grant', fees: 'n', country: 'International' }]);
-    assert.equal(result.rejected.length, 2);
+    assert.equal(result.rejected.length, 3);
+    assert.deepEqual(result.rejected.find((row) => row.name === 'Future Job Listing')?.errors, ['type is not yet public']);
 });

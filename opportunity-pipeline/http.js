@@ -54,6 +54,42 @@ export async function fetchText(url, { retries = 2, delayMs = 0, timeoutMs = 25_
     throw new Error(`Unable to fetch ${url}: ${lastError?.message || 'unknown error'}`);
 }
 
+export async function postForm(url, fields, { retries = 2, delayMs = 0, timeoutMs = 25_000 } = {}) {
+    if (delayMs > 0) await sleep(delayMs);
+
+    let lastError;
+    for (let attempt = 0; attempt <= retries; attempt += 1) {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), timeoutMs);
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                redirect: 'follow',
+                signal: controller.signal,
+                headers: {
+                    ...REQUEST_HEADERS,
+                    accept: 'application/json,text/plain,*/*',
+                    'content-type': 'application/x-www-form-urlencoded;charset=UTF-8'
+                },
+                body: new URLSearchParams(fields)
+            });
+            if (!response.ok) throw new HttpStatusError(response.status, response.statusText, url);
+            return {
+                text: await response.text(),
+                finalUrl: response.url,
+                etag: response.headers.get('etag') || ''
+            };
+        } catch (error) {
+            lastError = error;
+            if (!isRetryable(error)) break;
+            if (attempt < retries) await sleep(750 * (attempt + 1));
+        } finally {
+            clearTimeout(timer);
+        }
+    }
+    throw new Error(`Unable to POST ${url}: ${lastError?.message || 'unknown error'}`);
+}
+
 export function absoluteUrl(value, base) {
     try {
         return new URL(value, base).toString();

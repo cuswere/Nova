@@ -64,22 +64,21 @@ export function isExpired(deadline, today = new Date()) {
 
 export function inferType(name = '', description = '') {
     const text = `${name} ${description}`.toLowerCase();
-    if (/public art|commission|request for qualifications|\brfq\b/.test(text)) return 'Public Art';
+    if (/public art|commission|request for qualifications|\brfq\b/.test(text)) return 'Commission';
     if (/residen|artist colony|studio program/.test(text)) return 'Residency';
     if (/fellowship/.test(text)) return 'Fellowship';
     if (/grant|funding|emergency relief|microgrant/.test(text)) return 'Grant';
     if (/prize|award|competition/.test(text)) return 'Award';
     if (/acquisition|purchase program/.test(text)) return 'Acquisition';
     if (/exhibition|biennial|triennial|juried show|open call/.test(text)) return 'Exhibition';
-    return 'Other';
+    return '';
 }
 
 export function normalizeType(value, name = '', description = '') {
     const raw = String(value || '').trim();
     const direct = ALLOWED_TYPES.find((type) => type.toLowerCase() === raw.toLowerCase());
     if (direct) return direct;
-    if (raw) return raw;
-    return inferType(name, `${value || ''} ${description}`);
+    return inferType(name, description);
 }
 
 export function inferFee(text = '') {
@@ -138,6 +137,7 @@ export function normalizeCandidate(raw, now = new Date()) {
     if (!name) issues.push('missing name');
     if (!link) issues.push('invalid link');
     if (!deadline) issues.push('missing deadline');
+    if (!candidate.type) issues.push('unresolved type');
     if (!candidate.fees) issues.push('unresolved application fee');
     if (!candidate.country) issues.push('unresolved eligibility');
     if (!isVisualArtsCore(candidate)) issues.push('outside visual-arts scope');

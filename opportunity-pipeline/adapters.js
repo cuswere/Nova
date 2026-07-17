@@ -1,6 +1,6 @@
 import * as cheerio from 'cheerio';
 import { SOURCE_DEFINITIONS } from './config.js';
-import { absoluteUrl, cleanText, fetchText } from './http.js';
+import { absoluteUrl, cleanText, fetchText, postForm } from './http.js';
 import { inferFee, inferType } from './normalize.js';
 
 function source(id) {
@@ -51,7 +51,7 @@ export function parseArtworkArchive(html, definition = source('artwork_archive')
     return uniqueByLinkAndName(rows);
 }
 
-export function parseCreativeCapital(html, definition = source('creative_capital')) {
+export function parseCreativeCapital(html, definition = source('creative_capital'), typeOverride = '') {
     const $ = cheerio.load(html);
     const rows = [];
     $('a.item').each((_, element) => {
@@ -64,7 +64,7 @@ export function parseCreativeCapital(html, definition = source('creative_capital
             name,
             deadline: label.replace(/Deadline\s*:/gi, '').trim(),
             link: absoluteUrl(anchor.attr('href'), definition.url),
-            type: inferType(name, description),
+            type: typeOverride || inferType(name, description),
             fees: inferFee(description),
             country: /international|worldwide|artists anywhere/i.test(description) ? 'International' : '',
             hostLocation: locationFromText(description),
@@ -75,7 +75,7 @@ export function parseCreativeCapital(html, definition = source('creative_capital
             confidence: 0.62
         });
     });
-    return uniqueByLinkAndName(rows).slice(0, definition.limit);
+    return uniqueByLinkAndName(rows);
 }
 
 export function parseCreativeWest(html, definition = source('creative_west')) {
@@ -173,9 +173,9 @@ export function parseTransArtists(html, definition = source('transartists')) {
 
 export async function discoverSource(definition) {
     if (definition.id === 'artwork_archive') return discoverArtworkArchive(definition);
+    if (definition.id === 'creative_capital') return discoverCreativeCapital(definition);
     const { text } = await fetchText(definition.url, { delayMs: definition.delayMs || 0 });
     switch (definition.id) {
-        case 'creative_capital': return parseCreativeCapital(text, definition);
         case 'creative_west': return parseCreativeWest(text, definition);
         case 'transartists': return parseTransArtists(text, definition);
         case 'hyperallergic': {
@@ -188,6 +188,107 @@ export async function discoverSource(definition) {
         }
         default: return [];
     }
+}
+
+async function discoverCreativeCapital(definition) {
+    const rows = [];
+    const visited = new Set();
+    let url = definition.url;
+    let nonce = '';
+    while (url && !visited.has(url)) {
+        visited.add(url);
+        const result = await fetchText(url, { delayMs: definition.delayMs || 0 });
+        if (!nonce) nonce = extractCreativeCapitalNonce(result.text);
+        rows.push(...parseCreativeCapital(result.text, definition));
+        url = nextCreativeCapitalPage(result.text, result.finalUrl || url);
+    }
+    if (!nonce) return uniqueByLinkAndName(rows);
+
+    const typeRows = [];
+    for (const typeValue of definition.typeValues || []) {
+        typeRows.push(...await discoverCreativeCapitalType(definition, nonce, typeValue));
+    }
+    return mergeCreativeCapitalTypes([...rows, ...typeRows]);
+}
+
+async function discoverCreativeCapitalType(definition, nonce, typeValue) {
+    const rows = [];
+    const visited = new Set();
+    let page = 1;
+    while (!visited.has(page)) {
+        visited.add(page);
+        const result = await postForm('https://creative-capital.org/wp-admin/admin-ajax.php', {
+            action: 'get_opportunities',
+            _nonce: nonce,
+            target_page: String(page),
+            opportunities_type: typeValue
+        }, { delayMs: definition.delayMs || 0 });
+        let payload;
+        try {
+            payload = JSON.parse(result.text);
+        } catch {
+            throw new Error(`Creative Capital returned invalid filter response for ${typeValue}`);
+        }
+        if (payload.type !== 'success' || typeof payload.html !== 'string') {
+            throw new Error(`Creative Capital filter failed for ${typeValue}`);
+        }
+        rows.push(...parseCreativeCapital(payload.html, definition, labelCreativeCapitalType(typeValue)));
+        const next = nextCreativeCapitalAjaxPage(payload.html, page);
+        if (!next) break;
+        page = next;
+    }
+    return rows;
+}
+
+function extractCreativeCapitalNonce(html) {
+    return html.match(/(?:globalAjax|ajax)[^\n]{0,300}["']nonce["']\s*:\s*["']([a-z0-9]+)["']/i)?.[1] ||
+        html.match(/["']nonce["']\s*:\s*["']([a-z0-9]+)["']/i)?.[1] || '';
+}
+
+function nextCreativeCapitalAjaxPage(html, currentPage) {
+    const $ = cheerio.load(html);
+    const pages = $('[data-page]').map((_, element) => Number($(element).attr('data-page'))).get()
+        .filter((page) => page > currentPage);
+    return pages.sort((left, right) => left - right)[0] || 0;
+}
+
+function labelCreativeCapitalType(value) {
+    if (value === 'prize') return 'Award';
+    return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
+function mergeCreativeCapitalTypes(rows) {
+    const byLink = new Map();
+    for (const row of rows) {
+        const existing = byLink.get(row.link);
+        if (!existing) {
+            byLink.set(row.link, row);
+            continue;
+        }
+        const types = [...new Set([existing.type, row.type].filter(Boolean))];
+        byLink.set(row.link, { ...existing, type: types.join(', ') });
+    }
+    return [...byLink.values()];
+}
+
+export function nextCreativeCapitalPage(html, currentUrl) {
+    const $ = cheerio.load(html);
+    const current = new URL(currentUrl);
+    const currentPage = Number(current.searchParams.get('page') || current.searchParams.get('paged') || 1);
+    const candidates = $('a[href]').map((_, element) => absoluteUrl($(element).attr('href'), currentUrl)).get();
+    return candidates
+        .map((candidate) => {
+            try {
+                const url = new URL(candidate);
+                const pathMatch = url.pathname.match(/\/page\/(\d+)\/?$/i);
+                const page = Number(url.searchParams.get('page') || url.searchParams.get('paged') || pathMatch?.[1] || 0);
+                return { url: url.toString(), page };
+            } catch {
+                return { url: '', page: 0 };
+            }
+        })
+        .filter(({ url, page }) => url && page > currentPage)
+        .sort((left, right) => left.page - right.page)[0]?.url || '';
 }
 
 async function discoverArtworkArchive(definition) {
@@ -211,7 +312,7 @@ function nextArtworkArchivePage(html, currentUrl) {
 }
 
 function mapCreativeWestType(type, name) {
-    if (/commission/i.test(type)) return 'Public Art';
+    if (/commission/i.test(type)) return 'Commission';
     if (/residen/i.test(type)) return 'Residency';
     if (/fellow/i.test(type)) return 'Fellowship';
     if (/grant/i.test(type)) return 'Grant';
