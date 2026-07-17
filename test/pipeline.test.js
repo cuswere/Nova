@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
-import { nextCreativeCapitalPage, parseArtworkArchive, parseCreativeCapital, parseHyperallergicArticle } from '../opportunity-pipeline/adapters.js';
+import { creativeCapitalMaxPage, creativeCapitalPageUrl, parseArtworkArchive, parseCreativeCapital, parseHyperallergicArticle } from '../opportunity-pipeline/adapters.js';
 import { enrichCandidate } from '../opportunity-pipeline/enrich.js';
 import {
     canonicalizeUrl,
@@ -98,16 +98,12 @@ test('parses Creative Capital fixture', () => {
     assert.equal(row.country, 'International');
 });
 
-test('finds the next Creative Capital pagination page', () => {
-    const html = '<nav><a href="/artist-resources/artist-opportunities/?page=2">2</a><a href="/artist-resources/artist-opportunities/?page=6">6</a></nav>';
-    assert.equal(
-        nextCreativeCapitalPage(html, 'https://creative-capital.org/artist-resources/artist-opportunities/'),
-        'https://creative-capital.org/artist-resources/artist-opportunities/?page=2'
-    );
-    assert.equal(
-        nextCreativeCapitalPage(html, 'https://creative-capital.org/artist-resources/artist-opportunities/?page=2'),
-        'https://creative-capital.org/artist-resources/artist-opportunities/?page=6'
-    );
+test('builds Creative Capital GET pagination URLs and bounds pages from data attributes', () => {
+    const base = 'https://creative-capital.org/artist-resources/artist-opportunities/';
+    assert.equal(creativeCapitalPageUrl(base, 1), base);
+    assert.equal(creativeCapitalPageUrl(base, 2, 'grant'), `${base}page/2/?opportunities_type=grant`);
+    assert.equal(creativeCapitalMaxPage('<nav><a href="#" data-page="0">Previous</a><a href="#" data-page="1">1</a><a href="#" data-page="6">6</a></nav>'), 6);
+    assert.equal(creativeCapitalMaxPage('<nav></nav>'), 1);
 });
 
 test('parses Hyperallergic fixture', () => {

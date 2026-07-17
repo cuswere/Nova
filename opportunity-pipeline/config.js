@@ -49,6 +49,7 @@ export const SOURCE_DEFINITIONS = [
         url: 'https://creative-capital.org/artist-resources/artist-opportunities/',
         enabled: true,
         delayMs: 2_000,
+        minExpectedResults: 100,
         typeValues: ['commission', 'exhibition', 'fellowship', 'grant', 'job', 'prize', 'residency']
     },
     {

@@ -1,6 +1,6 @@
 import * as cheerio from 'cheerio';
 import { SOURCE_DEFINITIONS } from './config.js';
-import { absoluteUrl, cleanText, fetchText, postForm } from './http.js';
+import { absoluteUrl, cleanText, fetchText } from './http.js';
 import { inferFee, inferType } from './normalize.js';
 
 function source(id) {
@@ -191,65 +191,50 @@ export async function discoverSource(definition) {
 }
 
 async function discoverCreativeCapital(definition) {
-    const rows = [];
-    const visited = new Set();
-    let url = definition.url;
-    let nonce = '';
-    while (url && !visited.has(url)) {
-        visited.add(url);
-        const result = await fetchText(url, { delayMs: definition.delayMs || 0 });
-        if (!nonce) nonce = extractCreativeCapitalNonce(result.text);
-        rows.push(...parseCreativeCapital(result.text, definition));
-        url = nextCreativeCapitalPage(result.text, result.finalUrl || url);
-    }
-    if (!nonce) return uniqueByLinkAndName(rows);
-
+    const rows = await crawlCreativeCapitalListing(definition);
     const typeRows = [];
     for (const typeValue of definition.typeValues || []) {
-        typeRows.push(...await discoverCreativeCapitalType(definition, nonce, typeValue));
+        typeRows.push(...await crawlCreativeCapitalListing(definition, typeValue));
     }
-    return mergeCreativeCapitalTypes([...rows, ...typeRows]);
+    const merged = mergeCreativeCapitalTypes([...rows, ...typeRows]);
+    if (definition.minExpectedResults && merged.length < definition.minExpectedResults) {
+        throw new Error(`Creative Capital discovery returned ${merged.length} opportunities; expected at least ${definition.minExpectedResults}.`);
+    }
+    return merged;
 }
 
-async function discoverCreativeCapitalType(definition, nonce, typeValue) {
+async function crawlCreativeCapitalListing(definition, typeValue = '') {
     const rows = [];
-    const visited = new Set();
+    const seenLinks = new Set();
     let page = 1;
-    while (!visited.has(page)) {
-        visited.add(page);
-        const result = await postForm('https://creative-capital.org/wp-admin/admin-ajax.php', {
-            action: 'get_opportunities',
-            _nonce: nonce,
-            target_page: String(page),
-            opportunities_type: typeValue
-        }, { delayMs: definition.delayMs || 0 });
-        let payload;
-        try {
-            payload = JSON.parse(result.text);
-        } catch {
-            throw new Error(`Creative Capital returned invalid filter response for ${typeValue}`);
-        }
-        if (payload.type !== 'success' || typeof payload.html !== 'string') {
-            throw new Error(`Creative Capital filter failed for ${typeValue}`);
-        }
-        rows.push(...parseCreativeCapital(payload.html, definition, labelCreativeCapitalType(typeValue)));
-        const next = nextCreativeCapitalAjaxPage(payload.html, page);
-        if (!next) break;
-        page = next;
+    let maxPage = 1;
+    while (page <= maxPage) {
+        const result = await fetchText(creativeCapitalPageUrl(definition.url, page, typeValue), {
+            delayMs: definition.delayMs || 0
+        });
+        const pageRows = parseCreativeCapital(result.text, definition, typeValue && labelCreativeCapitalType(typeValue));
+        if (!pageRows.length) break;
+        if (page === 1) maxPage = creativeCapitalMaxPage(result.text);
+        const newRows = pageRows.filter((row) => !seenLinks.has(row.link));
+        if (page > 1 && !newRows.length) break;
+        for (const row of newRows) seenLinks.add(row.link);
+        rows.push(...newRows);
+        page += 1;
     }
     return rows;
 }
 
-function extractCreativeCapitalNonce(html) {
-    return html.match(/(?:globalAjax|ajax)[^\n]{0,300}["']nonce["']\s*:\s*["']([a-z0-9]+)["']/i)?.[1] ||
-        html.match(/["']nonce["']\s*:\s*["']([a-z0-9]+)["']/i)?.[1] || '';
+export function creativeCapitalPageUrl(baseUrl, page, typeValue = '') {
+    const url = new URL(baseUrl);
+    if (page > 1) url.pathname = `${url.pathname.replace(/\/+$/, '')}/page/${page}/`;
+    if (typeValue) url.searchParams.set('opportunities_type', typeValue);
+    return url.toString();
 }
 
-function nextCreativeCapitalAjaxPage(html, currentPage) {
+export function creativeCapitalMaxPage(html) {
     const $ = cheerio.load(html);
-    const pages = $('[data-page]').map((_, element) => Number($(element).attr('data-page'))).get()
-        .filter((page) => page > currentPage);
-    return pages.sort((left, right) => left - right)[0] || 0;
+    const pages = $('[data-page]').map((_, element) => Number($(element).attr('data-page'))).get();
+    return Math.max(1, ...pages.filter((page) => Number.isInteger(page) && page > 0));
 }
 
 function labelCreativeCapitalType(value) {
@@ -269,26 +254,6 @@ function mergeCreativeCapitalTypes(rows) {
         byLink.set(row.link, { ...existing, type: types.join(', ') });
     }
     return [...byLink.values()];
-}
-
-export function nextCreativeCapitalPage(html, currentUrl) {
-    const $ = cheerio.load(html);
-    const current = new URL(currentUrl);
-    const currentPage = Number(current.searchParams.get('page') || current.searchParams.get('paged') || 1);
-    const candidates = $('a[href]').map((_, element) => absoluteUrl($(element).attr('href'), currentUrl)).get();
-    return candidates
-        .map((candidate) => {
-            try {
-                const url = new URL(candidate);
-                const pathMatch = url.pathname.match(/\/page\/(\d+)\/?$/i);
-                const page = Number(url.searchParams.get('page') || url.searchParams.get('paged') || pathMatch?.[1] || 0);
-                return { url: url.toString(), page };
-            } catch {
-                return { url: '', page: 0 };
-            }
-        })
-        .filter(({ url, page }) => url && page > currentPage)
-        .sort((left, right) => left.page - right.page)[0]?.url || '';
 }
 
 async function discoverArtworkArchive(definition) {
