@@ -491,3 +491,41 @@ test('Sheet writes use the schema-derived S column and keep manual public values
     const current = { name: 'Editor title', deadline: '2026-08-01', link: 'https://example.org/editor', type: 'Grant', fees: 'n', country: 'United States', status: 'publish' };
     assert.equal(mergeCandidate(current, { ...current, name: 'Crawler title', status: 'review' }).name, 'Editor title');
 });
+
+test('upsert skips brand-new already-expired candidates but still flags existing rows that expire', async () => {
+    const calls = { updates: [], appends: [] };
+    const existingRow = SHEET_HEADERS.map((header) => {
+        if (header === 'name') return 'Still Open Grant';
+        if (header === 'link') return 'https://example.org/still-open';
+        if (header === 'deadline') return '2026-01-01';
+        if (header === 'status') return 'review';
+        if (header === 'id') return 'existing-id';
+        return 'value';
+    });
+    const sheet = {
+        spreadsheets: {
+            values: {
+                get: async ({ range }) => ({ data: { values: range.endsWith('1:1') ? [SHEET_HEADERS] : [SHEET_HEADERS, existingRow] } }),
+                batchUpdate: async (value) => calls.updates.push(value),
+                append: async (value) => calls.appends.push(value)
+            },
+            get: async () => ({ data: { sheets: [{ properties: { title: 'Opportunities', sheetId: 1 } }] } }),
+            batchUpdate: async () => {}
+        }
+    };
+    const brandNewExpired = normalizeCandidate({
+        name: 'Already Closed Call', deadline: 'January 1, 2026', link: 'https://example.org/closed', type: 'Grant', fees: 'n', country: 'International', source: 'Hyperallergic'
+    }, today);
+    // Same identity (link/name/deadline) as the sheet's existing row, so it matches via
+    // fingerprint and takes the merge/update path rather than the new-append path.
+    const stillOpenUpdate = normalizeCandidate({
+        name: 'Still Open Grant', deadline: 'January 1, 2026', link: 'https://example.org/still-open', type: 'Grant', fees: 'n', country: 'International', source: 'Hyperallergic'
+    }, today);
+    const result = await upsertCandidates([brandNewExpired, stillOpenUpdate], {
+        sheets: sheet, spreadsheetId: 'test', sheetName: 'Opportunities'
+    });
+    assert.equal(calls.appends.length, 0);
+    assert.equal(result.added, 0);
+    assert.equal(result.skippedExpired, 1);
+    assert.equal(result.updated, 1);
+});

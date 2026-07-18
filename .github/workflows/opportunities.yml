@@ -2,7 +2,7 @@ name: Refresh opportunities
 
 on:
   schedule:
-    - cron: '0 14 * * 2,5'
+    - cron: '0 14 * * *'
   workflow_dispatch:
     inputs:
       source:
@@ -25,7 +25,54 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  gate:
+    # Manual runs always proceed. Scheduled runs only proceed if the
+    # AUTOMATION_ACTIVE repo variable is "true" and today matches the
+    # FREQUENCY_DAYS cadence. Edit both under Settings > Secrets and
+    # variables > Actions > Variables - no code changes needed.
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.check.outputs.should_run }}
+    steps:
+      - id: check
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          AUTOMATION_ACTIVE: ${{ vars.AUTOMATION_ACTIVE }}
+          FREQUENCY_DAYS: ${{ vars.FREQUENCY_DAYS }}
+        run: |
+          if [ "$EVENT_NAME" != "schedule" ]; then
+            echo "Manual run; proceeding."
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          active="${AUTOMATION_ACTIVE:-true}"
+          if [ "$active" != "true" ]; then
+            echo "AUTOMATION_ACTIVE=$active; skipping scheduled run."
+            echo "should_run=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          freq="${FREQUENCY_DAYS:-1}"
+          if ! [[ "$freq" =~ ^[0-9]+$ ]] || [ "$freq" -lt 1 ]; then
+            echo "FREQUENCY_DAYS='$freq' is invalid; defaulting to 1 (daily)."
+            freq=1
+          fi
+
+          day_number=$(( $(date -u +%s) / 86400 ))
+          remainder=$(( day_number % freq ))
+          if [ "$remainder" -eq 0 ]; then
+            echo "Day $day_number is due (mod $freq == 0); proceeding."
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Day $day_number not due (mod $freq == $remainder); skipping."
+            echo "should_run=false" >> "$GITHUB_OUTPUT"
+          fi
+
   refresh:
+    needs: gate
+    if: needs.gate.outputs.should_run == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:

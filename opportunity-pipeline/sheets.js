@@ -82,10 +82,19 @@ export async function upsertCandidates(candidates, options = {}) {
         }));
     const appends = [];
     let updated = 0;
+    let skippedExpired = 0;
 
     for (const candidate of candidates) {
         const current = byId.get(candidate.id) || byFingerprint.get(fingerprint(candidate));
         if (!current) {
+            // A candidate discovered for the first time already past its deadline was
+            // never live for anyone to review; adding it as a new row has no editorial
+            // value and only clutters the sheet. Only rows an editor already saw
+            // (existing rows transitioning to expired, below) are worth flagging.
+            if (candidate.status === 'expired') {
+                skippedExpired += 1;
+                continue;
+            }
             appends.push(rowValues(candidate));
             continue;
         }
@@ -117,7 +126,8 @@ export async function upsertCandidates(candidates, options = {}) {
         discovered: candidates.length,
         added: appends.length,
         updated,
-        expired: updates.length - updated
+        expired: updates.length - updated,
+        skippedExpired
     };
 }
 
