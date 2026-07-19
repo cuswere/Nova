@@ -42,25 +42,25 @@ To test one HTTP source at a time, open the workflow in GitHub Actions, click **
 
 Artwork Archive is intentionally excluded from GitHub Actions. Open its call-for-entry page normally in Vivaldi, then open DevTools (`F12`) and create a reusable **Sources > Snippets** snippet containing [tools/artwork-archive-collector.js](tools/artwork-archive-collector.js). Run the snippet with `Ctrl+Enter`. It uses the current browser session to collect every results page, follows each Artwork Archive detail page, and saves the external **Learn More** destination as the opportunity `link` in a dated `nova-artwork-archive-*.json` download. The existing `source_url` field is set to that individual Artwork Archive detail page for investigation. It also prefers the detail page's deadline, type, entry fee, eligibility, location, and richer description (including organization, award, categories, and event dates). Entries without an external Learn More link are reported and skipped.
 
-Check the downloaded file without changing the Sheet:
+Use the normal sync pipeline to check the newest Artwork Archive download without changing the Sheet:
 
 ```
-npm run import-artwork-archive -- "C:\path\to\nova-artwork-archive-YYYY-MM-DD.json" --dry-run
+npm run sync-opportunities -- --source artwork_archive --dry-run
 ```
 
-Then upsert it into Nova Sources:
+Then sync it into Nova Sources:
 
 ```
-npm run import-artwork-archive -- "C:\path\to\nova-artwork-archive-YYYY-MM-DD.json"
+npm run sync-opportunities -- --source artwork_archive
 ```
 
-The importing Windows account needs `GOOGLE_SERVICE_ACCOUNT_JSON` set as a user environment variable. The browser export contains only listing-card HTML and is parsed, normalized, deduplicated, and written by Nova's existing pipeline.
+These commands select the newest `nova-artwork-archive-YYYY-MM-DD.json` file in Downloads, including duplicate filenames such as `nova-artwork-archive-YYYY-MM-DD (1).json`. The importing Windows account needs `GOOGLE_SERVICE_ACCOUNT_JSON` set as a user environment variable. The browser export contains only listing-card HTML and is parsed, normalized, deduplicated, and written through Nova's normal sync pipeline. To use a specific export instead, add `--artwork-archive-export "C:\path\to\export.json"`.
 
-For a two-click manual flow, run the Vivaldi collector and then double-click [Import Latest Artwork Archive.cmd](tools/Import%20Latest%20Artwork%20Archive.cmd). The launcher selects the newest `nova-artwork-archive-*.json` file in Downloads, loads the service-account key from Downloads only when the environment variable is absent, and imports it. Add `-DryRun` to the accompanying PowerShell script when you want to validate an export without writing to the Sheet.
+For a two-click manual flow, run the Vivaldi collector and then double-click [Import Latest Artwork Archive.cmd](tools/Import%20Latest%20Artwork%20Archive.cmd). The launcher starts the normal Artwork Archive sync, which selects the newest `nova-artwork-archive-*.json` file in Downloads, then loads the service-account key from Downloads only when the environment variable is absent. Add `-DryRun` to the accompanying PowerShell script when you want to validate an export without writing to the Sheet.
 
 DevTools Snippets cannot be launched by a desktop shortcut. To avoid DevTools, run [Copy Artwork Archive Collector Bookmarklet.cmd](tools/Copy%20Artwork%20Archive%20Collector%20Bookmarklet.cmd) once, create a Vivaldi bookmark named `Nova Collect`, and paste the copied value in its URL field. Clicking that bookmark while on the call-for-entry page runs the same collector in the normal Vivaldi session.
 
-The Sheet's first six columns are the public site contract: `name`, `deadline`, `link`, `type`, `fees`, and `country`. New candidates arrive with `status=review`; set complete rows to `publish` or `reject`. The `fees` field means application/submission fee only, while `country` means applicant eligibility rather than host location.
+The Sheet's first six columns are the public site contract: `name`, `deadline`, `link`, `type`, `fees`, and `country`. New candidates arrive with `status=review`; set complete rows to `publish` or `reject`. The `fees` field means application/submission fee only. Unknown fees remain blank in the stored and published data; the MVP frontend may present a blank fee as no fee without changing the source record. `country` means applicant eligibility rather than host location; it is optional metadata and does not block publication.
 
 ## Feedback form setup
 

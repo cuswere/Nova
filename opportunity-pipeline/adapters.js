@@ -66,6 +66,19 @@ function labeledDescriptionField(description, label) {
     )?.[1]);
 }
 
+function artworkArchiveCountry(eligibility, eligibilityDetails) {
+    if (/international/i.test(eligibility)) return 'International';
+    const proseCountry = resolveProseEligibility(eligibilityDetails).country;
+    if (proseCountry) return proseCountry;
+    // Artwork Archive uses National as a platform eligibility tier for U.S.-wide
+    // calls. Keep this source-specific so foreign uses of "national" stay intact.
+    if (/^national$/i.test(eligibility.trim()) ||
+        /\bopen (?:to )?(?:all )?(?:artists? )?nationally\b|\bopen to national artists?\b/i.test(eligibilityDetails)) {
+        return 'United States';
+    }
+    return '';
+}
+
 export function parseArtworkArchive(html, definition = source('artwork_archive')) {
     const $ = cheerio.load(html);
     const rows = [];
@@ -85,7 +98,6 @@ export function parseArtworkArchive(html, definition = source('artwork_archive')
             labeledDescriptionField(description, 'Eligibility details') ||
             cleanText(description.match(/(?:^|\s)Eligibility Info\s+(.+)$/i)?.[1]);
         const eligibility = detail('eligibility') || field('Eligibility:') || eligibilityDetails;
-        const proseEligibility = resolveProseEligibility(eligibilityDetails);
         rows.push({
             name,
             deadline,
@@ -93,7 +105,7 @@ export function parseArtworkArchive(html, definition = source('artwork_archive')
             sourceListingUrl: absoluteUrl(card.attr('data-nova-source-link') || listingUrl, definition.url),
             type: detail('type') || field('Type:'),
             fees: inferFee(`Entry Fee: ${fee}`),
-            country: /international/i.test(eligibility) ? 'International' : proseEligibility.country,
+            country: artworkArchiveCountry(eligibility, eligibilityDetails),
             hostLocation: detail('location') || field('Location:'),
             feeDetails: fee,
             awardInfo: detail('award-info') || labeledDescriptionField(description, 'Award'),
@@ -105,6 +117,16 @@ export function parseArtworkArchive(html, definition = source('artwork_archive')
         });
     });
     return uniqueByLinkAndName(rows);
+}
+
+export function discoverArtworkArchiveExport(payload, definition = source('artwork_archive')) {
+    if (payload?.source !== 'artwork_archive' || !Array.isArray(payload.pages)) {
+        throw new Error('Not a Nova Artwork Archive export');
+    }
+    return uniqueByLinkAndName(payload.pages.flatMap((page) => {
+        if (typeof page?.html !== 'string') throw new Error('Artwork Archive export page is missing HTML');
+        return parseArtworkArchive(page.html, definition);
+    }));
 }
 
 export function parseCreativeCapital(html, definition = source('creative_capital'), typeOverride = '') {

@@ -16,7 +16,7 @@ if (-not $ExportPath) {
 if (-not $ExportPath) { throw "No Nova Artwork Archive export was found in $downloads" }
 if (-not (Test-Path -LiteralPath $ExportPath)) { throw "Export not found: $ExportPath" }
 
-Write-Host "Importing: $ExportPath"
+Write-Host "Syncing the latest Artwork Archive export: $ExportPath"
 
 if (-not $env:GOOGLE_SERVICE_ACCOUNT_JSON) {
     $keyPath = Join-Path $downloads 'nova-opportunities-aab1e980a6bd.json'
@@ -26,7 +26,9 @@ if (-not $env:GOOGLE_SERVICE_ACCOUNT_JSON) {
 
 Push-Location (Join-Path $PSScriptRoot '..')
 try {
-    $arguments = @('run', 'import-artwork-archive', '--', $ExportPath)
+    # The launcher passes the chosen file explicitly. Running sync-opportunities
+    # without this switch still selects the newest matching Downloads file itself.
+    $arguments = @('run', 'sync-opportunities', '--', '--source', 'artwork_archive', '--artwork-archive-export', $ExportPath)
     if ($DryRun) { $arguments += '--dry-run' }
     & npm.cmd @arguments
     if ($LASTEXITCODE -ne 0) { throw "Nova import failed with exit code $LASTEXITCODE" }
@@ -34,5 +36,5 @@ try {
     Pop-Location
 }
 
-Write-Host "Imported $ExportPath" -ForegroundColor Green
+Write-Host "Synced $ExportPath" -ForegroundColor Green
 if ($Pause) { Read-Host 'Press Enter to close' }

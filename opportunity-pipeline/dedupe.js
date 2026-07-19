@@ -29,6 +29,10 @@ function isHyperallergic(row) {
     return /^hyperallergic$/i.test(String(row.source || '').trim());
 }
 
+function isArtworkArchive(row) {
+    return /^artwork archive$/i.test(String(row.source || '').trim());
+}
+
 export function areSameOpportunity(left, right) {
     const leftTitle = normalizedTitle(left.name);
     const rightTitle = normalizedTitle(right.name);
@@ -36,6 +40,15 @@ export function areSameOpportunity(left, right) {
 
     const leftLink = canonicalizeUrl(left.link);
     const rightLink = canonicalizeUrl(right.link);
+    if (isArtworkArchive(left) && isArtworkArchive(right)) {
+        const leftIdentity = canonicalizeUrl(left.source_url || left.sourceListingUrl);
+        const rightIdentity = canonicalizeUrl(right.source_url || right.sourceListingUrl);
+        // Artwork Archive legitimately publishes separate applicant tracks and
+        // disciplines with the same external destination and deadline. Its own
+        // detail URL is the stable identity, so fuzzy link/title matching must
+        // never collapse two different detail pages.
+        if (leftIdentity && rightIdentity) return leftIdentity === rightIdentity;
+    }
     const leftDeadline = normalizeDeadline(left.deadline);
     const rightDeadline = normalizeDeadline(right.deadline);
     const compatibleDeadlines = !leftDeadline || !rightDeadline || leftDeadline === rightDeadline ||

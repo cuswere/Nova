@@ -164,7 +164,8 @@ export function normalizeCandidate(raw, now = new Date()) {
         deadline,
         link,
         type: normalizeType(raw.type, name, description),
-        fees: ['y', 'n'].includes(String(raw.fees || '').toLowerCase()) ? String(raw.fees).toLowerCase() : inferFee(`${description} ${raw.feeDetails || ''}`),
+        fees: (['y', 'n'].includes(String(raw.fees || '').toLowerCase()) ?
+            String(raw.fees).toLowerCase() : inferFee(`${description} ${raw.feeDetails || ''}`)),
         country: normalizeCountry(raw.country),
         award_info: String(raw.awardInfo || raw.award_info || '').replace(/\s+/g, ' ').trim(),
         status: 'review',
@@ -184,10 +185,11 @@ export function normalizeCandidate(raw, now = new Date()) {
     if (!link) issues.push('invalid link');
     if (!deadline) issues.push('missing deadline');
     if (!candidate.type) issues.push('unresolved type');
-    if (!candidate.fees) issues.push('unresolved application fee');
-    if (!candidate.country) issues.push('unresolved eligibility');
     candidate.issue = issues.join('; ');
-    candidate.id = makeId(candidate);
+    // Some sources supply a stable listing URL separately from the public link.
+    // Artwork Archive's public Learn More destination can change, while its detail
+    // URL remains the correct identity for updating an existing Sheet row.
+    candidate.id = makeId({ ...candidate, link: raw.identityUrl || candidate.link });
     if (deadline && isExpired(deadline, now)) candidate.status = 'expired';
     return candidate;
 }
@@ -198,8 +200,37 @@ export function validatePublishable(row, now = new Date()) {
     if (!canonicalizeUrl(row.link)) errors.push('link');
     if (!normalizeDeadline(row.deadline)) errors.push('deadline');
     if (!ALLOWED_TYPES.some((type) => type.toLowerCase() === String(row.type || '').trim().toLowerCase())) errors.push('type');
-    if (!['y', 'n'].includes(String(row.fees).toLowerCase())) errors.push('fees');
-    if (!row.country) errors.push('country');
+    if (row.fees && !['y', 'n'].includes(String(row.fees).toLowerCase())) errors.push('fees');
     if (isExpired(normalizeDeadline(row.deadline), now)) errors.push('expired');
     return errors;
+}
+
+const CREATIVE_CAPITAL_DUPLICATE_SOURCE_HOSTS = [
+    'artworkarchive.com',
+    'wearecreativewest.org',
+    'creativewest.org',
+    'callforentry.org',
+    'zapplication.org',
+    'gosmart.org',
+    'publicartarchive.org'
+];
+
+function matchesHost(hostname, domain) {
+    return hostname === domain || hostname.endsWith(`.${domain}`);
+}
+
+export function candidateImportExclusion(candidate) {
+    if (!/^creative capital$/i.test(String(candidate.source || '').trim())) return '';
+    if (!candidate.type) return 'untyped_creative_capital';
+    const link = canonicalizeUrl(candidate.link);
+    if (!link) return '';
+    const hostname = new URL(link).hostname;
+    if (CREATIVE_CAPITAL_DUPLICATE_SOURCE_HOSTS.some((domain) => matchesHost(hostname, domain))) {
+        return 'duplicate_source_creative_capital';
+    }
+    return '';
+}
+
+export function shouldImportCandidate(candidate) {
+    return !candidateImportExclusion(candidate);
 }

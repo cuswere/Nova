@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
@@ -9,6 +10,7 @@ import {
     creativeWestDeadline,
     creativeWestFeeSummary,
     creativeWestIndependentLink,
+    discoverArtworkArchiveExport,
     discoverCreativeWest,
     discoverHyperallergic,
     mapCreativeWestItem,
@@ -21,6 +23,7 @@ import { areSameOpportunity, deduplicateCandidates } from '../opportunity-pipeli
 import { enrichCandidate } from '../opportunity-pipeline/enrich.js';
 import { htmlToText, resolveEligibility, resolveProseEligibility } from '../opportunity-pipeline/eligibility.js';
 import { postJson } from '../opportunity-pipeline/http.js';
+import { findLatestArtworkArchiveExport, readArtworkArchiveExport } from '../opportunity-pipeline/artwork-archive-export.js';
 import {
     canonicalizeUrl,
     formatPublicDeadline,
@@ -30,7 +33,9 @@ import {
     normalizeCandidate,
     normalizeCountry,
     normalizeDeadline,
-    normalizeType
+    normalizeType,
+    candidateImportExclusion,
+    shouldImportCandidate
 } from '../opportunity-pipeline/normalize.js';
 import { columnLetter, escapeSheetValue, mergeCandidate, rowValues, upsertCandidates } from '../opportunity-pipeline/sheets.js';
 import { SHEET_HEADERS } from '../opportunity-pipeline/config.js';
@@ -120,6 +125,22 @@ test('imports a browser-collected Artwork Archive export', () => {
     assert.equal(rows[0].award_info, '$5,000 stipend and studio access');
 });
 
+test('selects the newest Artwork Archive download, including a duplicate filename', (t) => {
+    const downloads = fs.mkdtempSync(path.join(os.tmpdir(), 'nova-downloads-'));
+    t.after(() => fs.rmSync(downloads, { recursive: true, force: true }));
+    const first = path.join(downloads, 'nova-artwork-archive-2026-07-19.json');
+    const newest = path.join(downloads, 'nova-artwork-archive-2026-07-19 (1).json');
+    const payload = { source: 'artwork_archive', pages: [{ url: 'https://www.artworkarchive.com/call-for-entry', html: fixture('artwork-archive.html') }] };
+    fs.writeFileSync(first, JSON.stringify(payload));
+    fs.writeFileSync(newest, JSON.stringify(payload));
+    fs.utimesSync(first, new Date('2026-07-19T10:00:00Z'), new Date('2026-07-19T10:00:00Z'));
+    fs.utimesSync(newest, new Date('2026-07-19T10:01:00Z'), new Date('2026-07-19T10:01:00Z'));
+
+    assert.equal(findLatestArtworkArchiveExport(downloads), newest);
+    assert.equal(readArtworkArchiveExport(newest).payload.source, 'artwork_archive');
+    assert.equal(discoverArtworkArchiveExport(payload).length, 1);
+});
+
 test('backfills Artwork Archive structured fields from older collector descriptions', () => {
     const html = fixture('artwork-archive.html')
         .replace(/ data-nova-eligibility-details="[^"]*"/, '')
@@ -128,6 +149,14 @@ test('backfills Artwork Archive structured fields from older collector descripti
     assert.equal(row.eligibilityDetails, 'Open internationally.');
     assert.equal(row.awardInfo, '$5,000. A detailed opportunity description.');
     assert.equal(row.country, 'International');
+});
+
+test('maps Artwork Archive national eligibility to the United States without a global national heuristic', () => {
+    const html = fixture('artwork-archive.html')
+        .replace('data-nova-eligibility="International"', 'data-nova-eligibility="National"')
+        .replace('data-nova-eligibility-details="Open internationally to artists at any career stage."', 'data-nova-eligibility-details="Open to artists nationally."');
+    assert.equal(parseArtworkArchive(html)[0].country, 'United States');
+    assert.equal(normalizeCountry('National'), 'National');
 });
 
 test('parses TransArtists detail pages instead of publishing listing stubs', () => {
@@ -310,6 +339,8 @@ test('inferFee recognizes bare fee labels and free applications without misreadi
 test('resolveProseEligibility resolves country conservatively and flags conflicts', () => {
     assert.deepEqual(resolveProseEligibility('Open to artists worldwide.'), { country: 'International', issue: '' });
     assert.deepEqual(resolveProseEligibility('Open only to artists based in New York.'), { country: 'United States', issue: '' });
+    assert.deepEqual(resolveProseEligibility('The competition is open to all artists across Australia.'), { country: 'Australia', issue: '' });
+    assert.deepEqual(resolveProseEligibility('They invite submissions from LGBTQIA+ and UK based creatives.'), { country: 'United Kingdom', issue: '' });
     assert.deepEqual(resolveProseEligibility('Critics may submit essays.'), { country: '', issue: '' });
     assert.match(resolveProseEligibility('Only Colorado residents are eligible. Artists from any country may apply.').issue, /eligibility conflict/);
 });
@@ -324,9 +355,21 @@ test('normalization records unresolved fields instead of guessing', () => {
         source: 'Fixture',
         sourceUrl: 'https://example.org'
     }, today);
-    assert.match(row.issue, /unresolved application fee/);
-    assert.match(row.issue, /unresolved eligibility/);
+    assert.equal(row.fees, '');
+    assert.equal(row.country, '');
+    assert.equal(row.issue, '');
     assert.equal(row.status, 'review');
+});
+
+test('excludes untyped and already-covered source links only for Creative Capital', () => {
+    assert.equal(shouldImportCandidate({ source: 'Creative Capital', type: '' }), false);
+    assert.equal(shouldImportCandidate({ source: 'Creative Capital', type: 'Grant' }), true);
+    assert.equal(shouldImportCandidate({ source: 'Creative Capital', type: 'Grant', link: 'https://artworkarchive.com/call-for-entry/example' }), false);
+    assert.equal(shouldImportCandidate({ source: 'Creative Capital', type: 'Commission', link: 'https://artist.callforentry.org/festivals_unique_info.php?ID=1' }), false);
+    assert.equal(shouldImportCandidate({ source: 'Creative Capital', type: 'Grant', link: 'https://opportunities.wearecreativewest.org/opportunity/1/CAFE' }), false);
+    assert.equal(shouldImportCandidate({ source: 'Artwork Archive', type: '' }), true);
+    assert.equal(shouldImportCandidate({ source: 'Artwork Archive', type: 'Grant', link: 'https://artist.callforentry.org/apply/1' }), true);
+    assert.equal(candidateImportExclusion({ source: 'Creative Capital', type: 'Grant', link: 'https://artworkarchive.com/call-for-entry/example' }), 'duplicate_source_creative_capital');
 });
 
 test('upsert merge preserves manual public fields and decisions', () => {
@@ -396,6 +439,26 @@ test('cross-source Hyperallergic deduplication handles regenerated links and cyc
     assert.deepEqual(deduplicateCandidates([artworkArchive, directCreativeWest]), [directCreativeWest]);
 });
 
+test('keeps distinct Artwork Archive detail pages that share an application link', () => {
+    const common = {
+        deadline: '2026-07-21',
+        link: 'https://grandmaraisartcolony.org/residencies',
+        source: 'Artwork Archive'
+    };
+    const teaching = {
+        ...common,
+        name: 'Printmaking Teaching Residency',
+        source_url: 'https://artworkarchive.com/call-for-entry/printmaking-teaching-residency-2026'
+    };
+    const community = {
+        ...common,
+        name: 'Printmaking Community Residency',
+        source_url: 'https://artworkarchive.com/call-for-entry/printmaking-community-residency-2026'
+    };
+    assert.equal(areSameOpportunity(teaching, community), false);
+    assert.equal(deduplicateCandidates([teaching, community]).length, 2);
+});
+
 test('AI enrichment uses structured evidence without inventing unsupported costs', async () => {
     let request;
     const client = {
@@ -443,12 +506,15 @@ test('publisher exports only valid approved rows and keeps browser-safe dates', 
         { name: 'Good Grant', deadline: '2026-08-01', link: 'https://example.org/good', type: 'Grant', fees: 'n', country: 'International', award_info: 'Up to $10,000', status: 'publish' },
         { name: 'Future Job Listing', deadline: '2026-08-02', link: 'https://example.org/job', type: 'Job', fees: 'n', country: 'International', status: 'publish' },
         { name: 'Needs Review', deadline: '2026-08-02', link: 'https://example.org/review', type: 'Grant', fees: 'n', country: 'International', status: 'review' },
-        { name: 'Bad Fee', deadline: '2026-08-03', link: 'https://example.org/bad', type: 'Grant', fees: '', country: 'International', status: 'publish' },
+        { name: 'Unknown Fee', deadline: '2026-08-03', link: 'https://example.org/bad', type: 'Grant', fees: '', country: 'International', status: 'publish' },
         { name: 'Bad Type', deadline: '2026-08-03', link: 'https://example.org/bad-type', type: 'Other', fees: 'n', country: 'International', status: 'publish' },
         { name: 'Expired', deadline: '2026-07-01', link: 'https://example.org/expired', type: 'Grant', fees: 'n', country: 'International', status: 'publish' }
     ], today);
-    assert.deepEqual(result.published, [{ name: 'Good Grant', deadline: '8/1/2026', link: 'https://example.org/good', type: 'Grant', fees: 'n', country: 'International', award_info: 'Up to $10,000' }]);
-    assert.equal(result.rejected.length, 4);
+    assert.deepEqual(result.published, [
+        { name: 'Good Grant', deadline: '8/1/2026', link: 'https://example.org/good', type: 'Grant', fees: 'n', country: 'International', award_info: 'Up to $10,000' },
+        { name: 'Unknown Fee', deadline: '8/3/2026', link: 'https://example.org/bad', type: 'Grant', fees: '', country: 'International', award_info: undefined }
+    ]);
+    assert.equal(result.rejected.length, 3);
     assert.deepEqual(result.rejected.find((row) => row.name === 'Future Job Listing')?.errors, ['type is not yet public']);
     assert.deepEqual(result.rejected.find((row) => row.name === 'Bad Type')?.errors, ['type']);
 });
@@ -610,7 +676,7 @@ test('normalization retains specific eligibility issues and Sheet values follow 
         issue: 'eligibility conflict: region=INTERNATIONAL; text restricts applicants to Colorado', eligibilityDetails: 'Colorado only'
     }, today);
     assert.match(row.issue, /eligibility conflict/);
-    assert.match(row.issue, /unresolved eligibility/);
+    assert.doesNotMatch(row.issue, /unresolved eligibility/);
     assert.equal(row.eligibility_details, 'Colorado only');
     assert.equal(SHEET_HEADERS.length, 19);
     assert.equal(columnLetter(19), 'S');

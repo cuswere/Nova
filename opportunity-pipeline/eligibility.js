@@ -10,8 +10,16 @@ const US_STATES_AND_TERRITORIES = [
     'Vermont', 'Virgin Islands', 'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming'
 ];
 const STATE_PATTERN = new RegExp(`\\b(${US_STATES_AND_TERRITORIES.join('|')})\\b`, 'i');
-const OTHER_COUNTRIES = ['Canada', 'Canadian', 'Mexico', 'Mexican', 'United Kingdom', 'England', 'Australia', 'Australian', 'New Zealand'];
+const OTHER_COUNTRIES = ['Canada', 'Canadian', 'Mexico', 'Mexican', 'United Kingdom', 'UK', 'England', 'British', 'Australia', 'Australian', 'New Zealand'];
 const COUNTRY_PATTERN = new RegExp(`\\b(${OTHER_COUNTRIES.join('|')})\\b`, 'i');
+
+function canonicalCountry(label) {
+    if (/^canadian$/i.test(label)) return 'Canada';
+    if (/^mexican$/i.test(label)) return 'Mexico';
+    if (/^(?:uk|united kingdom|england|british)$/i.test(label)) return 'United Kingdom';
+    if (/^australian$/i.test(label)) return 'Australia';
+    return label.replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
 
 export function htmlToText(html = '', maxLength = 10_000) {
     const $ = cheerio.load(`<body>${String(html || '')}</body>`, { decodeEntities: true });
@@ -89,6 +97,13 @@ function applicantLocationInClause(clause, label) {
 
 function hardRestriction(text) {
     for (const clause of clausesFromDetails(text)) {
+        const explicitForeign = clause.match(new RegExp(
+            `\\b(?:artists?|applicants?|creatives?|residents?|participants?)\\b[^.!?]{0,55}\\b(?:from|in|across|throughout|based in)\\s+(?:the\\s+)?${COUNTRY_PATTERN.source}|` +
+            `${COUNTRY_PATTERN.source}[- ]based\\s+(?:artists?|applicants?|creatives?|residents?|participants?)\\b`,
+            'i'
+        ));
+        const foreignLabel = explicitForeign?.[1] || explicitForeign?.[2];
+        if (foreignLabel) return { country: canonicalCountry(foreignLabel), label: foreignLabel };
         if (classifyClause(clause) !== 'restriction') continue;
         if (/\b(?:nyc|new york city)[- ]based\b[^.!?]{0,50}\b(?:artists?|applicants?|residents?|participants?)\b|\b(?:artists?|applicants?|residents?|participants?)\b[^.!?]{0,55}\b(?:based|reside|live|work)\s+(?:in\s+)?(?:nyc|new york city)\b/i.test(clause)) {
             return { country: 'United States', label: 'New York City' };
@@ -101,7 +116,7 @@ function hardRestriction(text) {
         const country = clause.match(COUNTRY_PATTERN)?.[1];
         if (country && applicantLocationInClause(clause, country)) {
             return {
-                country: ({ Canadian: 'Canada', Mexican: 'Mexico', England: 'United Kingdom', Australian: 'Australia' })[country] || country,
+                country: canonicalCountry(country),
                 label: country
             };
         }
