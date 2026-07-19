@@ -3,8 +3,8 @@
 import { SOURCE_DEFINITIONS } from './opportunity-pipeline/config.js';
 import { discoverArtworkArchiveExport, discoverSource } from './opportunity-pipeline/adapters.js';
 import { readArtworkArchiveExport } from './opportunity-pipeline/artwork-archive-export.js';
-import { deduplicateCandidates } from './opportunity-pipeline/dedupe.js';
-import { candidateImportExclusion, normalizeCandidate, shouldImportCandidate } from './opportunity-pipeline/normalize.js';
+import { deduplicateCandidatesWithSummary } from './opportunity-pipeline/dedupe.js';
+import { candidateImportExclusion, inferFee, normalizeCandidate, shouldImportCandidate } from './opportunity-pipeline/normalize.js';
 import { upsertCandidates } from './opportunity-pipeline/sheets.js';
 
 const dryRun = process.argv.includes('--dry-run');
@@ -15,8 +15,10 @@ const artworkArchiveExport = exportArgumentIndex >= 0 ? process.argv[exportArgum
 const now = new Date();
 
 async function main() {
+    const includeLocalArtworkArchive = requestedSource === 'artwork_archive' ||
+        (requestedSource === 'all' && process.env.GITHUB_ACTIONS !== 'true');
     const enabled = SOURCE_DEFINITIONS.filter((definition) => (definition.enabled ||
-        (definition.id === 'artwork_archive' && requestedSource === 'artwork_archive')) &&
+        (definition.id === 'artwork_archive' && includeLocalArtworkArchive)) &&
         (requestedSource === 'all' || definition.id === requestedSource));
     if (requestedSource !== 'all' && !SOURCE_DEFINITIONS.some((definition) => definition.id === requestedSource)) {
         throw new Error(`Unknown opportunity source: ${requestedSource}`);
@@ -44,7 +46,8 @@ async function main() {
     const exclusionReasons = normalized.map(candidateImportExclusion);
     const excludedUntypedCreativeCapital = exclusionReasons.filter((reason) => reason === 'untyped_creative_capital').length;
     const excludedCreativeCapitalSourceDuplicates = exclusionReasons.filter((reason) => reason === 'duplicate_source_creative_capital').length;
-    const candidates = deduplicateCandidates(normalized.filter(shouldImportCandidate));
+    const deduplicated = deduplicateCandidatesWithSummary(normalized.filter(shouldImportCandidate));
+    const candidates = deduplicated.candidates;
     const summary = {
         sourcesSucceeded: settled.filter((result) => result.status === 'fulfilled').length,
         sourcesFailed: failures.length,
@@ -53,15 +56,65 @@ async function main() {
         needsReview: candidates.filter((candidate) => candidate.status === 'review').length,
         expired: candidates.filter((candidate) => candidate.status === 'expired').length,
         excludedUntypedCreativeCapital,
-        excludedCreativeCapitalSourceDuplicates
+        excludedCreativeCapitalSourceDuplicates,
+        excludedDuplicatesByReason: deduplicated.excludedByReason
     };
 
     if (dryRun) {
-        console.log(JSON.stringify({ summary, sample: candidates.slice(0, 10) }, null, 2));
+        console.log(JSON.stringify({ summary, audit: auditCandidates(candidates), sample: candidates.slice(0, 10) }, null, 2));
         return;
     }
     const sheet = await upsertCandidates(candidates);
     console.log(JSON.stringify({ ...summary, sheet }, null, 2));
+}
+
+function auditCandidates(candidates) {
+    const describe = (candidate, reason) => ({
+        name: candidate.name,
+        source: candidate.source,
+        reason
+    });
+    const audit = {
+        unexpectedSources: [],
+        missingRequired: [],
+        malformedDeadlines: [],
+        trackingLinks: [],
+        cafeFallbackLinks: [],
+        knownFeeBlanks: [],
+        countryContradictions: [],
+        reviewIssues: []
+    };
+    const approvedSourceIds = new Set(['artwork_archive', 'creative_capital', 'creative_west', 'hyperallergic']);
+    const approvedSources = new Set(SOURCE_DEFINITIONS
+        .filter((definition) => approvedSourceIds.has(definition.id))
+        .map((definition) => definition.name));
+    const trackingParameter = /[?&](?:gclid|gbraid|fbclid|msclkid|gad_[^=&#]*|hsa_[^=&#]*)=/i;
+    const foreignEligibility = /\b(?:Australia|Australian|United Kingdom|UK-based|Canada|Canadian|New Zealand|European Union|EU residents?)\b/i;
+
+    for (const candidate of candidates) {
+        if (!approvedSources.has(candidate.source)) {
+            audit.unexpectedSources.push(describe(candidate, candidate.source || 'blank source'));
+        }
+        const missing = ['name', 'link', 'deadline', 'description', 'type'].filter((field) => !String(candidate[field] || '').trim());
+        if (missing.length) audit.missingRequired.push(describe(candidate, missing.join(', ')));
+        if (!/^(?:Rolling|\d{4}-\d{2}-\d{2})$/.test(candidate.deadline || '')) {
+            audit.malformedDeadlines.push(describe(candidate, candidate.deadline || 'blank'));
+        }
+        if (trackingParameter.test(candidate.link || '')) {
+            audit.trackingLinks.push(describe(candidate, candidate.link));
+        }
+        if (/https?:\/\/(?:[^/]+\.)?(?:callforentry\.org|zapplication\.org)(?:\/|$)/i.test(candidate.link || '')) {
+            audit.cafeFallbackLinks.push(describe(candidate, candidate.link));
+        }
+        if (!candidate.fees && inferFee(`${candidate.description || ''} ${candidate.fee_details || ''}`)) {
+            audit.knownFeeBlanks.push(describe(candidate, 'fee prose was deterministically recognizable'));
+        }
+        if (candidate.country === 'United States' && foreignEligibility.test(candidate.eligibility_details || candidate.description || '')) {
+            audit.countryContradictions.push(describe(candidate, 'United States conflicts with foreign applicant prose'));
+        }
+        if (candidate.issue) audit.reviewIssues.push(describe(candidate, candidate.issue));
+    }
+    return audit;
 }
 
 async function discover(definition) {

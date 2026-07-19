@@ -19,7 +19,7 @@ import {
     parseHyperallergicArticle,
     parseTransArtistsDetail
 } from '../opportunity-pipeline/adapters.js';
-import { areSameOpportunity, deduplicateCandidates } from '../opportunity-pipeline/dedupe.js';
+import { areSameOpportunity, deduplicateCandidates, deduplicateCandidatesWithSummary } from '../opportunity-pipeline/dedupe.js';
 import { enrichCandidate } from '../opportunity-pipeline/enrich.js';
 import { htmlToText, resolveEligibility, resolveProseEligibility } from '../opportunity-pipeline/eligibility.js';
 import { postJson } from '../opportunity-pipeline/http.js';
@@ -27,6 +27,7 @@ import { findLatestArtworkArchiveExport, readArtworkArchiveExport } from '../opp
 import {
     canonicalizeUrl,
     formatPublicDeadline,
+    inferAwardInfo,
     inferFee,
     inferType,
     isExpired,
@@ -48,6 +49,7 @@ const today = new Date(2026, 6, 16);
 
 test('normalizes URLs, dates, countries, and application fees', () => {
     assert.equal(canonicalizeUrl('https://www.Example.com/call/?utm_source=x#apply'), 'https://example.com/call');
+    assert.equal(canonicalizeUrl('https://example.com/apply?gclid=1&hsa_cam=2&keep=yes'), 'https://example.com/apply?keep=yes');
     assert.equal(normalizeDeadline('Deadline: October 29, 2026'), '2026-10-29');
     assert.equal(formatPublicDeadline('2026-10-29'), '10/29/2026');
     assert.equal(normalizeCountry('USA'), 'United States');
@@ -70,6 +72,12 @@ test('keeps commissions and open calls distinct and resolves grouped grant categ
     assert.equal(inferType('Call for Artists: Downtown Public Art RFQ'), 'Commission');
     assert.equal(normalizeType('Grants & Fellowships', 'Studio Fellowship'), 'Fellowship');
     assert.equal(normalizeType('Grants & Fellowships', 'Artist Support Program'), 'Grant');
+    assert.equal(normalizeType('Residency', 'Pollock-Krasner Foundation Grant'), 'Grant');
+    assert.equal(normalizeType('Other', 'Emergency Relief Grant for Artists'), 'Grant');
+    assert.equal(normalizeType('Commission', 'ON::View Artist Residency Program'), 'Residency');
+    assert.equal(normalizeType('Commission', 'Accelerator Grant Program 2026, Ohio'), 'Grant');
+    assert.equal(normalizeType('Residency', 'The 7th VH Award'), 'Award');
+    assert.equal(normalizeType('Commission', 'Buffalo Run Golf Course Clubhouse'), 'Commission');
 
     const unknown = normalizeCandidate({
         name: 'Unclassified opportunity',
@@ -157,6 +165,37 @@ test('maps Artwork Archive national eligibility to the United States without a g
         .replace('data-nova-eligibility-details="Open internationally to artists at any career stage."', 'data-nova-eligibility-details="Open to artists nationally."');
     assert.equal(parseArtworkArchive(html)[0].country, 'United States');
     assert.equal(normalizeCountry('National'), 'National');
+
+    const reviewedAustralianCases = [
+        ['Burnie Art Prize', 'Open to Australian artists aged 18 and over.'],
+        ['Shirley Hannan National Portrait Award', 'Australian residents may submit portraits.'],
+        ['Hornsby Art Prize', 'Open to artists residing in Australia.'],
+        ['Paddo Art Prize', 'Australian-based artists and creatives are eligible.']
+    ];
+    for (const [name, eligibilityDetails] of reviewedAustralianCases) {
+        const australian = html
+            .replace('Test Studio Fellowship', name)
+            .replace('data-nova-eligibility-details="Open to artists nationally."', `data-nova-eligibility-details="${eligibilityDetails}"`);
+        assert.equal(parseArtworkArchive(australian)[0].country, 'Australia', name);
+    }
+
+    const contextualOnly = html.replace('data-nova-eligibility-details="Open to artists nationally."', 'data-nova-eligibility-details="Paintings must be inspired by the Australian landscape and appear in the national arts calendar."');
+    assert.equal(parseArtworkArchive(contextualOnly)[0].country, '');
+});
+
+test('Artwork Archive fee prose overrides unlabeled detail amounts', () => {
+    const noFee = fixture('artwork-archive.html')
+        .replace('data-nova-fee-details="$35"', 'data-nova-fee-details="$25"')
+        .replace('A detailed opportunity description.', 'There are no application fees for open calls.');
+    assert.equal(parseArtworkArchive(noFee)[0].fees, 'n');
+
+    const juryFree = fixture('artwork-archive.html')
+        .replace('data-nova-fee-details="$35"', 'data-nova-fee-details=""')
+        .replace('A detailed opportunity description.', 'There is no jury submission fee.');
+    assert.equal(parseArtworkArchive(juryFree)[0].fees, 'n');
+
+    assert.equal(inferFee('Price Sculpture Forest has no application or submission fee.'), 'n');
+    assert.equal(inferFee('TBQA membership costs $45, but there is no application fee.'), 'n');
 });
 
 test('parses TransArtists detail pages instead of publishing listing stubs', () => {
@@ -248,11 +287,12 @@ test('interprets Hyperallergic roundup sections, awards, fees, rolling deadlines
     assert.equal(normalizeDeadline(prize.deadline), '2026-10-29');
     assert.equal(prize.link, 'https://bigprize.org/enter?ref=hyperallergic.com');
 
-    // Ambiguous currency remains in the row description and is flagged for review.
+    // A generic materials budget remains in the description for normalization,
+    // while tuition remains a cost; neither creates review noise.
     assert.equal(byName['Budget Only Grant'].awardInfo, '');
-    assert.match(byName['Budget Only Grant'].issue, /ambiguous award amount/);
+    assert.equal(byName['Budget Only Grant'].issue, '');
     assert.equal(byName['Tuition Trap Grant'].awardInfo, '');
-    assert.match(byName['Tuition Trap Grant'].issue, /ambiguous award amount/);
+    assert.equal(byName['Tuition Trap Grant'].issue, '');
 
     // Entries without an independent external link (missing / internal) are dropped.
     assert.ok(!rows.some((row) => row.name === 'No Link Award'));
@@ -333,7 +373,17 @@ test('inferFee recognizes bare fee labels and free applications without misreadi
     assert.equal(inferFee('$10 application fee'), 'y');
     assert.equal(inferFee('Free to enter.'), 'n');
     assert.equal(inferFee('No fee.'), 'n');
+    assert.equal(inferFee('Application Fee 700 US Dollar (USD)'), 'y');
+    assert.equal(inferFee('Application Fee 40 US Dollar (USD)'), 'y');
+    assert.equal(inferFee('There is no jury submission fee.'), 'n');
+    assert.equal(inferFee('Membership is $25, with no application fees for open calls.'), 'n');
     assert.equal(inferFee('Six artists will receive $1,800 stipends.'), '');
+});
+
+test('extracts actionable compensation without treating costs as awards', () => {
+    assert.match(inferAwardInfo('The selected artist will receive a $9,500 stipend covering all project costs.'), /\$9,500 stipend/);
+    assert.match(inferAwardInfo('Commission Budget: $29,100. Design Stipend: $300.'), /\$29,100/);
+    assert.equal(inferAwardInfo('The application fee is $40. Residency cost is $650 per week.'), '');
 });
 
 test('resolveProseEligibility resolves country conservatively and flags conflicts', () => {
@@ -341,6 +391,9 @@ test('resolveProseEligibility resolves country conservatively and flags conflict
     assert.deepEqual(resolveProseEligibility('Open only to artists based in New York.'), { country: 'United States', issue: '' });
     assert.deepEqual(resolveProseEligibility('The competition is open to all artists across Australia.'), { country: 'Australia', issue: '' });
     assert.deepEqual(resolveProseEligibility('They invite submissions from LGBTQIA+ and UK based creatives.'), { country: 'United Kingdom', issue: '' });
+    assert.deepEqual(resolveProseEligibility('Open to Australian artists aged 18 and over.'), { country: 'Australia', issue: '' });
+    assert.deepEqual(resolveProseEligibility('Open to Australian residents aged 18 and over.'), { country: 'Australia', issue: '' });
+    assert.deepEqual(resolveProseEligibility('Must be a Colorado resident.'), { country: 'United States', issue: '' });
     assert.deepEqual(resolveProseEligibility('Critics may submit essays.'), { country: '', issue: '' });
     assert.match(resolveProseEligibility('Only Colorado residents are eligible. Artists from any country may apply.').issue, /eligibility conflict/);
 });
@@ -457,6 +510,66 @@ test('keeps distinct Artwork Archive detail pages that share an application link
     };
     assert.equal(areSameOpportunity(teaching, community), false);
     assert.equal(deduplicateCandidates([teaching, community]).length, 2);
+    const spanish = { ...common, name: 'The Residency at Casa Gracìa - Spanish Artists', source_url: 'https://artworkarchive.com/call-for-entry/casa-spanish' };
+    const international = { ...common, name: 'The Residency at Casa Gracìa - International Artists', source_url: 'https://artworkarchive.com/call-for-entry/casa-international' };
+    assert.equal(deduplicateCandidates([spanish, international]).length, 2);
+});
+
+test('deduplicates reviewed same-program and cross-source overlaps while preferring dated detail', () => {
+    const cases = [
+        [
+            { name: 'Pollock-Krasner Foundation Grants', deadline: 'Rolling', link: 'https://pkf.org/our-grants', source: 'Creative Capital', description: 'Short grant summary.' },
+            { name: 'POLLOCK-KRASNER FOUNDATION GRANT', deadline: 'Rolling', link: 'https://pkf.org/', source: 'Artwork Archive', source_url: 'https://artworkarchive.com/call-for-entry/pkf', description: 'Detailed grant evidence for professional visual artists.', eligibility_details: 'Open to all artists.' }
+        ],
+        [
+            { name: 'The Awesome Foundation Grants', deadline: 'Rolling', link: 'https://awesomefoundation.org/en', source: 'Creative Capital' },
+            { name: 'The Awesome Foundation', deadline: 'Rolling', link: 'https://awesomefoundation.org/', source: 'Artwork Archive', source_url: 'https://artworkarchive.com/call-for-entry/awesome' }
+        ],
+        [
+            { name: 'Adolph and Esther Gottlieb Emergency Grant', deadline: 'Rolling', link: 'https://gottliebfoundation.org/emergency-grant', source: 'Creative Capital' },
+            { name: 'Adolph & Esther Gottlieb Emergency Grant', deadline: 'Rolling', link: 'https://gottliebfoundation.org/emergency-grant/', source: 'Artwork Archive', source_url: 'https://artworkarchive.com/call-for-entry/gottlieb', description: 'Emergency support for qualified visual artists.' }
+        ],
+        [
+            { name: 'Hayama Artist Residency 2027', deadline: '2026-09-30', link: 'https://hayama-art-residency.com/apply', source: 'Creative Capital' },
+            { name: 'Hayama Artist Residency 2027', deadline: '2026-09-30', link: 'https://hayama-art-residency.com/', source: 'Artwork Archive', source_url: 'https://artworkarchive.com/call-for-entry/hayama', description: 'Full Hayama residency application details.' }
+        ],
+        [
+            { name: '2027 Summer Exhibition', deadline: '2026-08-10', link: 'https://wassaicproject.org/apply', source: 'Creative Capital' },
+            { name: 'Wassaic Project 2027 Summer Exhibition Open Call', deadline: '2026-08-10', link: 'https://wassaicproject.slideroom.com/', source: 'Artwork Archive', source_url: 'https://artworkarchive.com/call-for-entry/wassaic', description: 'Detailed Wassaic exhibition information.' }
+        ],
+        [
+            { name: 'Interior Artist Pool for Pediatric Hospital', deadline: '2026-07-28', link: 'https://chandracerrito.com/', source: 'Creative West Art Opps' },
+            { name: 'Interior Artist Pool for Pediatric Hospital', deadline: '2026-07-28', link: 'https://ccartadvisors.com/artist-opportunities', source: 'Artwork Archive', source_url: 'https://artworkarchive.com/call-for-entry/pediatric' }
+        ],
+        [
+            { name: 'Hyundai Motor Group – The 7th VH Award', deadline: '2026-07-21', link: 'https://bit.ly/example', source: 'Hyperallergic' },
+            { name: 'The 7th VH Award', deadline: '2026-07-21', link: 'https://vhaward.com/7th-award', source: 'Artwork Archive', source_url: 'https://artworkarchive.com/call-for-entry/vh', description: 'Detailed VH AWARD description.' }
+        ]
+    ];
+    for (const pair of cases) assert.equal(deduplicateCandidates(pair).length, 1, pair.map((row) => row.name).join(' / '));
+
+    const rolling = { name: 'Price Sculpture Forest Exhibition Opportunity', deadline: 'Rolling', link: 'https://sculptureforest.org/', source: 'Artwork Archive', source_url: 'https://artworkarchive.com/call-for-entry/price-2025', description: 'Sculpture Forest exhibition opportunity.' };
+    const dated = { name: 'Exhibition Opportunity at Public Sculpture Park', deadline: '2026-12-31', link: 'https://sculptureforest.org/sculptors', source: 'Artwork Archive', source_url: 'https://artworkarchive.com/call-for-entry/price-2026', description: 'Public Sculpture Forest exhibition opportunity for sculptors.' };
+    assert.deepEqual(deduplicateCandidates([rolling, dated]), [dated]);
+
+    const marineWrongTitle = { name: 'Society of Wildlife Artists | The Natural Eye 2026', deadline: '2026-08-07', link: 'https://mallgalleries.org.uk/open-calls/royal-society-marine-artists', source: 'Artwork Archive', source_url: 'https://artworkarchive.com/call-for-entry/wildlife', description: 'Royal Society of Marine Artists seeks marine art. '.repeat(8) };
+    const marine = { ...marineWrongTitle, name: 'Royal Society of Marine Artists Annual Exhibition 2026', source_url: 'https://artworkarchive.com/call-for-entry/marine' };
+    assert.deepEqual(deduplicateCandidates([marineWrongTitle, marine]), [marine]);
+
+    const sharedCreativeWest = { deadline: '2026-08-20', link: 'https://agency.example.org/opportunities', source: 'Creative West Art Opps' };
+    const preserved = [
+        { ...sharedCreativeWest, name: 'SCG Artist in Residence 2027 - National', description: 'Nationwide studio residency with teaching duties.' },
+        { ...sharedCreativeWest, name: 'SCG Artist in Residence 2027 - Regional', description: 'Regional community residency for nearby practitioners.' },
+        { ...sharedCreativeWest, name: 'Commerce City Civic Center Commission', description: 'Indoor suspended sculpture for the municipal atrium.' },
+        { ...sharedCreativeWest, name: 'Commerce City Transit Plaza Commission', description: 'Outdoor mosaic seating for the transit plaza.' },
+        { ...sharedCreativeWest, name: 'RISCA Project Grant for Artists', description: 'Project funding for individual artist creation.' },
+        { ...sharedCreativeWest, name: 'RISCA General Operating Support', description: 'Operating support for nonprofit cultural organizations.' }
+    ];
+    assert.equal(deduplicateCandidates(preserved).length, preserved.length);
+
+    const summary = deduplicateCandidatesWithSummary(cases[0]);
+    assert.equal(summary.candidates.length, 1);
+    assert.equal(Object.values(summary.excludedByReason).reduce((total, count) => total + count, 0), 1);
 });
 
 test('AI enrichment uses structured evidence without inventing unsupported costs', async () => {
@@ -592,6 +705,14 @@ test('Creative West mapper handles allowed types, local deadlines, fees, and rev
     assert.equal(mapCreativeWestItem(creativeWestItem({ name: 'The Bennett Prize 5', type: 'GRANT' })).type, 'Award');
     assert.equal(mapCreativeWestItem(creativeWestItem({ name: 'Winter Issue: Open Call for Submissions', type: 'GRANT' })).type, 'Open Call');
     assert.equal(mapCreativeWestItem(creativeWestItem({ name: 'Call for Artists: Pediatric Hospital', type: 'COMMISSION' })).type, 'Commission');
+    assert.equal(mapCreativeWestItem(creativeWestItem({ name: 'Buffalo Run Golf Course Clubhouse', type: 'COMMISSION' })).type, 'Commission');
+    const risca = mapCreativeWestItem(creativeWestItem({
+        name: 'RISCA Call for Artists',
+        applicationDeadline: '2026-07-28T03:59:59.000Z',
+        originalTimezone: 'EDT',
+        shortDescription: '<p>The old announcement says applications close July 20.</p>'
+    }));
+    assert.equal(risca.deadline, '2026-07-27');
     assert.deepEqual(creativeWestDeadline(creativeWestItem()), { deadline: '2026-07-31', issue: '' });
     assert.deepEqual(creativeWestDeadline(creativeWestItem({ rollingDeadline: true })), { deadline: 'Rolling', issue: '' });
     assert.match(creativeWestDeadline(creativeWestItem({ originalTimezone: 'CEST' })).issue, /unknown deadline timezone/);
@@ -610,6 +731,13 @@ test('Creative West mapper handles allowed types, local deadlines, fees, and rev
     assert.equal(creativeWestFeeSummary(creativeWestItem({ fees: [{ name: 'Jury fee', value: '40', type: 'JURY', currency: 'USD' }] })).fees, '');
     assert.equal(creativeWestFeeSummary(creativeWestItem({ fees: [] })).fees, '');
     assert.equal(creativeWestFeeSummary(creativeWestItem({ fees: [], entryFee: { cost: '15.00' } })).fees, 'y');
+
+    const rich = mapCreativeWestItem(creativeWestItem({
+        shortDescription: '<p>Short summary.</p>',
+        description: '<p>A complete commission description with a project budget of $80,000.</p>'
+    }));
+    assert.match(rich.description, /\$80,000/);
+    assert.match(normalizeCandidate(rich, today).award_info, /\$80,000/);
 });
 
 test('Creative West extracts an independent organizer link from Contact Information', () => {
@@ -640,7 +768,7 @@ test('converts eligibility HTML without duplicate nested text and resolves Creat
     assert.deepEqual(resolveEligibility({ sourceId: 'creative_west', eligibilityLocation: 'International', details: 'Artists worldwide may apply.' }), { country: 'International', issue: '' });
     assert.deepEqual(resolveEligibility({ sourceId: 'creative_west', eligibilityLocation: 'National', details: 'Artists legally authorized to work in the United States may apply.' }), { country: 'United States', issue: '' });
     assert.deepEqual(resolveEligibility({ sourceId: 'creative_west', eligibilityLocation: 'Local', details: 'Open to artists based in Colorado.' }), { country: 'United States', issue: '' });
-    assert.match(resolveEligibility({ sourceId: 'creative_west', eligibilityLocation: 'Regional', details: 'Open to all artists.' }).issue, /does not establish United States/);
+    assert.deepEqual(resolveEligibility({ sourceId: 'creative_west', eligibilityLocation: 'Regional', details: 'Open to all artists.' }), { country: '', issue: '' });
     assert.deepEqual(resolveEligibility({ sourceId: 'creative_west', details: 'Artists from any country may apply.' }), { country: 'International', issue: '' });
     assert.deepEqual(resolveEligibility({ sourceId: 'creative_west', details: 'Open to all artists.' }), { country: '', issue: '' });
     assert.match(resolveEligibility({ sourceId: 'creative_west', eligibilityLocation: 'International', details: 'Open to Colorado artists only.' }).issue, /eligibility conflict/);
@@ -657,10 +785,13 @@ test('Creative West eligibility classifies applicant restrictions separately fro
     assert.match(resolve('INTERNATIONAL', '', 'Only Colorado residents are eligible.').issue, /eligibility conflict/);
     assert.match(resolve('NATIONAL', '', 'Only Canadian residents are eligible.').issue, /eligibility conflict/);
     assert.deepEqual(resolve('LOCAL', '', 'Colorado residents only.'), { country: 'United States', issue: '' });
-    assert.match(resolve('LOCAL', '', 'Preference for Colorado artists.').issue, /does not establish United States/);
-    assert.match(resolve('REGIONAL', '', 'The project location is Austin, Texas.').issue, /does not establish United States/);
+    assert.deepEqual(resolve('LOCAL', '', 'Preference for Colorado artists.'), { country: '', issue: '' });
+    assert.deepEqual(resolve('REGIONAL', '', 'The project location is Austin, Texas.'), { country: '', issue: '' });
+    assert.deepEqual(resolve('LOCAL', '', 'Open to all Chicago based professional artists.'), { country: 'United States', issue: '' });
+    assert.deepEqual(resolve('REGIONAL', '', 'Artists residing in Yolo County and the Northern California region may apply.'), { country: 'United States', issue: '' });
     assert.deepEqual(resolve('UNSPECIFIED', '', 'Open to artists from any country.'), { country: 'International', issue: '' });
     assert.deepEqual(resolve('UNSPECIFIED', '', 'Open to artists from Canada.'), { country: 'Canada', issue: '' });
+    assert.deepEqual(resolve('NATIONAL', '', 'Applicants must:\nBe 18 years or older and a resident of the US or Canada.'), { country: '', issue: '' });
     assert.match(resolve('INTERNATIONAL', '', 'This call is not open to international applicants.').issue, /excludes international applicants/);
     const mapped = mapCreativeWestItem(creativeWestItem({
         eligibilityRegion: 'INTERNATIONAL',

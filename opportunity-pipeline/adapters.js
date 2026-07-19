@@ -72,8 +72,9 @@ function artworkArchiveCountry(eligibility, eligibilityDetails) {
     if (proseCountry) return proseCountry;
     // Artwork Archive uses National as a platform eligibility tier for U.S.-wide
     // calls. Keep this source-specific so foreign uses of "national" stay intact.
-    if (/^national$/i.test(eligibility.trim()) ||
-        /\bopen (?:to )?(?:all )?(?:artists? )?nationally\b|\bopen to national artists?\b/i.test(eligibilityDetails)) {
+    const foreignEvidence = /\b(?:Australia|Australian|Canada|Canadian|Mexico|Mexican|United Kingdom|UK|British|England|New Zealand)\b/i.test(eligibilityDetails);
+    if (!foreignEvidence && (/^national$/i.test(eligibility.trim()) ||
+        /\bopen (?:to )?(?:all )?(?:artists? )?nationally\b|\bopen to national artists?\b/i.test(eligibilityDetails))) {
         return 'United States';
     }
     return '';
@@ -104,7 +105,7 @@ export function parseArtworkArchive(html, definition = source('artwork_archive')
             link: canonicalUrl,
             sourceListingUrl: absoluteUrl(card.attr('data-nova-source-link') || listingUrl, definition.url),
             type: detail('type') || field('Type:'),
-            fees: inferFee(`Entry Fee: ${fee}`),
+            fees: inferFee(`Entry Fee: ${fee} ${description}`),
             country: artworkArchiveCountry(eligibility, eligibilityDetails),
             hostLocation: detail('location') || field('Location:'),
             feeDetails: fee,
@@ -204,6 +205,9 @@ export function creativeWestFeeSummary(item) {
 export function mapCreativeWestItem(item, definition = source('creative_west')) {
     const deadline = creativeWestDeadline(item);
     const eligibilityText = htmlToText(item.eligibilityDescription);
+    const shortDescription = htmlToText(item.shortDescription).text;
+    const fullDescription = htmlToText(item.description).text;
+    const description = fullDescription.length > shortDescription.length ? fullDescription : shortDescription;
     const eligibility = resolveEligibility({
         sourceId: definition.id,
         eligibilityRegion: item.eligibilityRegion,
@@ -227,13 +231,13 @@ export function mapCreativeWestItem(item, definition = source('creative_west')) 
         name: item.name,
         deadline: deadline.deadline,
         link,
-        type: mapCreativeWestType(item.type, item.name, htmlToText(item.shortDescription || item.description).text),
+        type: mapCreativeWestType(item.type, item.name, description),
         fees: fee.fees,
         country: eligibility.country,
         hostLocation: [item.city, item.state].filter(Boolean).join(', '),
         feeDetails: fee.feeDetails,
         eligibilityDetails: eligibilityText.text,
-        description: htmlToText(item.shortDescription || item.description).text,
+        description,
         source: definition.name,
         sourceUrl: listingUrl,
         confidence: 0.76,
@@ -276,24 +280,20 @@ function hyperallergicOpportunityLink(hrefs, base) {
 
 // Award value as a display string. Scans sentence by sentence and returns the first
 // that pairs a currency amount with award-oriented language (or an "Up to $…"
-// construction). Fee sentences and generic budgets/tuition/reimbursements are excluded,
-// and the recurring "Read more on Hyperallergic" boilerplate is trimmed.
+// construction). Application costs and amounts tied to tuition, residency costs,
+// reimbursements, or sales are excluded. Boilerplate is trimmed.
 function hyperallergicAwardInfo(lines) {
     const sentences = lines.flatMap((line) => line.split(/(?<=[.!?])\s+/));
-    let ambiguous = false;
     for (const raw of sentences) {
         const sentence = cleanText(raw).replace(/\s*Read more on Hyperallergic\.?$/i, '');
         if (/\bfee\b/i.test(sentence) || !/(?:\$|€|£)\s?\d/.test(sentence)) continue;
-        if (/\b(?:tuition|membership|dues?|budgets?|reimburse\w*|costs?)\b/i.test(sentence)) {
-            ambiguous = true;
-            continue;
-        }
+        const amountIsCost = /\b(?:tuition|residency costs?|sales? (?:price|value)|reimburse\w*)\b[^.!?]{0,25}(?:\$|â‚¬|Â£)\s?\d|(?:\$|â‚¬|Â£)\s?\d[^.!?]{0,25}\b(?:tuition|residency costs?|sales? (?:price|value)|reimburse\w*)\b/i.test(sentence);
+        if (amountIsCost) continue;
         if (/\b(?:award|prize|stipend|grant|honorarium|funding|receiv)/i.test(sentence) || /up to\s*(?:\$|€|£)/i.test(sentence)) {
             return { awardInfo: sentence, issue: '' };
         }
-        ambiguous = true;
     }
-    return { awardInfo: '', issue: ambiguous ? 'ambiguous award amount' : '' };
+    return { awardInfo: '', issue: '' };
 }
 
 export function parseHyperallergicArticle(html, definition = source('hyperallergic'), articleUrl = definition.url) {
@@ -694,13 +694,12 @@ function nextArtworkArchivePage(html, currentUrl) {
 
 function mapCreativeWestType(type, name, description = '') {
     const titleType = inferType(name, '');
-    // "Call for artists" is generic language on many public-art RFQs; do not
-    // let that weaker signal erase an explicit commission category.
-    if (titleType && !(titleType === 'Open Call' && /commission/i.test(type))) return titleType;
+    // Preserve explicit operational categories before weaker title words. This
+    // prevents venue names such as "Golf Course" from becoming workshops.
     if (/commission/i.test(type)) return 'Commission';
     if (/residen/i.test(type)) return 'Residency';
     if (/fellow/i.test(type)) return 'Fellowship';
-    if (/grant/i.test(type)) return 'Grant';
+    if (/grant/i.test(type)) return titleType || 'Grant';
     if (/award|competition/i.test(type)) return inferType(name, description) || 'Award';
     if (/exhibition|fair|festival/i.test(type)) return 'Exhibition';
     return inferType(name, description);

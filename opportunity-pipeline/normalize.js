@@ -13,7 +13,7 @@ export function canonicalizeUrl(value) {
         const url = new URL(String(value).trim());
         url.hash = '';
         for (const key of [...url.searchParams.keys()]) {
-            if (/^(utm_|ref$|ref_|source$|mc_)/i.test(key)) url.searchParams.delete(key);
+            if (/^(?:utm_|ref$|ref_|source$|mc_|gclid$|gbraid$|fbclid$|msclkid$|gad_|hsa_)/i.test(key)) url.searchParams.delete(key);
         }
         url.hostname = url.hostname.toLowerCase().replace(/^www\./, '');
         if (url.pathname !== '/') url.pathname = url.pathname.replace(/\/+$/, '');
@@ -118,25 +118,58 @@ export function inferType(name = '', description = '') {
     return '';
 }
 
+export function inferTitleType(name = '') {
+    const title = String(name).toLowerCase();
+    if (/public art|commission|request for (?:qualifications|proposals)|\brfq\b|\bmural\b|artist pool/.test(title)) return 'Commission';
+    if (/\b(?:emergency relief|microgrant|grants?)\b/.test(title)) return 'Grant';
+    if (/\bfellowship\b/.test(title)) return 'Fellowship';
+    if (/\b(?:artist[- ]in[- ]residence|residenc(?:y|ies))\b/.test(title)) return 'Residency';
+    if (/\b(?:prize|award)\b/.test(title)) return 'Award';
+    if (/\bopen[- ]call\b|\bcall for\b[^.]{0,40}\b(?:artists?|entries|submissions)\b/.test(title)) return 'Open Call';
+    if (/\b(?:exhibition|biennial|triennial|juried show)\b/.test(title)) return 'Exhibition';
+    // "Course" alone is not sufficient: venue names such as Golf Course are
+    // common in public-art commissions.
+    if (/\bworkshop\b|\btraining (?:course|program)\b|\b(?:online|intensive|development) course\b/.test(title)) return 'Workshop';
+    return '';
+}
+
 export function normalizeType(value, name = '', description = '') {
     const raw = String(value || '').trim();
     const direct = ALLOWED_TYPES.find((type) => type.toLowerCase() === raw.toLowerCase());
-    if (direct) return direct;
+    const titleType = inferTitleType(name);
+    if (direct) {
+        if (['Award', 'Competition'].includes(direct) && ['Award', 'Competition'].includes(titleType)) return direct;
+        if (titleType && titleType !== direct) return titleType;
+        return direct;
+    }
     const inferred = inferType(name, description);
     // Artwork Archive groups grants and fellowships into one non-public bucket.
     // Prefer an explicit title signal, then use Grant as the conservative fallback.
-    if (/^grants?\s*&\s*fellowships?$/i.test(raw)) return inferred || 'Grant';
-    return inferred;
+    if (/^grants?\s*&\s*fellowships?$/i.test(raw)) return titleType || inferred || 'Grant';
+    return titleType || inferred;
 }
 
 export function inferFee(text = '') {
-    if (/\b(no|zero)\s+(?:application|entry|submission)?\s*fee\b|(?:application|entry|submission)?\s*fee\s*:\s*\$?0\b|free to (?:apply|enter|submit)/i.test(text)) return 'n';
+    if (/\b(?:no|zero)\b[^.\n]{0,25}\b(?:application|entry|submission|jury)(?:\s+\w+){0,2}\s+fees?\b|\b(?:no|zero)\s+(?:application|entry|submission)?\s*fees?\b|(?:application|entry|submission)?\s*fee\s*:\s*\$?0\b|free to (?:apply|enter|submit)/i.test(text)) return 'n';
     // Anchored to the word "fee" so award/stipend amounts are never read as a fee.
     if (/\b(?:application|entry|submission)\s+fee\b[^.\n]{0,40}(?:\$|€|£|CAD|USD|EUR)\s?\d/i.test(text) ||
         /\b(?:application|entry|submission)?\s*fee\s*:?\s*(?:\$|€|£|CAD|USD|EUR)\s?\d/i.test(text) ||
         /(?:\$|€|£)\s?\d[\d,]*\s*(?:application|entry|submission)?\s*fee\b/i.test(text) ||
         /\bfee\b[^.\n]{0,20}(?:\$|€|£)\s?\d/i.test(text)) return 'y';
+    if (/\b(?:application|entry|submission)\s+fee\b[^.\n]{0,30}\d[\d,.]*\s+(?:US Dollars?|USD|Canadian Dollars?|CAD|Euros?|EUR|Pounds?|GBP)\b/i.test(text)) return 'y';
     return '';
+}
+
+export function inferAwardInfo(text = '') {
+    const clauses = String(text || '').match(/[^.!?\n]+[.!?]?/g) || [];
+    const amount = /(?:USD|AUD|CAD|GBP|EUR)?\s*(?:\$|£|€)\s*\d[\d,.]*|\b\d[\d,.]*\s*(?:USD|AUD|CAD|GBP|EUR)\b/i;
+    const label = /\b(?:award|budget|grant|stipend|honorarium|prize|project funds?|commission budget)\b/i;
+    return clauses
+        .map((clause) => clause.replace(/\s+/g, ' ').trim())
+        .filter((clause) => amount.test(clause) && label.test(clause))
+        .filter((clause) => !/\b(?:tuition|residency cost|for sale|sales price)\b/i.test(clause) || /\b(?:award|stipend|honorarium|grant)\b/i.test(clause))
+        .slice(0, 2)
+        .join(' ');
 }
 
 export function normalizeCountry(value = '') {
@@ -155,7 +188,9 @@ export function makeId(candidate) {
 }
 
 export function normalizeCandidate(raw, now = new Date()) {
-    const name = String(raw.name || '').replace(/\s+/g, ' ').trim();
+    const name = String(raw.name || '').replace(/\s+/g, ' ').trim()
+        .replace(/^CC\/AA\s+/i, '')
+        .replace(/\bHV award\b/i, (match) => /\bVH AWARD\b/i.test(String(raw.description || '')) ? match.replace(/HV/i, 'VH') : match);
     const link = canonicalizeUrl(raw.link || raw.sourceUrl);
     const deadline = normalizeDeadline(raw.deadline);
     const description = String(raw.description || '').replace(/\s+/g, ' ').trim();
@@ -167,7 +202,7 @@ export function normalizeCandidate(raw, now = new Date()) {
         fees: (['y', 'n'].includes(String(raw.fees || '').toLowerCase()) ?
             String(raw.fees).toLowerCase() : inferFee(`${description} ${raw.feeDetails || ''}`)),
         country: normalizeCountry(raw.country),
-        award_info: String(raw.awardInfo || raw.award_info || '').replace(/\s+/g, ' ').trim(),
+        award_info: String(raw.awardInfo || raw.award_info || inferAwardInfo(description)).replace(/\s+/g, ' ').trim(),
         status: 'review',
         source: raw.source || '',
         source_url: canonicalizeUrl(raw.sourceUrl || raw.link),
