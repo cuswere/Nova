@@ -125,6 +125,16 @@ export async function upsertCandidates(candidates, options = {}) {
             insertDataOption: 'INSERT_ROWS',
             requestBody: { values: appends }
         });
+        // Google Sheets may copy the header row's formatting when rows are
+        // inserted immediately below it. Keep imported opportunities in the
+        // normal data style instead of inheriting the gray/bold header style.
+        await resetAppendedRowFormatting({
+            sheets,
+            spreadsheetId,
+            sheetName,
+            startRowIndex: existing.length + 1,
+            rowCount: appends.length
+        });
     }
     await sortByDeadline({ sheets, spreadsheetId, sheetName, rowCount: existing.length + appends.length + 1 });
     return {
@@ -134,6 +144,38 @@ export async function upsertCandidates(candidates, options = {}) {
         expired: updates.length - updated,
         skippedExpired
     };
+}
+
+async function resetAppendedRowFormatting({ sheets, spreadsheetId, sheetName, startRowIndex, rowCount }) {
+    const metadata = await sheets.spreadsheets.get({
+        spreadsheetId,
+        fields: 'sheets.properties'
+    });
+    const sheet = (metadata.data.sheets || []).find(({ properties }) => properties.title === sheetName);
+    if (!sheet) throw new Error(`Sheet ${sheetName} was not found`);
+    await sheets.spreadsheets.batchUpdate({
+        spreadsheetId,
+        requestBody: {
+            requests: [{
+                repeatCell: {
+                    range: {
+                        sheetId: sheet.properties.sheetId,
+                        startRowIndex,
+                        endRowIndex: startRowIndex + rowCount,
+                        startColumnIndex: 0,
+                        endColumnIndex: SHEET_HEADERS.length
+                    },
+                    cell: {
+                        userEnteredFormat: {
+                            backgroundColor: { red: 1, green: 1, blue: 1 },
+                            textFormat: { bold: false }
+                        }
+                    },
+                    fields: 'userEnteredFormat.backgroundColor,userEnteredFormat.textFormat.bold'
+                }
+            }]
+        }
+    });
 }
 
 async function sortByDeadline({ sheets, spreadsheetId, sheetName, rowCount }) {
