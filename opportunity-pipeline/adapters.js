@@ -47,13 +47,23 @@ function source(id) {
 }
 
 function dateFromText(text) {
-    return text.match(/(?:Deadline\s*:\s*)?((?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2}(?:st|nd|rd|th)?[,]?\s+20\d{2})/i)?.[1] ||
-        (/(rolling|ongoing|no deadline)/i.test(text) ? 'Rolling' : '');
+    const month = '(?:January|February|March|April|May|June|July|August|September|October|November|December)';
+    const date = `(?:${month}\\s+\\d{1,2}(?:st|nd|rd|th)?[,]?\\s+20\\d{2}|\\d{1,2}(?:st|nd|rd|th)?\\s+${month}[,]?\\s+20\\d{2})`;
+    return text.match(new RegExp(`(?:deadline|apply by|applications? close|runs? through|\\bby)[^.!?]{0,50}?(${date})`, 'i'))?.[1] ||
+        (/\b(?:rolling deadline|applications? (?:are |is )?(?:accepted )?(?:on an )?ongoing basis|no deadline)\b/i.test(text) ? 'Rolling' : '');
 }
 
 function locationFromText(text) {
     const match = text.match(/Location\s*:\s*([^\n|]{2,100})/i);
     return match ? cleanText(match[1]) : '';
+}
+
+function labeledDescriptionField(description, label) {
+    const labels = 'Organization|Eligibility details|Event dates|Award|Categories';
+    const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return cleanText(String(description || '').match(
+        new RegExp(`(?:^|\\s)${escaped}:\\s*(.*?)(?=\\s+(?:${labels}):|$)`, 'i')
+    )?.[1]);
 }
 
 export function parseArtworkArchive(html, definition = source('artwork_archive')) {
@@ -70,7 +80,12 @@ export function parseArtworkArchive(html, definition = source('artwork_archive')
         const canonicalUrl = absoluteUrl(card.attr('data-nova-link') || listingUrl, definition.url);
         if (!name || !listingUrl || !canonicalUrl || !deadline) return;
         const fee = detail('fee-details') || field('Entry Fee:');
-        const eligibility = detail('eligibility') || field('Eligibility:');
+        const description = detail('description') || cleanText(card.find('p').first().text());
+        const eligibilityDetails = detail('eligibility-details') ||
+            labeledDescriptionField(description, 'Eligibility details') ||
+            cleanText(description.match(/(?:^|\s)Eligibility Info\s+(.+)$/i)?.[1]);
+        const eligibility = detail('eligibility') || field('Eligibility:') || eligibilityDetails;
+        const proseEligibility = resolveProseEligibility(eligibilityDetails);
         rows.push({
             name,
             deadline,
@@ -78,12 +93,12 @@ export function parseArtworkArchive(html, definition = source('artwork_archive')
             sourceListingUrl: absoluteUrl(card.attr('data-nova-source-link') || listingUrl, definition.url),
             type: detail('type') || field('Type:'),
             fees: inferFee(`Entry Fee: ${fee}`),
-            country: /international/i.test(eligibility) ? 'International' : '',
+            country: /international/i.test(eligibility) ? 'International' : proseEligibility.country,
             hostLocation: detail('location') || field('Location:'),
             feeDetails: fee,
-            awardInfo: detail('award-info'),
-            eligibilityDetails: detail('eligibility-details'),
-            description: detail('description') || cleanText(card.find('p').first().text()),
+            awardInfo: detail('award-info') || labeledDescriptionField(description, 'Award'),
+            eligibilityDetails,
+            description,
             source: definition.name,
             sourceUrl: absoluteUrl(card.attr('data-nova-source-link') || definition.url, definition.url),
             confidence: 0.68
@@ -252,7 +267,7 @@ function hyperallergicAwardInfo(lines) {
             continue;
         }
         if (/\b(?:award|prize|stipend|grant|honorarium|funding|receiv)/i.test(sentence) || /up to\s*(?:\$|€|£)/i.test(sentence)) {
-            return { awardInfo: sentence.slice(0, 200), issue: '' };
+            return { awardInfo: sentence, issue: '' };
         }
         ambiguous = true;
     }
@@ -424,14 +439,83 @@ export function parseTransArtists(html, definition = source('transartists')) {
     return uniqueByLinkAndName(rows).slice(0, definition.limit);
 }
 
+function transArtistsExternalLink($, container, pageUrl) {
+    const links = container.find('a[href]').map((_, element) => ({
+        url: absoluteUrl($(element).attr('href'), pageUrl),
+        label: cleanText($(element).text())
+    })).get().filter(({ url }) => {
+        try {
+            return !/(^|\.)transartists\.org$/i.test(new URL(url).hostname);
+        } catch {
+            return false;
+        }
+    });
+    return links.find(({ label }) => /apply|application|online|open call|more information/i.test(label))?.url ||
+        links.at(-1)?.url || pageUrl;
+}
+
+function transArtistsAwardInfo(text) {
+    return String(text || '').split(/\r?\n/).flatMap((line) => line.split(/(?<=[.!?])\s+/)).find((sentence) =>
+        /(?:\$|€|£|USD|EUR|GBP)\s?\d/i.test(sentence) &&
+        /award|prize|stipend|grant|honorarium|production budget|receive/i.test(sentence) &&
+        !/application|entry|submission fee/i.test(sentence)
+    ) || '';
+}
+
+export function parseTransArtistsDetail(html, pageUrl, definition = source('transartists')) {
+    const $ = cheerio.load(html);
+    const heading = $('main h2').first();
+    const container = heading.closest('article').length ? heading.closest('article') : $('main');
+    const name = cleanText(heading.text());
+    const contentHtml = container.find('p,ul,ol').filter((_, element) =>
+        !$(element).parents('ul,ol').length
+    ).map((_, element) => $.html(element)).get().join('');
+    const description = htmlToText(contentHtml || container.html()).text;
+    const eligibility = resolveProseEligibility(description);
+    return {
+        name,
+        deadline: dateFromText(description),
+        link: transArtistsExternalLink($, container, pageUrl),
+        // TransArtists is a residency-specific feed; title phrases such as
+        // "open call" describe the application, not a different opportunity type.
+        type: 'Residency',
+        fees: inferFee(description),
+        country: eligibility.country,
+        hostLocation: locationFromText(description),
+        feeDetails: description.match(/(?:application|entry|submission) fee[^.]{0,70}/i)?.[0] || '',
+        awardInfo: transArtistsAwardInfo(description),
+        eligibilityDetails: description.match(/(?:open to|eligible)[^.!?]{0,500}[.!?]/i)?.[0] || '',
+        description,
+        source: definition.name,
+        sourceUrl: pageUrl,
+        confidence: 0.68,
+        issue: eligibility.issue
+    };
+}
+
+async function discoverTransArtists(definition, { fetcher = fetchText } = {}) {
+    const listing = await fetcher(definition.url, { delayMs: definition.delayMs || 0 });
+    const stubs = parseTransArtists(listing.text, definition);
+    const rows = [];
+    for (const stub of stubs) {
+        try {
+            const detail = await fetcher(stub.link, { delayMs: definition.delayMs || 0 });
+            rows.push(parseTransArtistsDetail(detail.text, detail.finalUrl || stub.link, definition));
+        } catch {
+            rows.push(stub);
+        }
+    }
+    return rows.filter((row) => row.name && row.link);
+}
+
 export async function discoverSource(definition) {
     if (definition.id === 'artwork_archive') return discoverArtworkArchive(definition);
     if (definition.id === 'creative_capital') return discoverCreativeCapital(definition);
     if (definition.id === 'creative_west') return discoverCreativeWest(definition);
     if (definition.id === 'hyperallergic') return discoverHyperallergic(definition);
+    if (definition.id === 'transartists') return discoverTransArtists(definition);
     const { text } = await fetchText(definition.url, { delayMs: definition.delayMs || 0 });
     switch (definition.id) {
-        case 'transartists': return parseTransArtists(text, definition);
         default: return [];
     }
 }

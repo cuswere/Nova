@@ -14,7 +14,8 @@ import {
     mapCreativeWestItem,
     parseArtworkArchive,
     parseCreativeCapital,
-    parseHyperallergicArticle
+    parseHyperallergicArticle,
+    parseTransArtistsDetail
 } from '../opportunity-pipeline/adapters.js';
 import { areSameOpportunity, deduplicateCandidates } from '../opportunity-pipeline/dedupe.js';
 import { enrichCandidate } from '../opportunity-pipeline/enrich.js';
@@ -117,6 +118,30 @@ test('imports a browser-collected Artwork Archive export', () => {
     assert.equal(rows[0].source, 'Artwork Archive');
     assert.equal(rows[0].eligibility_details, 'Open internationally to artists at any career stage.');
     assert.equal(rows[0].award_info, '$5,000 stipend and studio access');
+});
+
+test('backfills Artwork Archive structured fields from older collector descriptions', () => {
+    const html = fixture('artwork-archive.html')
+        .replace(/ data-nova-eligibility-details="[^"]*"/, '')
+        .replace(/ data-nova-award-info="[^"]*"/, '');
+    const [row] = parseArtworkArchive(html);
+    assert.equal(row.eligibilityDetails, 'Open internationally.');
+    assert.equal(row.awardInfo, '$5,000. A detailed opportunity description.');
+    assert.equal(row.country, 'International');
+});
+
+test('parses TransArtists detail pages instead of publishing listing stubs', () => {
+    const html = `<main><article><h2>TED and POSCA Residency</h2>
+      <p>Selected artists receive USD $15,000 in fees and production support.</p>
+      <p>The call is open to artists from around the world. Apply <a href="https://fineacts.co/residency">online</a>
+      with a deadline of <strong>31 July 2026</strong>.</p></article></main>`;
+    const row = parseTransArtistsDetail(html, 'https://transartists.org/en/news/test');
+    assert.equal(row.deadline, '31 July 2026');
+    assert.equal(row.link, 'https://fineacts.co/residency');
+    assert.equal(row.country, 'International');
+    assert.equal(row.awardInfo, 'Selected artists receive USD $15,000 in fees and production support.');
+    assert.equal(parseTransArtistsDetail(html.replace('deadline of <strong>31 July 2026</strong>', 'materials are due by <strong>14 August 2026</strong>'), 'https://transartists.org/en/news/test').deadline, '14 August 2026');
+    assert.equal(parseTransArtistsDetail(html.replace('deadline of <strong>31 July 2026</strong>', 'deadline information is forthcoming; ongoing collaborations continue'), 'https://transartists.org/en/news/test').deadline, '');
 });
 
 test('keeps Artwork Archive detail URLs as identity while using Learn More links', () => {
@@ -267,6 +292,8 @@ test('normalizeDeadline resolves ranges to the end date and rejects impossible d
     assert.equal(normalizeDeadline('February 29, 2026'), '');
     assert.equal(normalizeDeadline('2026-02-31'), '');
     assert.equal(normalizeDeadline('8/1/2026'), '2026-08-01');
+    assert.equal(normalizeDeadline('31 July 2026'), '2026-07-31');
+    assert.equal(normalizeDeadline('46236'), '2026-08-02');
     assert.equal(normalizeDeadline('02/31/2026'), '');
     assert.equal(normalizeDeadline('rolling'), 'Rolling');
 });
@@ -357,6 +384,16 @@ test('cross-source Hyperallergic deduplication handles regenerated links and cyc
     };
     assert.equal(areSameOpportunity(hyperallergic, creativeWest), true);
     assert.deepEqual(deduplicateCandidates([hyperallergic, creativeWest]), [creativeWest]);
+    const artworkArchive = {
+        name: 'The Bennett Prize',
+        deadline: '46284',
+        link: 'https://thebennettprize.org/',
+        source: 'Artwork Archive',
+        description: 'Less complete listing copy.'
+    };
+    const directCreativeWest = { ...creativeWest, link: 'https://thebennettprize.org/' };
+    assert.equal(areSameOpportunity(artworkArchive, directCreativeWest), true);
+    assert.deepEqual(deduplicateCandidates([artworkArchive, directCreativeWest]), [directCreativeWest]);
 });
 
 test('AI enrichment uses structured evidence without inventing unsupported costs', async () => {
@@ -604,6 +641,7 @@ test('Sheet writes use the schema-derived S column and keep manual public values
     assert.equal(calls.appends[0].range, "'Opportunities'!A:S");
     assert.equal(calls.appends[0].requestBody.values[0].length, 19);
     assert.equal(calls.appends[0].requestBody.values[0][0], "'=formula");
+    assert.equal(calls.appends[0].valueInputOption, 'RAW');
     const current = { name: 'Editor title', deadline: '2026-08-01', link: 'https://example.org/editor', type: 'Grant', fees: 'n', country: 'United States', status: 'publish' };
     assert.equal(mergeCandidate(current, { ...current, name: 'Crawler title', status: 'review' }).name, 'Editor title');
 });

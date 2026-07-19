@@ -37,11 +37,26 @@ export function normalizeDeadline(value) {
     if (!text) return '';
     if (/rolling|ongoing|no deadline/i.test(text)) return 'Rolling';
 
+    // Google Sheets stores dates as days since 1899-12-30. Older USER_ENTERED
+    // imports can therefore be read back as values such as 46236.
+    if (/^\d{5}$/.test(text)) {
+        const serial = Number(text);
+        if (serial >= 30_000 && serial <= 80_000) {
+            return new Date(Date.UTC(1899, 11, 30) + serial * 86_400_000).toISOString().slice(0, 10);
+        }
+    }
+
     const iso = text.match(/^(20\d{2})-(\d{2})-(\d{2})$/);
     if (iso) return validCalendarDate(Number(iso[1]), Number(iso[2]) - 1, Number(iso[3]));
 
     const numeric = text.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](20\d{2})$/);
     if (numeric) return validCalendarDate(Number(numeric[3]), Number(numeric[1]) - 1, Number(numeric[2]));
+
+    const dayFirst = text.match(/\b(\d{1,2})(?:st|nd|rd|th)?\s+([A-Za-z]+),?\s+(20\d{2})\b/i);
+    if (dayFirst) {
+        const month = MONTHS.get(dayFirst[2].toLowerCase());
+        if (month !== undefined) return validCalendarDate(Number(dayFirst[3]), month, Number(dayFirst[1]));
+    }
 
     // Date ranges resolve to the end date. Handle these before the general parser,
     // which would otherwise misread strings such as "October 1-29, 2026".
@@ -88,8 +103,10 @@ export function isExpired(deadline, today = new Date()) {
 }
 
 export function inferType(name = '', description = '') {
+    const title = String(name).toLowerCase();
     const text = `${name} ${description}`.toLowerCase();
-    if (/public art|commission|request for qualifications|\brfq\b/.test(text)) return 'Commission';
+    if (/public art|commission|request for qualifications|\brfq\b|\bmural\b|artist pool/.test(text)) return 'Commission';
+    if (/\bopen[- ]call\b|\bcall for\b[^.]{0,40}\b(?:artists?|entries|submissions)\b/.test(title)) return 'Open Call';
     if (/residen|artist colony|studio program/.test(text)) return 'Residency';
     if (/fellowship/.test(text)) return 'Fellowship';
     if (/grant|funding|emergency relief|microgrant/.test(text)) return 'Grant';
@@ -97,6 +114,7 @@ export function inferType(name = '', description = '') {
     if (/acquisition|purchase program/.test(text)) return 'Acquisition';
     if (/\bopen call\b|\bcall for\b[^.]{0,40}\b(?:artists?|entries|submissions)\b/.test(text)) return 'Open Call';
     if (/exhibition|biennial|triennial|juried show/.test(text)) return 'Exhibition';
+    if (/\bworkshop\b|\bcourse\b|\btuition\b|training program|development year/.test(text)) return 'Workshop';
     return '';
 }
 
@@ -148,7 +166,7 @@ export function normalizeCandidate(raw, now = new Date()) {
         type: normalizeType(raw.type, name, description),
         fees: ['y', 'n'].includes(String(raw.fees || '').toLowerCase()) ? String(raw.fees).toLowerCase() : inferFee(`${description} ${raw.feeDetails || ''}`),
         country: normalizeCountry(raw.country),
-        award_info: String(raw.awardInfo || raw.award_info || '').replace(/\s+/g, ' ').trim().slice(0, 200),
+        award_info: String(raw.awardInfo || raw.award_info || '').replace(/\s+/g, ' ').trim(),
         status: 'review',
         source: raw.source || '',
         source_url: canonicalizeUrl(raw.sourceUrl || raw.link),

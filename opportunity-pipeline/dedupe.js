@@ -17,6 +17,14 @@ function titleCore(value = '') {
         .join(' ');
 }
 
+function titleOverlap(left, right) {
+    const leftTokens = new Set(titleCore(left).split(' ').filter(Boolean));
+    const rightTokens = new Set(titleCore(right).split(' ').filter(Boolean));
+    if (!leftTokens.size || !rightTokens.size) return 0;
+    const shared = [...leftTokens].filter((token) => rightTokens.has(token)).length;
+    return shared / Math.min(leftTokens.size, rightTokens.size);
+}
+
 function isHyperallergic(row) {
     return /^hyperallergic$/i.test(String(row.source || '').trim());
 }
@@ -28,7 +36,13 @@ export function areSameOpportunity(left, right) {
 
     const leftLink = canonicalizeUrl(left.link);
     const rightLink = canonicalizeUrl(right.link);
-    if (leftLink && rightLink && leftLink === rightLink && leftTitle === rightTitle) return true;
+    const leftDeadline = normalizeDeadline(left.deadline);
+    const rightDeadline = normalizeDeadline(right.deadline);
+    const compatibleDeadlines = !leftDeadline || !rightDeadline || leftDeadline === rightDeadline ||
+        leftDeadline === 'Rolling' || rightDeadline === 'Rolling';
+    if (leftTitle === rightTitle && leftDeadline && leftDeadline === rightDeadline) return true;
+    if (leftLink && rightLink && leftLink === rightLink && compatibleDeadlines &&
+        (leftTitle === rightTitle || titleOverlap(left.name, right.name) >= 0.65)) return true;
 
     // Hyperallergic regenerates short links between monthly roundups. Within that
     // source, an exact normalized title is the stable identity.
@@ -38,8 +52,7 @@ export function areSameOpportunity(left, right) {
     // differently (for example Bennett Prize cycle/edition labels). Apply the
     // relaxed comparison only when Hyperallergic is one side and deadlines match.
     if (isHyperallergic(left) !== isHyperallergic(right) &&
-        normalizeDeadline(left.deadline) &&
-        normalizeDeadline(left.deadline) === normalizeDeadline(right.deadline)) {
+        leftDeadline && leftDeadline === rightDeadline) {
         const leftCore = titleCore(left.name);
         const rightCore = titleCore(right.name);
         if (leftCore && leftCore.split(' ').length >= 2 && leftCore === rightCore) return true;

@@ -112,14 +112,16 @@ export async function upsertCandidates(candidates, options = {}) {
     if (updates.length) {
         await sheets.spreadsheets.values.batchUpdate({
             spreadsheetId,
-            requestBody: { valueInputOption: 'USER_ENTERED', data: updates }
+            // Rows are already normalized. RAW prevents ISO dates such as
+            // 2026-08-02 from becoming an unformatted Sheets serial (46236).
+            requestBody: { valueInputOption: 'RAW', data: updates }
         });
     }
     if (appends.length) {
         await sheets.spreadsheets.values.append({
             spreadsheetId,
             range: `'${sheetName.replaceAll("'", "''")}'!A:${LAST_COLUMN}`,
-            valueInputOption: 'USER_ENTERED',
+            valueInputOption: 'RAW',
             insertDataOption: 'INSERT_ROWS',
             requestBody: { values: appends }
         });

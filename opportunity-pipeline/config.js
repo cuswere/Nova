@@ -74,7 +74,7 @@ export const SOURCE_DEFINITIONS = [
         id: 'transartists',
         name: 'TransArtists',
         url: 'https://www.transartists.org/en/transartists-calls',
-        enabled: true,
+        enabled: false,
         limit: 12
     }
 ];

@@ -111,7 +111,7 @@ function hardRestriction(text) {
 
 function explicitWorldwide(text) {
     return clausesFromDetails(text).some((clause) => classifyClause(clause) !== 'exclusion' &&
-        /artists? from any countr(?:y|ies)|open to (?:artists?|applicants?) (?:from )?(?:any country|worldwide)|regardless of geographic location|(?:artists?|applicants?) worldwide/i.test(clause));
+        /artists? from any countr(?:y|ies)|open to (?:artists?|applicants?) (?:from )?(?:any country|worldwide|around the world)|regardless of geographic location|(?:artists?|applicants?) worldwide/i.test(clause));
 }
 
 function excludesInternational(text) {
