@@ -8,6 +8,7 @@ import {
     creativeCapitalPageUrl,
     creativeWestDeadline,
     creativeWestFeeSummary,
+    creativeWestIndependentLink,
     discoverCreativeWest,
     discoverHyperallergic,
     mapCreativeWestItem,
@@ -15,6 +16,7 @@ import {
     parseCreativeCapital,
     parseHyperallergicArticle
 } from '../opportunity-pipeline/adapters.js';
+import { areSameOpportunity, deduplicateCandidates } from '../opportunity-pipeline/dedupe.js';
 import { enrichCandidate } from '../opportunity-pipeline/enrich.js';
 import { htmlToText, resolveEligibility, resolveProseEligibility } from '../opportunity-pipeline/eligibility.js';
 import { postJson } from '../opportunity-pipeline/http.js';
@@ -22,10 +24,12 @@ import {
     canonicalizeUrl,
     formatPublicDeadline,
     inferFee,
+    inferType,
     isExpired,
     normalizeCandidate,
     normalizeCountry,
-    normalizeDeadline
+    normalizeDeadline,
+    normalizeType
 } from '../opportunity-pipeline/normalize.js';
 import { columnLetter, escapeSheetValue, mergeCandidate, rowValues, upsertCandidates } from '../opportunity-pipeline/sheets.js';
 import { SHEET_HEADERS } from '../opportunity-pipeline/config.js';
@@ -46,7 +50,7 @@ test('normalizes URLs, dates, countries, and application fees', () => {
     assert.equal(isExpired('2026-07-15', today), true);
 });
 
-test('uses Commission as the public-art category and flags unknown types for review', () => {
+test('keeps commissions and open calls distinct and resolves grouped grant categories', () => {
     const commission = normalizeCandidate({
         name: 'Downtown Public Art RFQ',
         deadline: 'August 1, 2026',
@@ -55,6 +59,11 @@ test('uses Commission as the public-art category and flags unknown types for rev
         country: 'United States'
     }, today);
     assert.equal(commission.type, 'Commission');
+
+    assert.equal(inferType('Call for Latino Artists', 'An ongoing artist directory.'), 'Open Call');
+    assert.equal(inferType('Call for Artists: Downtown Public Art RFQ'), 'Commission');
+    assert.equal(normalizeType('Grants & Fellowships', 'Studio Fellowship'), 'Fellowship');
+    assert.equal(normalizeType('Grants & Fellowships', 'Artist Support Program'), 'Grant');
 
     const unknown = normalizeCandidate({
         name: 'Unclassified opportunity',
@@ -68,6 +77,21 @@ test('uses Commission as the public-art category and flags unknown types for rev
     assert.match(unknown.issue, /unresolved type/);
 });
 
+test('normalization preserves full descriptions and does not apply automatic relevance rejection', () => {
+    const description = `A visual arts course and commission. ${'x'.repeat(900)}`;
+    const row = normalizeCandidate({
+        name: 'Hospital Artwork Commission',
+        deadline: 'August 1, 2026',
+        link: 'https://example.org/hospital-art',
+        type: 'Commission',
+        fees: 'n',
+        country: 'United States',
+        description
+    }, today);
+    assert.equal(row.description, description);
+    assert.doesNotMatch(row.issue, /outside visual-arts scope/);
+});
+
 test('parses Artwork Archive fixture', () => {
     const [row] = parseArtworkArchive(fixture('artwork-archive.html'));
     assert.equal(row.name, 'Test Studio Residency');
@@ -76,6 +100,8 @@ test('parses Artwork Archive fixture', () => {
     assert.equal(row.country, 'International');
     assert.equal(row.hostLocation, 'Seattle, United States');
     assert.equal(row.feeDetails, '$35');
+    assert.equal(row.eligibilityDetails, 'Open internationally to artists at any career stage.');
+    assert.equal(row.awardInfo, '$5,000 stipend and studio access');
     assert.match(row.description, /Test Arts Council/);
 });
 
@@ -89,6 +115,8 @@ test('imports a browser-collected Artwork Archive export', () => {
     assert.equal(rows[0].link, 'https://example.org/apply/test-studio-residency');
     assert.equal(rows[0].source_url, 'https://artworkarchive.com/call-for-entry/test-residency-2026');
     assert.equal(rows[0].source, 'Artwork Archive');
+    assert.equal(rows[0].eligibility_details, 'Open internationally to artists at any career stage.');
+    assert.equal(rows[0].award_info, '$5,000 stipend and studio access');
 });
 
 test('keeps Artwork Archive detail URLs as identity while using Learn More links', () => {
@@ -177,6 +205,18 @@ test('interprets Hyperallergic roundup sections, awards, fees, rolling deadlines
     assert.ok(!rows.some((row) => row.name === 'Internal Only'));
 });
 
+test('Hyperallergic merges split strong titles and removes roundup boilerplate', () => {
+    const [row] = parseHyperallergicArticle(`
+        <article><h2>Grants &amp; Awards</h2><p>
+        <strong>Hyundai Motor Group</strong> – <strong>The 7th VH Award</strong><br>
+        A global award for emerging media artists. Read more on Hyperallergic.R391<br>
+        Deadline: July 21, 2026 | <a href="https://bit.ly/new-vh-link">Apply</a>
+        </p></article>
+    `, undefined, 'https://hyperallergic.com/opportunities-in-july-2026/');
+    assert.equal(row.name, 'Hyundai Motor Group – The 7th VH Award');
+    assert.equal(row.description, 'A global award for emerging media artists.');
+});
+
 test('discoverHyperallergic reads the latest roundups newest-first, skips non-roundups, and dedupes', async () => {
     const feedXml = fixture('hyperallergic-feed.xml');
     const article = fixture('hyperallergic-roundup.html');
@@ -187,7 +227,8 @@ test('discoverHyperallergic reads the latest roundups newest-first, skips non-ro
         if (url.includes('july')) return { text: article, finalUrl: url };
         const variant = article
             .replace('<strong>Big Prize</strong>', '<strong>BIG   PRIZE</strong>')
-            .replace('https://bigprize.org/enter?ref=hyperallergic.com', 'https://www.bigprize.org/enter/?utm_source=older');
+            .replace('https://bigprize.org/enter?ref=hyperallergic.com', 'https://www.bigprize.org/enter/?utm_source=older')
+            .replace('https://example.org/vh-award', 'https://bit.ly/older-vh-link');
         return { text: variant, finalUrl: url };
     };
     const definition = { id: 'hyperallergic', name: 'Hyperallergic', url: 'https://hyperallergic.com/tag/opportunities/feed/', roundupMonths: 3 };
@@ -211,6 +252,7 @@ test('discoverHyperallergic reads the latest roundups newest-first, skips non-ro
         'Vermont Studio Center Residency'
     ]);
     assert.equal(rows.find((row) => row.name === 'Big Prize').sourceUrl, 'https://hyperallergic.com/opportunities-in-july-2026/');
+    assert.equal(rows.find((row) => /7th VH Award/.test(row.name)).link, 'https://example.org/vh-award');
 });
 
 test('normalizeDeadline resolves ranges to the end date and rejects impossible dates', () => {
@@ -270,6 +312,53 @@ test('upsert merge preserves manual public fields and decisions', () => {
     assert.equal(mergeCandidate({ ...current, status: 'review' }, { ...incoming, status: 'expired' }).status, 'expired');
 });
 
+test('source-aware deduplication prefers detailed non-Creative-Capital records', () => {
+    const creativeCapital = {
+        name: 'Artists Accelerator Program Fall 2026',
+        deadline: 'Rolling',
+        link: 'https://artist.callforentry.org/festivals_unique_info.php?ID=17654',
+        source: 'Creative Capital',
+        description: 'Short summary.'
+    };
+    const creativeWest = {
+        ...creativeCapital,
+        deadline: '2026-07-17',
+        source: 'Creative West Art Opps',
+        fees: 'n',
+        country: 'United States',
+        eligibility_details: 'Only Sonoma County artists may apply.',
+        description: 'A much more complete source description.'
+    };
+    assert.equal(areSameOpportunity(creativeCapital, creativeWest), true);
+    assert.deepEqual(deduplicateCandidates([creativeCapital, creativeWest]), [creativeWest]);
+    assert.equal(
+        mergeCandidate({ ...creativeCapital, status: 'review' }, { ...creativeWest, status: 'review' }).source,
+        'Creative West Art Opps'
+    );
+});
+
+test('cross-source Hyperallergic deduplication handles regenerated links and cycle labels', () => {
+    const hyperallergic = {
+        name: 'The Bennett Prize – 2026/2027 Award Cycle',
+        deadline: 'September 19, 2026',
+        link: 'https://bit.ly/generated-link',
+        source: 'Hyperallergic',
+        description: 'Brief roundup copy.'
+    };
+    const creativeWest = {
+        name: 'The Bennett Prize 5',
+        deadline: '2026-09-19',
+        link: 'https://artist.callforentry.org/festivals_unique_info.php?ID=16813',
+        source: 'Creative West Art Opps',
+        fees: 'y',
+        country: 'United States',
+        eligibility_details: 'Full eligibility details.',
+        description: 'Detailed prize description.'
+    };
+    assert.equal(areSameOpportunity(hyperallergic, creativeWest), true);
+    assert.deepEqual(deduplicateCandidates([hyperallergic, creativeWest]), [creativeWest]);
+});
+
 test('AI enrichment uses structured evidence without inventing unsupported costs', async () => {
     let request;
     const client = {
@@ -318,11 +407,13 @@ test('publisher exports only valid approved rows and keeps browser-safe dates', 
         { name: 'Future Job Listing', deadline: '2026-08-02', link: 'https://example.org/job', type: 'Job', fees: 'n', country: 'International', status: 'publish' },
         { name: 'Needs Review', deadline: '2026-08-02', link: 'https://example.org/review', type: 'Grant', fees: 'n', country: 'International', status: 'review' },
         { name: 'Bad Fee', deadline: '2026-08-03', link: 'https://example.org/bad', type: 'Grant', fees: '', country: 'International', status: 'publish' },
+        { name: 'Bad Type', deadline: '2026-08-03', link: 'https://example.org/bad-type', type: 'Other', fees: 'n', country: 'International', status: 'publish' },
         { name: 'Expired', deadline: '2026-07-01', link: 'https://example.org/expired', type: 'Grant', fees: 'n', country: 'International', status: 'publish' }
     ], today);
     assert.deepEqual(result.published, [{ name: 'Good Grant', deadline: '8/1/2026', link: 'https://example.org/good', type: 'Grant', fees: 'n', country: 'International', award_info: 'Up to $10,000' }]);
-    assert.equal(result.rejected.length, 3);
+    assert.equal(result.rejected.length, 4);
     assert.deepEqual(result.rejected.find((row) => row.name === 'Future Job Listing')?.errors, ['type is not yet public']);
+    assert.deepEqual(result.rejected.find((row) => row.name === 'Bad Type')?.errors, ['type']);
 });
 
 test('posts JSON with retry behavior and returns parsed responses', async () => {
@@ -370,10 +461,11 @@ test('Creative West GraphQL collector paginates, deduplicates by source ID, and 
         poster: async (_url, body) => {
             query = body.query;
             return pages.get(body.variables.input.pagination.page);
-        }
+        },
+        fetcher: async (url) => ({ text: '<main>No contact link</main>', finalUrl: url })
     });
     assert.equal(rows.length, 2);
-    assert.equal(rows[0].link, 'https://opportunities.wearecreativewest.org/opportunity/1/CAFE');
+    assert.equal(rows[0].link, 'https://apply.example/1');
     assert.match(query, /eligibilityRegion/);
     await assert.rejects(() => discoverCreativeWest({ id: 'creative_west', name: 'Creative West Art Opps', apiUrl: 'https://example.org/graphql', pageSize: 100, maxPages: 1 }, {
         poster: async () => ({ errors: [{ message: 'bad query' }] })
@@ -391,15 +483,20 @@ test('Creative West GraphQL collector paginates, deduplicates by source ID, and 
 
 test('Creative West mapper handles allowed types, local deadlines, fees, and review issues', () => {
     for (const [apiType, expected] of [['GRANT', 'Grant'], ['RESIDENCY', 'Residency'], ['COMMISSION', 'Commission']]) {
-        assert.equal(mapCreativeWestItem(creativeWestItem({ type: apiType })).type, expected);
+        assert.equal(mapCreativeWestItem(creativeWestItem({ name: 'Regional Artist Opportunity', type: apiType })).type, expected);
     }
+    assert.equal(mapCreativeWestItem(creativeWestItem({ name: '2026 National Juried Photography Exhibition', type: 'GRANT' })).type, 'Exhibition');
+    assert.equal(mapCreativeWestItem(creativeWestItem({ name: 'The Bennett Prize 5', type: 'GRANT' })).type, 'Award');
+    assert.equal(mapCreativeWestItem(creativeWestItem({ name: 'Winter Issue: Open Call for Submissions', type: 'GRANT' })).type, 'Open Call');
+    assert.equal(mapCreativeWestItem(creativeWestItem({ name: 'Call for Artists: Pediatric Hospital', type: 'COMMISSION' })).type, 'Commission');
     assert.deepEqual(creativeWestDeadline(creativeWestItem()), { deadline: '2026-07-31', issue: '' });
     assert.deepEqual(creativeWestDeadline(creativeWestItem({ rollingDeadline: true })), { deadline: 'Rolling', issue: '' });
     assert.match(creativeWestDeadline(creativeWestItem({ originalTimezone: 'CEST' })).issue, /unknown deadline timezone/);
-    const fallback = mapCreativeWestItem(creativeWestItem({ sourceUrl: '', applyUrl: 'https://apply.example/1' }), {
+    const fallback = mapCreativeWestItem(creativeWestItem({ sourceUrl: '', applyUrl: '' }), {
         id: 'creative_west', name: 'Creative West Art Opps', url: 'https://opportunities.wearecreativewest.org'
     });
     assert.equal(fallback.link, 'https://opportunities.wearecreativewest.org/opportunity/1/CAFE');
+    assert.match(fallback.issue, /application platform: CaFÉ/);
     const positive = creativeWestFeeSummary(creativeWestItem({ fees: [
         { name: 'Member application fee', value: '25', type: 'APPLICATION', currency: 'USD' },
         { name: 'Non-member application fee', value: '40', type: 'APPLICATION', currency: 'USD' }
@@ -410,6 +507,25 @@ test('Creative West mapper handles allowed types, local deadlines, fees, and rev
     assert.equal(creativeWestFeeSummary(creativeWestItem({ fees: [{ name: 'Jury fee', value: '40', type: 'JURY', currency: 'USD' }] })).fees, '');
     assert.equal(creativeWestFeeSummary(creativeWestItem({ fees: [] })).fees, '');
     assert.equal(creativeWestFeeSummary(creativeWestItem({ fees: [], entryFee: { cost: '15.00' } })).fees, 'y');
+});
+
+test('Creative West extracts an independent organizer link from Contact Information', () => {
+    const page = `
+        <main>
+            <a href="https://artist.callforentry.org/apply/1">Apply on CaFÉ</a>
+            <h2>Contact Information</h2>
+            <p><a href="https://organizer.example/opportunity">Independent organizer</a></p>
+            <h2>Requirement Overview</h2>
+        </main>
+    `;
+    assert.equal(
+        creativeWestIndependentLink(page, 'https://opportunities.wearecreativewest.org/opportunity/1/CAFE'),
+        'https://organizer.example/opportunity'
+    );
+    const mapped = mapCreativeWestItem(creativeWestItem({ independentUrl: 'https://organizer.example/opportunity' }));
+    assert.equal(mapped.link, 'https://organizer.example/opportunity');
+    assert.equal(mapped.sourceUrl, 'https://opportunities.wearecreativewest.org/opportunity/1/CAFE');
+    assert.doesNotMatch(mapped.issue, /application platform/);
 });
 
 test('converts eligibility HTML without duplicate nested text and resolves Creative West eligibility conservatively', () => {

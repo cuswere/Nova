@@ -23,7 +23,7 @@ then open the printed local URL.
 Opportunities are discovered twice weekly, reviewed in the [Nova Sources Google Sheet](https://docs.google.com/spreadsheets/d/120ZqG_0qZR76b4kYHdzPK-4OKecjk7MaZcKuQRRLcbI/edit), and published to the site as static JSON. The website still has no database or application server.
 
 ```text
-source boards -> deterministic extraction -> optional AI enrichment -> Sheet review -> static JSON
+source boards -> deterministic extraction -> Sheet review -> static JSON
 ```
 
 - `npm run dry-run-opportunities` fetches enabled sources and prints a summary without changing the Sheet.
@@ -31,12 +31,10 @@ source boards -> deterministic extraction -> optional AI enrichment -> Sheet rev
 - `npm run publish-data` validates approved rows and regenerates `data/opportunities.json`.
 - `npm test` runs parser, normalization, review-preservation, and publishing tests.
 
-The scheduled GitHub workflow runs at 14:00 UTC every Tuesday and Friday and can also be started manually. It refreshes the HTTP-friendly sources; Artwork Archive is collected manually from a normal browser session. Configure these repository secrets before enabling it:
+The scheduled GitHub workflow runs at 14:00 UTC every Tuesday and Friday and can also be started manually. It refreshes the HTTP-friendly sources; Artwork Archive is collected manually from a normal browser session. Configure this repository secret before enabling it:
 
 1. `GOOGLE_SERVICE_ACCOUNT_JSON`: raw single-line or base64-encoded service-account JSON. Share the Sheet with its `client_email` as an editor.
-2. `OPENAI_API_KEY`: used only to fill missing or ambiguous fields from canonical opportunity pages. Without it, discovery still works and unresolved candidates remain in `review`.
-
-The workflow uses `gpt-5.4-nano` with a strict Structured Outputs schema and enriches at most 30 candidates per run by default. Override `AI_ENRICH_LIMIT` to change that cap.
+AI enrichment is intentionally disabled during the beta. Missing or ambiguous fields remain marked for human review rather than triggering paid model calls.
 
 To test one HTTP source at a time, open the workflow in GitHub Actions, click **Run workflow**, and choose its source from the `source` dropdown. Scheduled runs continue to refresh all enabled HTTP sources.
 

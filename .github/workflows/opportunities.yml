@@ -77,9 +77,6 @@ jobs:
     timeout-minutes: 30
     env:
       GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
-      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-      OPENAI_MODEL: gpt-5.4-nano
-      AI_ENRICH_LIMIT: '30'
       OPPORTUNITY_SOURCE: ${{ inputs.source || 'all' }}
     steps:
       - uses: actions/checkout@v4
@@ -100,9 +97,6 @@ jobs:
           if [ -z "$GOOGLE_SERVICE_ACCOUNT_JSON" ]; then
             echo "::error::GOOGLE_SERVICE_ACCOUNT_JSON is not configured."
             exit 1
-          fi
-          if [ -z "$OPENAI_API_KEY" ]; then
-            echo "::warning::OPENAI_API_KEY is not configured; unresolved candidates will remain in review."
           fi
 
       - run: npm run sync-opportunities

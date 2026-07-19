@@ -56,7 +56,11 @@
             fields.awardInfo && `Award: ${fields.awardInfo}`,
             fields.categories && `Categories: ${fields.categories}`
         ].filter(Boolean);
-        return { ...fields, description: text([...supportingDetails, about].join(' ')) };
+        return {
+            ...fields,
+            eligibilityDetails: eligibilityInfo,
+            description: text([...supportingDetails, about].join(' '))
+        };
     }
 
     async function learnMoreUrl(card, pageUrl) {

@@ -1,5 +1,6 @@
 import { google } from 'googleapis';
 import { PUBLIC_FIELDS, SHEET_HEADERS, SHEET_NAME, SPREADSHEET_ID } from './config.js';
+import { areSameOpportunity, preferCandidate } from './dedupe.js';
 import { canonicalizeUrl, isExpired, normalizeDeadline } from './normalize.js';
 
 export function columnLetter(columnNumber) {
@@ -85,7 +86,9 @@ export async function upsertCandidates(candidates, options = {}) {
     let skippedExpired = 0;
 
     for (const candidate of candidates) {
-        const current = byId.get(candidate.id) || byFingerprint.get(fingerprint(candidate));
+        const current = byId.get(candidate.id) ||
+            byFingerprint.get(fingerprint(candidate)) ||
+            existing.find((row) => areSameOpportunity(row, candidate));
         if (!current) {
             // A candidate discovered for the first time already past its deadline was
             // never live for anyone to review; adding it as a new row has no editorial
@@ -160,7 +163,15 @@ async function sortByDeadline({ sheets, spreadsheetId, sheetName, rowCount }) {
 export function mergeCandidate(current, candidate) {
     const manualStatus = current.status || 'review';
     const preservePublic = ['publish', 'reject'].includes(manualStatus);
-    const merged = { ...current, ...candidate, status: manualStatus };
+    const preferred = preferCandidate(current, candidate);
+    const merged = {
+        ...current,
+        ...candidate,
+        ...preferred,
+        last_seen: candidate.last_seen || current.last_seen,
+        checked_at: candidate.checked_at || current.checked_at,
+        status: manualStatus
+    };
     if (preservePublic) {
         for (const field of PUBLIC_FIELDS) merged[field] = current[field];
     }

@@ -95,7 +95,8 @@ export function inferType(name = '', description = '') {
     if (/grant|funding|emergency relief|microgrant/.test(text)) return 'Grant';
     if (/prize|award|competition/.test(text)) return 'Award';
     if (/acquisition|purchase program/.test(text)) return 'Acquisition';
-    if (/exhibition|biennial|triennial|juried show|open call/.test(text)) return 'Exhibition';
+    if (/\bopen call\b|\bcall for\b[^.]{0,40}\b(?:artists?|entries|submissions)\b/.test(text)) return 'Open Call';
+    if (/exhibition|biennial|triennial|juried show/.test(text)) return 'Exhibition';
     return '';
 }
 
@@ -103,7 +104,11 @@ export function normalizeType(value, name = '', description = '') {
     const raw = String(value || '').trim();
     const direct = ALLOWED_TYPES.find((type) => type.toLowerCase() === raw.toLowerCase());
     if (direct) return direct;
-    return inferType(name, description);
+    const inferred = inferType(name, description);
+    // Artwork Archive groups grants and fellowships into one non-public bucket.
+    // Prefer an explicit title signal, then use Grant as the conservative fallback.
+    if (/^grants?\s*&\s*fellowships?$/i.test(raw)) return inferred || 'Grant';
+    return inferred;
 }
 
 export function inferFee(text = '') {
@@ -125,14 +130,6 @@ export function normalizeCountry(value = '') {
     return text.replace(/\buk\b/gi, 'United Kingdom').replace(/\busa\b/gi, 'United States');
 }
 
-export function isVisualArtsCore(candidate) {
-    const text = `${candidate.name || ''} ${candidate.description || ''}`.toLowerCase();
-    if (/\b(job|employment|degree program|workshop|class|course)\b/.test(text)) return false;
-    if (/writer|writing|poetry|literary|dance|theat(?:er|re)|music|composer/.test(text) &&
-        !/visual|artist|art |arts |media|film|photograph|design|curator|sculpt|paint|craft/.test(text)) return false;
-    return /artist| art|arts|visual|media|film|photograph|design|curator|sculpt|paint|craft|residen|grant|exhibition|fellowship|award|prize|public/.test(text);
-}
-
 export function makeId(candidate) {
     const title = String(candidate.name || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
     const key = `${canonicalizeUrl(candidate.link)}|${title}|${candidate.deadline || ''}`;
@@ -143,7 +140,7 @@ export function normalizeCandidate(raw, now = new Date()) {
     const name = String(raw.name || '').replace(/\s+/g, ' ').trim();
     const link = canonicalizeUrl(raw.link || raw.sourceUrl);
     const deadline = normalizeDeadline(raw.deadline);
-    const description = String(raw.description || '').replace(/\s+/g, ' ').trim().slice(0, 600);
+    const description = String(raw.description || '').replace(/\s+/g, ' ').trim();
     const candidate = {
         name,
         deadline,
@@ -171,7 +168,6 @@ export function normalizeCandidate(raw, now = new Date()) {
     if (!candidate.type) issues.push('unresolved type');
     if (!candidate.fees) issues.push('unresolved application fee');
     if (!candidate.country) issues.push('unresolved eligibility');
-    if (!isVisualArtsCore(candidate)) issues.push('outside visual-arts scope');
     candidate.issue = issues.join('; ');
     candidate.id = makeId(candidate);
     if (deadline && isExpired(deadline, now)) candidate.status = 'expired';
@@ -183,7 +179,7 @@ export function validatePublishable(row, now = new Date()) {
     if (!row.name) errors.push('name');
     if (!canonicalizeUrl(row.link)) errors.push('link');
     if (!normalizeDeadline(row.deadline)) errors.push('deadline');
-    if (!String(row.type || '').trim()) errors.push('type');
+    if (!ALLOWED_TYPES.some((type) => type.toLowerCase() === String(row.type || '').trim().toLowerCase())) errors.push('type');
     if (!['y', 'n'].includes(String(row.fees).toLowerCase())) errors.push('fees');
     if (!row.country) errors.push('country');
     if (isExpired(normalizeDeadline(row.deadline), now)) errors.push('expired');

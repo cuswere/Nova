@@ -81,6 +81,8 @@ export function parseArtworkArchive(html, definition = source('artwork_archive')
             country: /international/i.test(eligibility) ? 'International' : '',
             hostLocation: detail('location') || field('Location:'),
             feeDetails: fee,
+            awardInfo: detail('award-info'),
+            eligibilityDetails: detail('eligibility-details'),
             description: detail('description') || cleanText(card.find('p').first().text()),
             source: definition.name,
             sourceUrl: absoluteUrl(card.attr('data-nova-source-link') || definition.url, definition.url),
@@ -173,13 +175,22 @@ export function mapCreativeWestItem(item, definition = source('creative_west')) 
     });
     const fee = creativeWestFeeSummary(item);
     const fallback = `${definition.url.replace(/\/$/, '')}/opportunity/${item.id}/${item.source}`;
-    const link = item.sourceUrl || fallback || item.applyUrl || '';
-    const issue = [deadline.issue, eligibility.issue, eligibilityText.truncated ? 'eligibility details truncated at 10000 characters' : ''].filter(Boolean).join('; ');
+    const listingUrl = item.sourceUrl || fallback;
+    const independentLink = item.independentUrl ||
+        (isIndependentOpportunityUrl(item.sourceUrl) ? item.sourceUrl : '') ||
+        (isIndependentOpportunityUrl(item.applyUrl) ? item.applyUrl : '');
+    const link = independentLink || listingUrl || item.applyUrl || '';
+    const issue = [
+        deadline.issue,
+        eligibility.issue,
+        eligibilityText.truncated ? 'eligibility details truncated at 10000 characters' : '',
+        !independentLink && /^CAFE$/i.test(item.source) ? 'application platform: CaFÉ' : ''
+    ].filter(Boolean).join('; ');
     return {
         name: item.name,
         deadline: deadline.deadline,
         link,
-        type: mapCreativeWestType(item.type, item.name),
+        type: mapCreativeWestType(item.type, item.name, htmlToText(item.shortDescription || item.description).text),
         fees: fee.fees,
         country: eligibility.country,
         hostLocation: [item.city, item.state].filter(Boolean).join(', '),
@@ -187,7 +198,7 @@ export function mapCreativeWestItem(item, definition = source('creative_west')) 
         eligibilityDetails: eligibilityText.text,
         description: htmlToText(item.shortDescription || item.description).text,
         source: definition.name,
-        sourceUrl: link,
+        sourceUrl: listingUrl,
         confidence: 0.76,
         issue
     };
@@ -255,26 +266,54 @@ export function parseHyperallergicArticle(html, definition = source('hyperallerg
     $('p').filter((_, element) => isEntryParagraph(element)).each((_, paragraph) => {
         const section = cleanText($(paragraph).prevAll('h2, h3').first().text());
         const fragment = cheerio.load(`<div>${$(paragraph).html() || ''}</div>`);
-        const strongs = fragment('strong').filter((__, element) => !/^\s*$/.test(fragment(element).text()) && !/Deadline/i.test(fragment(element).text()));
-        strongs.each((index, strong) => {
-            const name = cleanText(fragment(strong).text());
-            if (!name) return;
-            const startHtml = fragment.html(strong);
-            const nextStrong = strongs.get(index + 1);
-            const wholeHtml = fragment('div').html() || '';
-            const start = wholeHtml.indexOf(startHtml);
-            const end = nextStrong ? wholeHtml.indexOf(fragment.html(nextStrong), start + startHtml.length) : wholeHtml.length;
-            const segmentHtml = wholeHtml.slice(start, end);
+        const strongs = fragment('strong')
+            .filter((__, element) => !/^\s*$/.test(fragment(element).text()) && !/Deadline/i.test(fragment(element).text()))
+            .get();
+        const wholeHtml = fragment('div').html() || '';
+        const entries = [];
+        let strongIndex = 0;
+        let searchFrom = 0;
+        while (strongIndex < strongs.length) {
+            const firstHtml = fragment.html(strongs[strongIndex]);
+            const start = wholeHtml.indexOf(firstHtml, searchFrom);
+            if (start === -1) break;
+            let titleEnd = start + firstHtml.length;
+            let nextIndex = strongIndex + 1;
+            while (nextIndex < strongs.length) {
+                const nextHtml = fragment.html(strongs[nextIndex]);
+                const nextStart = wholeHtml.indexOf(nextHtml, titleEnd);
+                if (nextStart === -1) break;
+                const between = wholeHtml.slice(titleEnd, nextStart);
+                const separator = cleanText(cheerio.load(`<div>${between}</div>`).text());
+                if (/<br\b/i.test(between) || !/^[\s\-–—:|/&+]*$/.test(separator)) break;
+                titleEnd = nextStart + nextHtml.length;
+                nextIndex += 1;
+            }
+            const following = nextIndex < strongs.length ? fragment.html(strongs[nextIndex]) : '';
+            const end = following ? wholeHtml.indexOf(following, titleEnd) : wholeHtml.length;
+            const name = cleanText(cheerio.load(`<div>${wholeHtml.slice(start, titleEnd)}</div>`).text());
+            entries.push({ name, html: wholeHtml.slice(start, end) });
+            searchFrom = end;
+            strongIndex = nextIndex;
+        }
+
+        for (const entry of entries) {
+            const { name } = entry;
+            if (!name) continue;
+            const segmentHtml = entry.html;
             const segment = cheerio.load(`<div>${segmentHtml}</div>`);
             const text = cleanText(segment.text());
             const lines = htmlToText(segmentHtml).text.split('\n').map((line) => line.trim()).filter(Boolean);
 
             const link = hyperallergicOpportunityLink(segment('a').map((__, anchor) => segment(anchor).attr('href')).get(), articleUrl);
-            if (!link) return;
+            if (!link) continue;
 
             const deadline = text.match(/Deadline\s*:\s*([^|]{2,60})/i)?.[1]?.trim() ||
                 (/\b(?:rolling|ongoing|no deadline)\b/i.test(text) ? 'Rolling' : '');
-            const description = cleanText(text.replace(name, '').replace(/Deadline\s*:.*/i, ''));
+            const withoutTitle = text.startsWith(name) ? text.slice(name.length) : text.replace(name, '');
+            const description = cleanText(withoutTitle
+                .replace(/Deadline\s*:.*/i, '')
+                .replace(/\s*Read more on Hyperallergic(?:\s*\.\s*[A-Z]?\d+)?\.?/gi, ' '));
             const eligibility = resolveProseEligibility(text);
             const award = hyperallergicAwardInfo(lines);
             rows.push({
@@ -293,9 +332,43 @@ export function parseHyperallergicArticle(html, definition = source('hyperallerg
                 confidence: 0.78,
                 issue: [eligibility.issue, award.issue].filter(Boolean).join('; ')
             });
-        });
+        }
     });
-    return uniqueByLinkAndName(rows);
+    return uniqueByNormalizedName(rows);
+}
+
+function isIndependentOpportunityUrl(value = '') {
+    try {
+        const host = new URL(value).hostname.toLowerCase().replace(/^www\./, '');
+        return ![
+            'opportunities.wearecreativewest.org',
+            'artist.callforentry.org',
+            'callforentry.org',
+            'zapplication.org',
+            'sales.zapplication.org',
+            'gosmart.org',
+            'publicartarchive.org'
+        ].some((blocked) => host === blocked || host.endsWith(`.${blocked}`));
+    } catch {
+        return false;
+    }
+}
+
+export function creativeWestIndependentLink(html, pageUrl) {
+    const $ = cheerio.load(html);
+    const elements = $('h1,h2,h3,h4,a[href]').get();
+    const headingIndex = elements.findIndex((element) =>
+        /^contact information$/i.test(cleanText($(element).text()))
+    );
+    if (headingIndex === -1) return '';
+
+    for (const element of elements.slice(headingIndex + 1)) {
+        if (/^h[1-4]$/i.test(element.name)) break;
+        if (element.name !== 'a') continue;
+        const url = absoluteUrl($(element).attr('href'), pageUrl);
+        if (isIndependentOpportunityUrl(url)) return url;
+    }
+    return '';
 }
 
 export async function discoverHyperallergic(definition = source('hyperallergic'), { fetcher = fetchText } = {}) {
@@ -322,7 +395,7 @@ export async function discoverHyperallergic(definition = source('hyperallergic')
         const article = await fetcher(item.link, { delayMs: definition.delayMs || 0 });
         rows.push(...parseHyperallergicArticle(article.text, definition, article.finalUrl || item.link));
     }
-    return uniqueByLinkAndName(rows);
+    return uniqueByNormalizedName(rows);
 }
 
 export function parseTransArtists(html, definition = source('transartists')) {
@@ -363,7 +436,7 @@ export async function discoverSource(definition) {
     }
 }
 
-export async function discoverCreativeWest(definition = source('creative_west'), { poster = postJson } = {}) {
+export async function discoverCreativeWest(definition = source('creative_west'), { poster = postJson, fetcher = fetchText } = {}) {
     const pageSize = definition.pageSize || 100;
     const maxPages = definition.maxPages || 1;
     const page = async (number) => {
@@ -401,7 +474,30 @@ export async function discoverCreativeWest(definition = source('creative_west'),
         }
     }
     if (items.size !== total) throw new Error(`Creative West pagination incomplete: collected ${items.size} unique IDs but API reported ${total}.`);
-    return [...items.values()].map((item) => mapCreativeWestItem(item, definition));
+    const collected = [...items.values()];
+    let cursor = 0;
+    const enriched = new Array(collected.length);
+    const workers = Array.from({ length: Math.min(6, collected.length) }, async () => {
+        while (cursor < collected.length) {
+            const index = cursor++;
+            const item = collected[index];
+            if (!/^CAFE$/i.test(item.source) || !item.sourceUrl) {
+                enriched[index] = item;
+                continue;
+            }
+            try {
+                const page = await fetcher(item.sourceUrl, { delayMs: definition.delayMs || 0 });
+                enriched[index] = {
+                    ...item,
+                    independentUrl: creativeWestIndependentLink(page.text, page.finalUrl || item.sourceUrl)
+                };
+            } catch {
+                enriched[index] = item;
+            }
+        }
+    });
+    await Promise.all(workers);
+    return enriched.map((item) => mapCreativeWestItem(item, definition));
 }
 
 async function discoverCreativeCapital(definition) {
@@ -490,14 +586,18 @@ function nextArtworkArchivePage(html, currentUrl) {
     return candidates.find((candidate) => Number(new URL(candidate).searchParams.get('page')) === currentPage + 1) || '';
 }
 
-function mapCreativeWestType(type, name) {
+function mapCreativeWestType(type, name, description = '') {
+    const titleType = inferType(name, '');
+    // "Call for artists" is generic language on many public-art RFQs; do not
+    // let that weaker signal erase an explicit commission category.
+    if (titleType && !(titleType === 'Open Call' && /commission/i.test(type))) return titleType;
     if (/commission/i.test(type)) return 'Commission';
     if (/residen/i.test(type)) return 'Residency';
     if (/fellow/i.test(type)) return 'Fellowship';
     if (/grant/i.test(type)) return 'Grant';
-    if (/award|competition/i.test(type)) return inferType(name, type);
+    if (/award|competition/i.test(type)) return inferType(name, description) || 'Award';
     if (/exhibition|fair|festival/i.test(type)) return 'Exhibition';
-    return inferType(name, type);
+    return inferType(name, description);
 }
 
 function uniqueByLinkAndName(rows) {
@@ -507,6 +607,16 @@ function uniqueByLinkAndName(rows) {
         const key = `${canonicalizeUrl(row.link) || row.link}|${name}`;
         if (seen.has(key)) return false;
         seen.add(key);
+        return true;
+    });
+}
+
+function uniqueByNormalizedName(rows) {
+    const seen = new Set();
+    return rows.filter((row) => {
+        const name = String(row.name || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+        if (!name || seen.has(name)) return false;
+        seen.add(name);
         return true;
     });
 }
