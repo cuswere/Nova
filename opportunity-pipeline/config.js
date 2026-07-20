@@ -42,7 +42,8 @@ export const SOURCE_DEFINITIONS = [
         name: 'Artwork Archive',
         url: 'https://www.artworkarchive.com/call-for-entry',
         enabled: false,
-        delayMs: 750
+        delayMs: 750,
+        autoPublish: true
     },
     {
         id: 'creative_capital',
@@ -50,8 +51,9 @@ export const SOURCE_DEFINITIONS = [
         url: 'https://creative-capital.org/artist-resources/artist-opportunities/',
         enabled: true,
         delayMs: 2_000,
-        minExpectedResults: 60,
-        typeValues: ['commission', 'exhibition', 'fellowship', 'grant', 'job', 'prize', 'residency']
+        minExpectedResults: 40,
+        typeValues: ['commission', 'exhibition', 'fellowship', 'grant', 'job', 'prize', 'residency'],
+        autoPublish: true
     },
     {
         id: 'creative_west',
@@ -60,7 +62,13 @@ export const SOURCE_DEFINITIONS = [
         apiUrl: 'https://opportunities-api.wearecreativewest.org/graphql',
         enabled: true,
         pageSize: 100,
-        maxPages: 10
+        // Not a fixed page count - discoverCreativeWest always computes the real
+        // number of pages from the API's live `total` every run. This is purely a
+        // sanity ceiling against a malformed/runaway response (see the "page
+        // ceiling" test in pipeline.test.js), sized well above any total Creative
+        // West realistically reaches so it doesn't need bumping as listings grow.
+        maxPages: 50,
+        autoPublish: true
     },
     {
         id: 'hyperallergic',
@@ -68,7 +76,8 @@ export const SOURCE_DEFINITIONS = [
         url: 'https://hyperallergic.com/tag/opportunities/feed/',
         enabled: true,
         roundupMonths: 3,
-        delayMs: 1_000
+        delayMs: 1_000,
+        autoPublish: true
     },
     {
         id: 'transartists',

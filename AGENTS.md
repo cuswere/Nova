@@ -29,9 +29,18 @@ source boards → deterministic extraction → Google Sheet review → static JS
 
 1. **Discovery** — GitHub Action `.github/workflows/opportunities.yml` (cron 14:00 UTC,
    gated by repo vars `AUTOMATION_ACTIVE` + `FREQUENCY_DAYS`) runs `sync-opportunities`,
-   upserting new rows as `status=review` into the **"Nova Sources"** Google Sheet.
-   Existing `publish`/`reject` rows are left fully intact — a re-fetch that matches
-   one only advances its `last_seen`/`checked_at` bookkeeping, never its content.
+   upserting new rows into the **"Nova Sources"** Google Sheet as `status=review` by
+   default. Sources flagged `autoPublish: true` in `SOURCE_DEFINITIONS` (currently the
+   four verified tier-1 sources: Artwork Archive, Creative Capital, Creative West,
+   Hyperallergic) skip review instead — a brand-new candidate from one of them lands
+   as `status=publish` directly, unless it has an extraction `issue` (missing name,
+   link, deadline, or type) or is already past its deadline, in which case it still
+   goes to `review`/`expired` for a human to look at. This only applies at first
+   collection; a `review` row from one of these sources that already exists in the
+   Sheet does not get retroactively promoted on a later re-fetch. Existing
+   `publish`/`reject` rows are left fully intact regardless of source — a re-fetch
+   that matches one only advances its `last_seen`/`checked_at` bookkeeping, never its
+   content.
 2. **Human curation** — a reviewer sets each `review` row to `publish` or `reject` in the Sheet.
 3. **Publish** — the same Action runs `publish-data` (`publish.js`): keeps only
    `status=publish` rows that pass `validatePublishable` (needs name, link, deadline,

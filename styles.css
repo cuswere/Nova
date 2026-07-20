@@ -106,7 +106,8 @@ button { cursor: pointer; }
 
 /* Home */
 .options-container { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding: 12px; min-height: 285px; }
-.opportunity-group, .option-btn-container { display: flex; flex-direction: column; align-items: stretch; }
+.opportunity-group, .action-group, .option-btn-container { display: flex; flex-direction: column; align-items: stretch; }
+.action-group { gap: 12px; }
 .option-btn-container { min-width: 0; }
 span.option-btn { display: flex; background: var(--face); box-shadow: var(--raise); font-family: var(--mono); font-size: clamp(23px, 3.3vw, 37px); line-height: .98; }
 .option-btn a { flex: 1; padding: 12px; color: }
@@ -138,7 +139,7 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
 .repo-status-message { margin: auto; padding: 20px; color: var(--muted); text-align: center; }
 .opportunity-card { display: grid; grid-template-columns: minmax(0, 1.5fr) 1fr; gap: 8px 14px; padding: 12px; border-bottom: 1px solid #999; background: var(--field); }
 .opportunity-card:hover {  }
-.opportunity-card a { position: relative; isolation: isolate; display: inline-block; min-width: 0; max-width: 100%; padding: 8px; background: var(--desktop); color: #fff; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 2px; vertical-align: top; font-size: 15px; font-weight: 600; }
+.opportunity-card a { font-size: 18px; font-weight: 600;  position: relative; isolation: isolate; display: inline-block; min-width: 0; max-width: 100%; padding: 8px; background: var(--desktop); color: #fff; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 2px; vertical-align: top; }
 .link-text { display: inline; }
 .link-line-backgrounds { position: absolute; z-index: -1; inset: 0; pointer-events: none; }
 .link-line-background { position: absolute; display: block; background: var(--desktop); pointer-events: none; }
@@ -155,7 +156,7 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
 .grid-cell, .date-cell { min-width: 0; padding: 4px 5px; text-align: center; font-size: 14px; text-transform: uppercase; letter-spacing: .04em; }
 .grid-cell { background: none; border: 1px solid var(--ink); flex: 0 1 auto; display: flex; align-items: center; justify-content: center; max-width: 100%; overflow: hidden; overflow-wrap: anywhere; line-height: 1.15; box-shadow: none; }
 .fee-cell { min-height: 20px; padding: 3px 5px; color: var(--ink); background: var(--amber); box-shadow: none; }
-.date-cell { grid-column: 1 / -1; width: fit-content; color: var(--ink); text-align: left; box-shadow: none; background: transparent; padding: 0; text-transform: none; letter-spacing: 0; font-size: 14px; }
+.date-cell { border: 1px solid var(--ink); padding: 4px; grid-column: 1 / -1; width: fit-content; color: var(--ink); text-align: left; box-shadow: none; background: transparent; text-transform: none; letter-spacing: 0; font-size: 14px; }
 .date-cell strong { color: var(--ink); font-weight: 600; }
 
 /* Filters */

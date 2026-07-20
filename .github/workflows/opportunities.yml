@@ -80,8 +80,6 @@ jobs:
       OPPORTUNITY_SOURCE: ${{ inputs.source || 'all' }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
@@ -90,15 +88,6 @@ jobs:
 
       - run: npm ci
       - run: npm test
-
-      - name: Check credentials
-        shell: bash
-        run: |
-          if [ -z "$GOOGLE_SERVICE_ACCOUNT_JSON" ]; then
-            echo "::error::GOOGLE_SERVICE_ACCOUNT_JSON is not configured."
-            exit 1
-          fi
-
       - run: npm run sync-opportunities
       - run: npm run publish-data
 

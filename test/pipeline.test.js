@@ -31,6 +31,7 @@ import {
     inferFee,
     inferType,
     inferTitleType,
+    isAutoPublishSource,
     isExpired,
     normalizeCandidate,
     normalizeCountry,
@@ -73,14 +74,16 @@ test('keeps commissions and open calls distinct and resolves grouped grant categ
     assert.equal(inferType('Call for Artists: Downtown Public Art RFQ'), 'Commission');
     assert.equal(normalizeType('Grants & Fellowships', 'Studio Fellowship'), 'Fellowship');
     assert.equal(normalizeType('Grants & Fellowships', 'Artist Support Program'), 'Grant');
-    assert.equal(normalizeType('Residency', 'Pollock-Krasner Foundation Grant'), 'Grant');
+    assert.equal(normalizeType('Residency', 'Pollock-Krasner Foundation Grant', '', 'Creative Capital'), 'Grant');
     assert.equal(normalizeType('Other', 'Emergency Relief Grant for Artists'), 'Grant');
-    assert.equal(normalizeType('Commission', 'ON::View Artist Residency Program'), 'Residency');
-    assert.equal(normalizeType('Commission', 'Accelerator Grant Program 2026, Ohio'), 'Grant');
-    assert.equal(normalizeType('Residency', 'The 7th VH Award'), 'Award');
+    assert.equal(normalizeType('Commission', 'ON::View Artist Residency Program', '', 'Creative Capital'), 'Residency');
+    assert.equal(normalizeType('Commission', 'Accelerator Grant Program 2026, Ohio', '', 'Creative Capital'), 'Grant');
+    assert.equal(normalizeType('Residency', 'The 7th VH Award', '', 'Creative Capital'), 'Award');
     assert.equal(normalizeType('Commission', 'Buffalo Run Golf Course Clubhouse'), 'Commission');
     assert.equal(inferTitleType('Grant Wood Fellowship'), 'Fellowship');
-    assert.equal(normalizeType('Grant', 'Grant Wood Fellowship'), 'Fellowship');
+    assert.equal(normalizeType('Grant', 'Grant Wood Fellowship', '', 'Creative Capital'), 'Fellowship');
+    assert.equal(normalizeType('Grant', 'Grant Wood Fellowship'), 'Grant');
+    assert.equal(normalizeType('Art Fair', 'IMMORTAL Queer Art Fair Residency', '', 'Artwork Archive'), 'Art Fair');
     assert.equal(inferTitleType('Open Call: Downtown Mural Commission'), 'Commission');
 
     const unknown = normalizeCandidate({
@@ -108,6 +111,57 @@ test('normalization preserves full descriptions and does not apply automatic rel
     }, today);
     assert.equal(row.description, description);
     assert.doesNotMatch(row.issue, /outside visual-arts scope/);
+});
+
+test('trusted tier-1 sources auto-publish clean candidates but not issue-flagged or expired ones', () => {
+    assert.equal(isAutoPublishSource('Creative Capital'), true);
+    assert.equal(isAutoPublishSource('Hyperallergic'), true);
+    assert.equal(isAutoPublishSource('TransArtists'), false);
+    assert.equal(isAutoPublishSource('Some Unknown Source'), false);
+
+    const clean = normalizeCandidate({
+        name: 'Studio Grant',
+        deadline: 'August 1, 2026',
+        link: 'https://example.org/studio-grant',
+        type: 'Grant',
+        fees: 'n',
+        country: 'United States',
+        source: 'Creative Capital'
+    }, today);
+    assert.equal(clean.status, 'publish');
+
+    const flagged = normalizeCandidate({
+        name: 'Ambiguous Opportunity',
+        deadline: 'August 1, 2026',
+        link: 'https://example.org/ambiguous',
+        fees: 'n',
+        country: 'United States',
+        source: 'Creative Capital'
+    }, today);
+    assert.match(flagged.issue, /unresolved type/);
+    assert.equal(flagged.status, 'review');
+
+    const expired = normalizeCandidate({
+        name: 'Past Deadline Grant',
+        deadline: 'January 1, 2026',
+        link: 'https://example.org/past',
+        type: 'Grant',
+        fees: 'n',
+        country: 'United States',
+        source: 'Creative Capital'
+    }, today);
+    assert.equal(expired.status, 'expired');
+
+    const untrustedSource = normalizeCandidate({
+        name: 'Manual Review Grant',
+        deadline: 'August 1, 2026',
+        link: 'https://example.org/manual',
+        type: 'Grant',
+        fees: 'n',
+        country: 'United States',
+        source: 'TransArtists'
+    }, today);
+    assert.equal(untrustedSource.status, 'review');
 });
 
 test('parses Artwork Archive fixture', () => {
@@ -762,9 +816,9 @@ test('Creative West mapper handles allowed types, local deadlines, fees, and rev
     for (const [apiType, expected] of [['GRANT', 'Grant'], ['RESIDENCY', 'Residency'], ['COMMISSION', 'Commission']]) {
         assert.equal(mapCreativeWestItem(creativeWestItem({ name: 'Regional Artist Opportunity', type: apiType })).type, expected);
     }
-    assert.equal(mapCreativeWestItem(creativeWestItem({ name: '2026 National Juried Photography Exhibition', type: 'GRANT' })).type, 'Exhibition');
-    assert.equal(mapCreativeWestItem(creativeWestItem({ name: 'The Bennett Prize 5', type: 'GRANT' })).type, 'Award');
-    assert.equal(mapCreativeWestItem(creativeWestItem({ name: 'Winter Issue: Open Call for Submissions', type: 'GRANT' })).type, 'Open Call');
+    assert.equal(mapCreativeWestItem(creativeWestItem({ name: '2026 National Juried Photography Exhibition', type: 'GRANT' })).type, 'Grant');
+    assert.equal(mapCreativeWestItem(creativeWestItem({ name: 'The Bennett Prize 5', type: 'GRANT' })).type, 'Grant');
+    assert.equal(mapCreativeWestItem(creativeWestItem({ name: 'Winter Issue: Open Call for Submissions', type: 'GRANT' })).type, 'Grant');
     assert.equal(mapCreativeWestItem(creativeWestItem({ name: 'Call for Artists: Pediatric Hospital', type: 'COMMISSION' })).type, 'Commission');
     assert.equal(mapCreativeWestItem(creativeWestItem({ name: 'Buffalo Run Golf Course Clubhouse', type: 'COMMISSION' })).type, 'Commission');
     const risca = mapCreativeWestItem(creativeWestItem({

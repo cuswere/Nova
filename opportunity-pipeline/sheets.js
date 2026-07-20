@@ -1,4 +1,4 @@
-import { google } from 'googleapis';
+import { auth, sheets as sheetsClient } from '@googleapis/sheets';
 import { SHEET_HEADERS, SHEET_NAME, SPREADSHEET_ID } from './config.js';
 import { areSameOpportunity, preferCandidate } from './dedupe.js';
 import { canonicalizeUrl, isExpired, normalizeDeadline } from './normalize.js';
@@ -35,11 +35,11 @@ export function getCredentials() {
 }
 
 export function createSheetsClient(credentials = getCredentials()) {
-    const auth = new google.auth.GoogleAuth({
+    const googleAuth = new auth.GoogleAuth({
         credentials,
         scopes: ['https://www.googleapis.com/auth/spreadsheets']
     });
-    return google.sheets({ version: 'v4', auth });
+    return sheetsClient({ version: 'v4', auth: googleAuth });
 }
 
 export async function readRows({ sheets = createSheetsClient(), spreadsheetId = SPREADSHEET_ID, sheetName = SHEET_NAME } = {}) {

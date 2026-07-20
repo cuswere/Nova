@@ -15,8 +15,8 @@
     "node": ">=20"
   },
   "dependencies": {
+    "@googleapis/sheets": "^13.0.2",
     "cheerio": "^1.2.0",
-    "googleapis": "^173.0.0",
     "openai": "^6.47.0"
   }
 }

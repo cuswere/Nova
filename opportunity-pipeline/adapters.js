@@ -693,14 +693,13 @@ function nextArtworkArchivePage(html, currentUrl) {
 }
 
 function mapCreativeWestType(type, name, description = '') {
-    const titleType = inferType(name, '');
-    // Preserve explicit operational categories before weaker title words. This
-    // prevents venue names such as "Golf Course" from becoming workshops.
+    // Creative West's API type is authoritative when present. Title and prose
+    // inference are only a fallback for missing or unsupported API values.
     if (/commission/i.test(type)) return 'Commission';
     if (/residen/i.test(type)) return 'Residency';
     if (/fellow/i.test(type)) return 'Fellowship';
-    if (/grant/i.test(type)) return titleType || 'Grant';
-    if (/award|competition/i.test(type)) return inferType(name, description) || 'Award';
+    if (/grant/i.test(type)) return 'Grant';
+    if (/award|competition/i.test(type)) return 'Award';
     if (/exhibition|fair|festival/i.test(type)) return 'Exhibition';
     return inferType(name, description);
 }

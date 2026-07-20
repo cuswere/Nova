@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import { ALLOWED_TYPES } from './config.js';
+import { ALLOWED_TYPES, SOURCE_DEFINITIONS } from './config.js';
 
 const MONTHS = new Map([
     ['jan', 0], ['january', 0], ['feb', 1], ['february', 1], ['mar', 2], ['march', 2],
@@ -148,13 +148,16 @@ export function inferTitleType(name = '') {
     return result;
 }
 
-export function normalizeType(value, name = '', description = '') {
+export function normalizeType(value, name = '', description = '', source = '') {
     const raw = String(value || '').trim();
     const direct = ALLOWED_TYPES.find((type) => type.toLowerCase() === raw.toLowerCase());
     const titleType = inferTitleType(name);
     if (direct) {
-        if (['Award', 'Competition'].includes(direct) && ['Award', 'Competition'].includes(titleType)) return direct;
-        if (titleType && titleType !== direct) return titleType;
+        // Artwork Archive, Creative West, and other sources provide usable
+        // type metadata. Preserve it. Creative Capital is the deliberate
+        // exception: its reviewed categories are often broad or incorrect,
+        // so a direct, explicit title signal may correct it.
+        if (/^creative capital$/i.test(String(source).trim()) && titleType && titleType !== direct) return titleType;
         return direct;
     }
     const inferred = inferType(name, description);
@@ -213,7 +216,7 @@ export function normalizeCandidate(raw, now = new Date()) {
         name,
         deadline,
         link,
-        type: normalizeType(raw.type, name, description),
+        type: normalizeType(raw.type, name, description, raw.source),
         fees: (['y', 'n'].includes(String(raw.fees || '').toLowerCase()) ?
             String(raw.fees).toLowerCase() : inferFee(`${description} ${raw.feeDetails || ''}`)),
         country: normalizeCountry(raw.country),
@@ -240,8 +243,20 @@ export function normalizeCandidate(raw, now = new Date()) {
     // Artwork Archive's public Learn More destination can change, while its detail
     // URL remains the correct identity for updating an existing Sheet row.
     candidate.id = makeId({ ...candidate, link: raw.identityUrl || candidate.link });
-    if (deadline && isExpired(deadline, now)) candidate.status = 'expired';
+    if (deadline && isExpired(deadline, now)) {
+        candidate.status = 'expired';
+    } else if (!candidate.issue && isAutoPublishSource(candidate.source)) {
+        candidate.status = 'publish';
+    }
     return candidate;
+}
+
+// Trusted, high-confidence sources skip manual review entirely for candidates
+// that came through clean (no extraction issue). A row still flagged with an
+// issue goes to review regardless of source, since that's exactly the case
+// review exists to catch.
+export function isAutoPublishSource(sourceName) {
+    return SOURCE_DEFINITIONS.some((definition) => definition.name === sourceName && definition.autoPublish);
 }
 
 export function validatePublishable(row, now = new Date()) {

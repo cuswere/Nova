@@ -57,7 +57,7 @@ export async function enrichCandidate(candidate, { client, fetcher = fetchText }
     return {
         ...candidate,
         deadline: normalizeDeadline(extracted.deadline) || candidate.deadline,
-        type: normalizeType(extracted.type, candidate.name, candidate.description),
+        type: normalizeType(extracted.type, candidate.name, candidate.description, candidate.source),
         fees: extracted.fees === 'unknown' ? candidate.fees : extracted.fees,
         country: normalizeCountry(extracted.country) || candidate.country,
         host_location: extracted.host_location || candidate.host_location,
