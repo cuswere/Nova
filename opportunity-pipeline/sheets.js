@@ -1,5 +1,5 @@
 import { google } from 'googleapis';
-import { PUBLIC_FIELDS, SHEET_HEADERS, SHEET_NAME, SPREADSHEET_ID } from './config.js';
+import { SHEET_HEADERS, SHEET_NAME, SPREADSHEET_ID } from './config.js';
 import { areSameOpportunity, preferCandidate } from './dedupe.js';
 import { canonicalizeUrl, isExpired, normalizeDeadline } from './normalize.js';
 
@@ -206,7 +206,17 @@ async function sortByDeadline({ sheets, spreadsheetId, sheetName, rowCount }) {
 
 export function mergeCandidate(current, candidate) {
     const manualStatus = current.status || 'review';
-    const preservePublic = ['publish', 'reject'].includes(manualStatus);
+    // publish/reject are editorial decisions on the whole row, not just the
+    // public fields. A re-fetch matching one of these rows must not clobber
+    // manual corrections to description, source metadata, etc. — only
+    // bookkeeping timestamps advance so the row still shows as recently seen.
+    if (['publish', 'reject'].includes(manualStatus)) {
+        return {
+            ...current,
+            last_seen: candidate.last_seen || current.last_seen,
+            checked_at: candidate.checked_at || current.checked_at
+        };
+    }
     const preferred = preferCandidate(current, candidate);
     const merged = {
         ...current,
@@ -216,10 +226,7 @@ export function mergeCandidate(current, candidate) {
         checked_at: candidate.checked_at || current.checked_at,
         status: manualStatus
     };
-    if (preservePublic) {
-        for (const field of PUBLIC_FIELDS) merged[field] = current[field];
-    }
-    if (candidate.status === 'expired' && manualStatus !== 'reject') merged.status = 'expired';
+    if (candidate.status === 'expired') merged.status = 'expired';
     return merged;
 }
 

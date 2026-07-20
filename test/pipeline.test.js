@@ -30,6 +30,7 @@ import {
     inferAwardInfo,
     inferFee,
     inferType,
+    inferTitleType,
     isExpired,
     normalizeCandidate,
     normalizeCountry,
@@ -78,6 +79,9 @@ test('keeps commissions and open calls distinct and resolves grouped grant categ
     assert.equal(normalizeType('Commission', 'Accelerator Grant Program 2026, Ohio'), 'Grant');
     assert.equal(normalizeType('Residency', 'The 7th VH Award'), 'Award');
     assert.equal(normalizeType('Commission', 'Buffalo Run Golf Course Clubhouse'), 'Commission');
+    assert.equal(inferTitleType('Grant Wood Fellowship'), 'Fellowship');
+    assert.equal(normalizeType('Grant', 'Grant Wood Fellowship'), 'Fellowship');
+    assert.equal(inferTitleType('Open Call: Downtown Mural Commission'), 'Commission');
 
     const unknown = normalizeCandidate({
         name: 'Unclassified opportunity',
@@ -433,6 +437,63 @@ test('upsert merge preserves manual public fields and decisions', () => {
     assert.equal(merged.name, 'Editor Title');
     assert.equal(merged.last_seen, '2026-07-16');
     assert.equal(mergeCandidate({ ...current, status: 'review' }, { ...incoming, status: 'expired' }).status, 'expired');
+});
+
+test('upsert merge fully preserves publish/reject rows, not just public fields', () => {
+    const current = {
+        name: 'Editor Title',
+        link: 'https://example.org/a',
+        deadline: '8/1/2026',
+        type: 'Grant',
+        fees: 'n',
+        country: 'United States',
+        status: 'publish',
+        description: 'Reviewer-cleaned-up description.',
+        eligibility_details: 'Reviewer note on eligibility.',
+        source: 'Creative Capital',
+        source_url: 'https://example.org/original-source',
+        host_location: 'Chicago, Illinois',
+        fee_details: 'Waived for BIPOC artists.',
+        confidence: '0.9'
+    };
+    const incoming = {
+        name: 'Crawler Title',
+        link: 'https://example.org/b',
+        deadline: '2026-08-02',
+        type: 'Award',
+        fees: 'y',
+        country: 'International',
+        status: 'review',
+        description: 'Freshly scraped, less accurate description.',
+        eligibility_details: 'Re-scraped eligibility text.',
+        source: 'Artwork Archive',
+        source_url: 'https://example.org/re-scraped-source',
+        host_location: 'Unknown',
+        fee_details: '',
+        confidence: '0.6',
+        last_seen: '2026-07-16',
+        checked_at: '2026-07-16T00:00:00.000Z'
+    };
+    const merged = mergeCandidate(current, incoming);
+    assert.equal(merged.description, current.description);
+    assert.equal(merged.eligibility_details, current.eligibility_details);
+    assert.equal(merged.source, current.source);
+    assert.equal(merged.source_url, current.source_url);
+    assert.equal(merged.host_location, current.host_location);
+    assert.equal(merged.fee_details, current.fee_details);
+    assert.equal(merged.confidence, current.confidence);
+    // Bookkeeping timestamps still advance so the row shows as recently re-matched.
+    assert.equal(merged.last_seen, incoming.last_seen);
+    assert.equal(merged.checked_at, incoming.checked_at);
+
+    const rejected = mergeCandidate({ ...current, status: 'reject' }, incoming);
+    assert.equal(rejected.status, 'reject');
+    assert.equal(rejected.description, current.description);
+
+    // A matching candidate that now looks expired must not flip an existing
+    // publish/reject row's status — that stays a manual/deadline-sweep decision.
+    assert.equal(mergeCandidate(current, { ...incoming, status: 'expired' }).status, 'publish');
+    assert.equal(mergeCandidate({ ...current, status: 'reject' }, { ...incoming, status: 'expired' }).status, 'reject');
 });
 
 test('source-aware deduplication prefers detailed non-Creative-Capital records', () => {

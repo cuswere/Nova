@@ -27,13 +27,15 @@ source boards -> deterministic extraction -> Sheet review -> static JSON
 ```
 
 - `npm run dry-run-opportunities` fetches enabled sources and prints a summary without changing the Sheet.
-- `npm run sync-opportunities` upserts candidates into the Sheet. Existing `publish` and `reject` decisions and their seven public fields are preserved.
+- `npm run sync-opportunities` upserts candidates into the Sheet. Existing `publish` and `reject` rows are left fully intact — a matching re-fetch only advances `last_seen`/`checked_at`, never overwrites content.
 - `npm run publish-data` validates approved rows and regenerates `data/opportunities.json`.
 - `npm test` runs parser, normalization, review-preservation, and publishing tests.
 
 The scheduled GitHub workflow runs at 14:00 UTC every Tuesday and Friday and can also be started manually. It refreshes the HTTP-friendly sources; Artwork Archive is collected manually from a normal browser session. Configure this repository secret before enabling it:
 
 1. `GOOGLE_SERVICE_ACCOUNT_JSON`: raw single-line or base64-encoded service-account JSON. Share the Sheet with its `client_email` as an editor.
+
+To publish Sheet edits (curation decisions) to the site without re-fetching any sources, run the **Publish opportunities** workflow (`.github/workflows/publish-only.yml`) manually from the Actions tab. It only runs `publish-data` and commits `data/opportunities.json` — no source crawling, no wait.
 AI enrichment is intentionally disabled during the beta. Missing or ambiguous fields remain marked for human review rather than triggering paid model calls.
 
 To test one HTTP source at a time, open the workflow in GitHub Actions, click **Run workflow**, and choose its source from the `source` dropdown. Scheduled runs continue to refresh all enabled HTTP sources.

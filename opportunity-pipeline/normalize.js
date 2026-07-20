@@ -120,17 +120,32 @@ export function inferType(name = '', description = '') {
 
 export function inferTitleType(name = '') {
     const title = String(name).toLowerCase();
-    if (/public art|commission|request for (?:qualifications|proposals)|\brfq\b|\bmural\b|artist pool/.test(title)) return 'Commission';
-    if (/\b(?:emergency relief|microgrant|grants?)\b/.test(title)) return 'Grant';
-    if (/\bfellowship\b/.test(title)) return 'Fellowship';
-    if (/\b(?:artist[- ]in[- ]residence|residenc(?:y|ies))\b/.test(title)) return 'Residency';
-    if (/\b(?:prize|award)\b/.test(title)) return 'Award';
-    if (/\bopen[- ]call\b|\bcall for\b[^.]{0,40}\b(?:artists?|entries|submissions)\b/.test(title)) return 'Open Call';
-    if (/\b(?:exhibition|biennial|triennial|juried show)\b/.test(title)) return 'Exhibition';
-    // "Course" alone is not sufficient: venue names such as Golf Course are
-    // common in public-art commissions.
-    if (/\bworkshop\b|\btraining (?:course|program)\b|\b(?:online|intensive|development) course\b/.test(title)) return 'Workshop';
-    return '';
+    // A title can contain more than one valid category word. Treat the final
+    // explicit opportunity key as the tie-breaker: "Grant Wood Fellowship" is
+    // a fellowship, while "Open Call: Mural Commission" is a commission. This
+    // deliberately excludes a bare "course", which is often part of a venue
+    // name (for example, a golf course) rather than an opportunity type.
+    const signals = [
+        ['Commission', /public art|commission|request for (?:qualifications|proposals)|\brfq\b|\bmural\b|artist pool/g],
+        ['Grant', /\b(?:emergency relief|microgrant|grants?)\b/g],
+        ['Fellowship', /\bfellowship\b/g],
+        ['Residency', /\b(?:artist[- ]in[- ]residence|residenc(?:y|ies))\b/g],
+        ['Award', /\b(?:prize|award)\b/g],
+        ['Open Call', /\bopen[- ]call\b|\bcall for\b[^.]{0,40}\b(?:artists?|entries|submissions)\b/g],
+        ['Exhibition', /\b(?:exhibition|biennial|triennial|juried show)\b/g],
+        ['Workshop', /\bworkshop\b|\btraining (?:course|program)\b|\b(?:online|intensive|development) course\b/g]
+    ];
+    let result = '';
+    let lastIndex = -1;
+    for (const [type, pattern] of signals) {
+        for (const match of title.matchAll(pattern)) {
+            if (match.index > lastIndex) {
+                result = type;
+                lastIndex = match.index;
+            }
+        }
+    }
+    return result;
 }
 
 export function normalizeType(value, name = '', description = '') {
