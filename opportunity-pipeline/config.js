@@ -5,9 +5,9 @@ export const PUBLIC_FIELDS = ['name', 'deadline', 'link', 'type', 'fees', 'count
 // Extra workflow columns copied into the published JSON in addition to
 // PUBLIC_FIELDS. These are surfaced on demand by the frontend (e.g. the
 // fee-details hover popup) but are deliberately NOT part of the leading
-// public-column contract, so the Sheet column order (SHEET_HEADERS) is
-// unaffected — no Sheet migration required to publish them.
-export const PUBLISHED_EXTRA_FIELDS = ['fee_details', 'eligibility_details'];
+// public-column contract. New extras are appended to the workflow schema so
+// the leading public-column contract remains stable.
+export const PUBLISHED_EXTRA_FIELDS = ['fee_details', 'eligibility_details', 'eligibility_tier'];
 export const WORKFLOW_FIELDS = [
     'id',
     'status',
@@ -20,7 +20,8 @@ export const WORKFLOW_FIELDS = [
     'checked_at',
     'issue',
     'description',
-    'eligibility_details'
+    'eligibility_details',
+    'eligibility_tier'
 ];
 export const SHEET_HEADERS = [...PUBLIC_FIELDS, ...WORKFLOW_FIELDS];
 

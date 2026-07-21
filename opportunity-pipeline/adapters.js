@@ -98,7 +98,8 @@ export function parseArtworkArchive(html, definition = source('artwork_archive')
         const eligibilityDetails = detail('eligibility-details') ||
             labeledDescriptionField(description, 'Eligibility details') ||
             cleanText(description.match(/(?:^|\s)Eligibility Info\s+(.+)$/i)?.[1]);
-        const eligibility = detail('eligibility') || field('Eligibility:') || eligibilityDetails;
+        const eligibilityTier = detail('eligibility') || field('Eligibility:');
+        const eligibility = eligibilityTier || eligibilityDetails;
         rows.push({
             name,
             deadline,
@@ -111,6 +112,7 @@ export function parseArtworkArchive(html, definition = source('artwork_archive')
             feeDetails: fee,
             awardInfo: detail('award-info') || labeledDescriptionField(description, 'Award'),
             eligibilityDetails,
+            eligibilityTier,
             description,
             source: definition.name,
             sourceUrl: absoluteUrl(card.attr('data-nova-source-link') || definition.url, definition.url),

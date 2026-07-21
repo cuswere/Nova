@@ -470,8 +470,11 @@ function feeDetailsText(item) {
     return /\d/.test(raw) ? raw : '';
 }
 
-function eligibilityDetailsText(item) {
-    return String((item && item.eligibility_details) || '').trim();
+function eligibilityPopupInfo(item) {
+    const details = String((item && item.eligibility_details) || '').trim();
+    if (details) return { text: details, ariaPrefix: 'Eligibility details' };
+    const tier = String((item && item.eligibility_tier) || '').trim();
+    return tier ? { text: tier, ariaPrefix: 'Eligibility tier' } : null;
 }
 
 // Telegraph extra details on a token: a dotted underline on the label
@@ -481,6 +484,8 @@ function eligibilityDetailsText(item) {
 function attachTokenDetails(cell, labelText, details, ariaPrefix) {
     cell.classList.add('detail-token', 'has-details');
     cell.tabIndex = 0;
+    cell.setAttribute('role', 'button');
+    cell.setAttribute('aria-pressed', 'false');
     cell.setAttribute('aria-label', `${ariaPrefix}: ${details}`);
 
     // Wrap the existing label ("fee"/"-") so only the word carries the underline.
@@ -531,9 +536,11 @@ function setupDetailsPopups() {
         cell.classList.toggle('popup-up', openUp);
         cell.classList.toggle('popup-down', !openUp);
 
-        // Keep wide dialogue windows inside the scrolling results pane. The
-        // tail moves back by the same amount, preserving its connection to the
-        // token's top-right "+" corner after the window shifts horizontally.
+        // Keep wide dialogue windows inside the scrolling results pane.
+        // Measure from the popup's unshifted anchor every time. Otherwise a
+        // previous correction is included in this measurement and the next
+        // placement can incorrectly cancel it.
+        popup.style.setProperty('--popup-shift-x', '0px');
         const popupRect = popup.getBoundingClientRect();
         const inset = 4;
         let shiftX = 0;
@@ -543,7 +550,44 @@ function setupDetailsPopups() {
             shiftX = boxRect.right - inset - popupRect.right;
         }
         popup.style.setProperty('--popup-shift-x', `${shiftX}px`);
-        popup.style.setProperty('--tail-shift-x', `${shiftX}px`);
+
+        // A dialogue may be centered (fee) or edge-aligned (eligibility), and
+        // may then shift to stay within the pane. Position the tail after that
+        // final placement so its point always meets the fold's center.
+        const fold = cell.querySelector('.detail-token-fold');
+        const tail = popup.querySelector('.details-popup-tail');
+        if (fold && tail) {
+            const finalPopupRect = popup.getBoundingClientRect();
+            const foldRect = fold.getBoundingClientRect();
+            const tailLeft = foldRect.left + foldRect.width / 2 - finalPopupRect.left - tail.offsetWidth / 2;
+            popup.style.setProperty('--tail-left', `${tailLeft}px`);
+        }
+    };
+
+    const setPinned = (cell, pinned) => {
+        cell.classList.toggle('popup-pinned', pinned);
+        cell.setAttribute('aria-pressed', String(pinned));
+        const fold = cell.querySelector('.detail-token-fold');
+        if (fold) fold.textContent = pinned ? '×' : '+';
+    };
+
+    const togglePinned = (cell) => {
+        const pinned = cell.classList.contains('popup-pinned');
+        if (pinned) {
+            setPinned(cell, false);
+            // Hover and focus would otherwise immediately reopen it under the
+            // pointer. Suppress that transient state until the pointer leaves.
+            cell.classList.add('popup-dismissed');
+            cell.blur();
+            return;
+        }
+
+        box.querySelectorAll('.detail-token.popup-pinned').forEach((other) => {
+            if (other !== cell) setPinned(other, false);
+        });
+        cell.classList.remove('popup-dismissed');
+        setPinned(cell, true);
+        place(cell);
     };
 
     const handle = (event) => {
@@ -553,6 +597,26 @@ function setupDetailsPopups() {
 
     box.addEventListener('mouseover', handle);
     box.addEventListener('focusin', handle);
+    box.addEventListener('click', (event) => {
+        if (event.target.closest && event.target.closest('.details-popup')) return;
+        const cell = event.target.closest && event.target.closest('.detail-token.has-details');
+        if (cell && box.contains(cell)) togglePinned(cell);
+    });
+    box.addEventListener('keydown', (event) => {
+        const cell = event.target.closest && event.target.closest('.detail-token.has-details');
+        if (!cell || !box.contains(cell)) return;
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            togglePinned(cell);
+        } else if (event.key === 'Escape' && cell.classList.contains('popup-pinned')) {
+            event.preventDefault();
+            togglePinned(cell);
+        }
+    });
+    box.addEventListener('mouseout', (event) => {
+        const cell = event.target.closest && event.target.closest('.detail-token.has-details');
+        if (cell && !cell.contains(event.relatedTarget)) cell.classList.remove('popup-dismissed');
+    });
 }
 
 // Populate opportunities table
@@ -620,8 +684,13 @@ function populateOpportunitiesMainTable() {
         const card = document.createElement('div');
         card.className = 'opportunity-card';
 
-        // Title column (left)
+        // The left and right sides are independent vertical stacks, so title
+        // wrapping cannot push the right-side eligibility token downward.
+        const mainColumnDiv = document.createElement('div');
+        mainColumnDiv.className = 'opportunity-main-column';
+
         const titleColumnDiv = document.createElement('div');
+        titleColumnDiv.className = 'opportunity-title';
 
         const link = document.createElement('a');
 
@@ -665,10 +734,11 @@ function populateOpportunitiesMainTable() {
         link.appendChild(linkContent);
         link.appendChild(backgroundLayer);
         titleColumnDiv.appendChild(link);
-        card.appendChild(titleColumnDiv);
+        mainColumnDiv.appendChild(titleColumnDiv);
 
-        // Right-side details are their own stack, independent from how many
-        // lines the title uses in the left column.
+        const detailsColumnDiv = document.createElement('div');
+        detailsColumnDiv.className = 'opportunity-details-column';
+
         const topRightGrid = document.createElement('div');
         topRightGrid.className = 'top-right-grid';
 
@@ -703,16 +773,15 @@ function populateOpportunitiesMainTable() {
         }
 
         topRightGrid.appendChild(metadataRow);
+        detailsColumnDiv.appendChild(topRightGrid);
 
-        const eligibilityDetails = eligibilityDetailsText(item);
-        if (eligibilityDetails) {
+        const eligibilityInfo = eligibilityPopupInfo(item);
+        if (eligibilityInfo) {
             const eligibilityCell = document.createElement('div');
             eligibilityCell.className = 'grid-cell field eligibility-cell';
-            attachTokenDetails(eligibilityCell, 'Eligibility', eligibilityDetails, 'Eligibility details');
-            topRightGrid.appendChild(eligibilityCell);
+            attachTokenDetails(eligibilityCell, 'Eligibility', eligibilityInfo.text, eligibilityInfo.ariaPrefix);
+            detailsColumnDiv.appendChild(eligibilityCell);
         }
-
-        card.appendChild(topRightGrid);
 
         // Format date as "Feb 2, '26'" when possible; otherwise display raw text
         let deadlineText = '-';
@@ -733,7 +802,9 @@ function populateOpportunitiesMainTable() {
         const deadlineColumnDiv = document.createElement('div');
         deadlineColumnDiv.className = 'field date-cell';
         deadlineColumnDiv.innerHTML = `<strong>Deadline: </strong> ${deadlineText}`;
-        card.appendChild(deadlineColumnDiv);
+        mainColumnDiv.appendChild(deadlineColumnDiv);
+
+        card.append(mainColumnDiv, detailsColumnDiv);
 
         container.appendChild(card);
     });

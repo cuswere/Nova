@@ -107,7 +107,9 @@ export function inferType(name = '', description = '') {
     const text = `${name} ${description}`.toLowerCase();
     if (/public art|commission|request for qualifications|\brfq\b|\bmural\b|artist pool/.test(text)) return 'Commission';
     if (/\bopen[- ]call\b|\bcall for\b[^.]{0,40}\b(?:artists?|entries|submissions)\b/.test(title)) return 'Open Call';
-    if (/residen|artist colony|studio program/.test(text)) return 'Residency';
+    // Do not match the "residen" stem: it appears in ordinary eligibility
+    // prose such as "Rhode Island residents". Require actual program terms.
+    if (/\b(?:residency|residencies|artist[- ]in[- ]residence|artist colony|studio program)\b/.test(text)) return 'Residency';
     if (/fellowship/.test(text)) return 'Fellowship';
     if (/grant|funding|emergency relief|microgrant/.test(text)) return 'Grant';
     if (/prize|award|competition/.test(text)) return 'Award';
@@ -150,7 +152,11 @@ export function inferTitleType(name = '') {
 
 export function normalizeType(value, name = '', description = '', source = '') {
     const raw = String(value || '').trim();
-    const direct = ALLOWED_TYPES.find((type) => type.toLowerCase() === raw.toLowerCase());
+    // Artwork Archive uses this category for civic commissions and public-art
+    // calls. It is valid source metadata but not a public Nova type label.
+    const sourceMappedType = /^artwork archive$/i.test(String(source).trim()) &&
+        /^public art\s*(?:&|and)\s*proposals?$/i.test(raw) ? 'Commission' : '';
+    const direct = sourceMappedType || ALLOWED_TYPES.find((type) => type.toLowerCase() === raw.toLowerCase());
     const titleType = inferTitleType(name);
     if (direct) {
         // Artwork Archive, Creative West, and other sources provide usable
@@ -231,7 +237,8 @@ export function normalizeCandidate(raw, now = new Date()) {
         checked_at: now.toISOString(),
         issue: '',
         description,
-        eligibility_details: String(raw.eligibilityDetails || raw.eligibility_details || '').trim()
+        eligibility_details: String(raw.eligibilityDetails || raw.eligibility_details || '').trim(),
+        eligibility_tier: String(raw.eligibilityTier || raw.eligibility_tier || '').trim()
     };
     const issues = String(raw.issue || '').split(';').map((issue) => issue.trim()).filter(Boolean);
     if (!name) issues.push('missing name');

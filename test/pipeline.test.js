@@ -72,6 +72,8 @@ test('keeps commissions and open calls distinct and resolves grouped grant categ
 
     assert.equal(inferType('Call for Latino Artists', 'An ongoing artist directory.'), 'Open Call');
     assert.equal(inferType('Call for Artists: Downtown Public Art RFQ'), 'Commission');
+    assert.equal(inferType('RISCA Call For Music', 'Open to Rhode Island residents.'), '');
+    assert.equal(inferType('Artist Opportunity', 'This residency includes studio access.'), 'Residency');
     assert.equal(normalizeType('Grants & Fellowships', 'Studio Fellowship'), 'Fellowship');
     assert.equal(normalizeType('Grants & Fellowships', 'Artist Support Program'), 'Grant');
     assert.equal(normalizeType('Residency', 'Pollock-Krasner Foundation Grant', '', 'Creative Capital'), 'Grant');
@@ -84,6 +86,15 @@ test('keeps commissions and open calls distinct and resolves grouped grant categ
     assert.equal(normalizeType('Grant', 'Grant Wood Fellowship', '', 'Creative Capital'), 'Fellowship');
     assert.equal(normalizeType('Grant', 'Grant Wood Fellowship'), 'Grant');
     assert.equal(normalizeType('Art Fair', 'IMMORTAL Queer Art Fair Residency', '', 'Artwork Archive'), 'Art Fair');
+    assert.equal(
+        normalizeType(
+            'Public Art & Proposals',
+            'RISCA Call For Music: Eleanor Slater Hospital - Regan Unit',
+            'Open to Rhode Island residents. This is funded through the Allocation for Art for Public Facilities Act.',
+            'Artwork Archive'
+        ),
+        'Commission'
+    );
     assert.equal(inferTitleType('Open Call: Downtown Mural Commission'), 'Commission');
 
     const unknown = normalizeCandidate({
@@ -173,6 +184,7 @@ test('parses Artwork Archive fixture', () => {
     assert.equal(row.hostLocation, 'Seattle, United States');
     assert.equal(row.feeDetails, '$35');
     assert.equal(row.eligibilityDetails, 'Open internationally to artists at any career stage.');
+    assert.equal(row.eligibilityTier, 'International');
     assert.equal(row.awardInfo, '$5,000 stipend and studio access');
     assert.match(row.description, /Test Arts Council/);
 });
@@ -188,6 +200,7 @@ test('imports a browser-collected Artwork Archive export', () => {
     assert.equal(rows[0].source_url, 'https://artworkarchive.com/call-for-entry/test-residency-2026');
     assert.equal(rows[0].source, 'Artwork Archive');
     assert.equal(rows[0].eligibility_details, 'Open internationally to artists at any career stage.');
+    assert.equal(rows[0].eligibility_tier, 'International');
     assert.equal(rows[0].award_info, '$5,000 stipend and studio access');
 });
 
@@ -215,6 +228,17 @@ test('backfills Artwork Archive structured fields from older collector descripti
     assert.equal(row.eligibilityDetails, 'Open internationally.');
     assert.equal(row.awardInfo, '$5,000. A detailed opportunity description.');
     assert.equal(row.country, 'International');
+});
+
+test('retains an Artwork Archive eligibility tier when no eligibility prose is supplied', () => {
+    const html = fixture('artwork-archive.html')
+        .replace(/ data-nova-eligibility-details="[^"]*"/, '')
+        .replace(/data-nova-description="[^"]*"/, 'data-nova-description="A public-art call."')
+        .replace('data-nova-eligibility="International"', 'data-nova-eligibility="State"');
+    const [row] = parseArtworkArchive(html);
+    assert.equal(row.eligibilityDetails, '');
+    assert.equal(row.eligibilityTier, 'State');
+    assert.equal(normalizeCandidate(row, today).eligibility_tier, 'State');
 });
 
 test('maps Artwork Archive national eligibility to the United States without a global national heuristic', () => {
@@ -731,7 +755,7 @@ test('AI enrichment uses structured evidence without inventing unsupported costs
 
 test('publisher exports only valid approved rows and keeps browser-safe dates', () => {
     const result = buildPublishedRows([
-        { name: 'Good Grant', deadline: '2026-08-01', link: 'https://example.org/good', type: 'Grant', fees: 'y', country: 'International', award_info: 'Up to $10,000', fee_details: '$35 entry fee', eligibility_details: 'Open to US residents', status: 'publish' },
+        { name: 'Good Grant', deadline: '2026-08-01', link: 'https://example.org/good', type: 'Grant', fees: 'y', country: 'International', award_info: 'Up to $10,000', fee_details: '$35 entry fee', eligibility_details: 'Open to US residents', eligibility_tier: 'National', status: 'publish' },
         { name: 'Future Job Listing', deadline: '2026-08-02', link: 'https://example.org/job', type: 'Job', fees: 'n', country: 'International', status: 'publish' },
         { name: 'Needs Review', deadline: '2026-08-02', link: 'https://example.org/review', type: 'Grant', fees: 'n', country: 'International', status: 'review' },
         { name: 'Unknown Fee', deadline: '2026-08-03', link: 'https://example.org/bad', type: 'Grant', fees: '', country: 'International', status: 'publish' },
@@ -741,8 +765,8 @@ test('publisher exports only valid approved rows and keeps browser-safe dates', 
     // fee_details/eligibility_details ride along in addition to the public fields;
     // rows without them simply carry undefined (dropped on JSON serialization).
     assert.deepEqual(result.published, [
-        { name: 'Good Grant', deadline: '8/1/2026', link: 'https://example.org/good', type: 'Grant', fees: 'y', country: 'International', award_info: 'Up to $10,000', fee_details: '$35 entry fee', eligibility_details: 'Open to US residents' },
-        { name: 'Unknown Fee', deadline: '8/3/2026', link: 'https://example.org/bad', type: 'Grant', fees: '', country: 'International', award_info: undefined, fee_details: undefined, eligibility_details: undefined }
+        { name: 'Good Grant', deadline: '8/1/2026', link: 'https://example.org/good', type: 'Grant', fees: 'y', country: 'International', award_info: 'Up to $10,000', fee_details: '$35 entry fee', eligibility_details: 'Open to US residents', eligibility_tier: 'National' },
+        { name: 'Unknown Fee', deadline: '8/3/2026', link: 'https://example.org/bad', type: 'Grant', fees: '', country: 'International', award_info: undefined, fee_details: undefined, eligibility_details: undefined, eligibility_tier: undefined }
     ]);
     assert.equal(result.rejected.length, 3);
     assert.deepEqual(result.rejected.find((row) => row.name === 'Future Job Listing')?.errors, ['type is not yet public']);
@@ -918,7 +942,7 @@ test('Creative West eligibility classifies applicant restrictions separately fro
     assert.equal(mapped.country, 'International');
 });
 
-test('normalization retains specific eligibility issues and Sheet values follow the derived 19-column schema safely', () => {
+test('normalization retains specific eligibility issues and Sheet values follow the derived 20-column schema safely', () => {
     const row = normalizeCandidate({
         name: 'Conflicted Eligibility', deadline: 'August 1, 2026', link: 'https://example.org/conflict', type: 'Grant', fees: 'n',
         issue: 'eligibility conflict: region=INTERNATIONAL; text restricts applicants to Colorado', eligibilityDetails: 'Colorado only'
@@ -926,17 +950,17 @@ test('normalization retains specific eligibility issues and Sheet values follow 
     assert.match(row.issue, /eligibility conflict/);
     assert.doesNotMatch(row.issue, /unresolved eligibility/);
     assert.equal(row.eligibility_details, 'Colorado only');
-    assert.equal(SHEET_HEADERS.length, 19);
-    assert.equal(columnLetter(19), 'S');
+    assert.equal(SHEET_HEADERS.length, 20);
+    assert.equal(columnLetter(20), 'T');
     assert.equal(columnLetter(27), 'AA');
     assert.equal(escapeSheetValue('=HYPERLINK("https://bad")'), "'=HYPERLINK(\"https://bad\")");
     assert.equal(escapeSheetValue('plain text'), 'plain text');
     const values = rowValues({ ...Object.fromEntries(SHEET_HEADERS.map((header) => [header, 'x'])), name: '=danger' });
-    assert.equal(values.length, 19);
+    assert.equal(values.length, 20);
     assert.equal(values[0], "'=danger");
 });
 
-test('Sheet writes use the schema-derived S column and keep manual public values', async () => {
+test('Sheet writes use the schema-derived T column and keep manual public values', async () => {
     const calls = { updates: [], appends: [] };
     const sheet = {
         spreadsheets: {
@@ -952,8 +976,8 @@ test('Sheet writes use the schema-derived S column and keep manual public values
     await upsertCandidates([{ ...Object.fromEntries(SHEET_HEADERS.map((header) => [header, 'value'])), id: 'new-id', name: '=formula' }], {
         sheets: sheet, spreadsheetId: 'test', sheetName: 'Opportunities'
     });
-    assert.equal(calls.appends[0].range, "'Opportunities'!A:S");
-    assert.equal(calls.appends[0].requestBody.values[0].length, 19);
+    assert.equal(calls.appends[0].range, "'Opportunities'!A:T");
+    assert.equal(calls.appends[0].requestBody.values[0].length, 20);
     assert.equal(calls.appends[0].requestBody.values[0][0], "'=formula");
     assert.equal(calls.appends[0].valueInputOption, 'RAW');
     const current = { name: 'Editor title', deadline: '2026-08-01', link: 'https://example.org/editor', type: 'Grant', fees: 'n', country: 'United States', status: 'publish' };
