@@ -45,7 +45,10 @@ source boards → deterministic extraction → Google Sheet review → static JS
 3. **Publish** — the same Action runs `publish-data` (`publish.js`): keeps only
    `status=publish` rows that pass `validatePublishable` (needs name, link, deadline,
    an allowed `type`, not expired, not a `NON_PUBLIC_TYPES` value) → strips to the 7
-   public fields → sorts by deadline → overwrites `data/opportunities.json`, commits, pushes.
+   public fields plus the `PUBLISHED_EXTRA_FIELDS` (`fee_details`,
+   `eligibility_details` — carried into the JSON for the frontend, e.g. the
+   fee-details hover popup, but not part of the leading Sheet-column contract) →
+   sorts by deadline → overwrites `data/opportunities.json`, commits, pushes.
    To push Sheet curation live without re-fetching sources (no wait, no risk of a
    scrape rate-limit or transient failure mid-review), run the manual-only
    `.github/workflows/publish-only.yml` Action instead — it skips `sync-opportunities`
@@ -53,7 +56,7 @@ source boards → deterministic extraction → Google Sheet review → static JS
 4. **Frontend** — `app.js` fetches that JSON. No backend.
 
 **Key files**
-- `opportunity-pipeline/config.js` — `PUBLIC_FIELDS` (`name, deadline, link, type, fees, country, award_info`), `SHEET_HEADERS`, `NON_PUBLIC_TYPES` (`['Job']`).
+- `opportunity-pipeline/config.js` — `PUBLIC_FIELDS` (`name, deadline, link, type, fees, country, award_info`), `PUBLISHED_EXTRA_FIELDS` (`fee_details, eligibility_details`), `SHEET_HEADERS`, `NON_PUBLIC_TYPES` (`['Job']`).
 - `opportunity-pipeline/normalize.js` — extraction/inference + `validatePublishable`.
 - `opportunity-pipeline/sheets.js` — Sheet read/write, review-decision preservation.
 - `publish.js` — `buildPublishedRows`, `publish`.

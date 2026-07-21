@@ -2,6 +2,12 @@ export const SPREADSHEET_ID = '120ZqG_0qZR76b4kYHdzPK-4OKecjk7MaZcKuQRRLcbI';
 export const SHEET_NAME = 'Opportunities';
 
 export const PUBLIC_FIELDS = ['name', 'deadline', 'link', 'type', 'fees', 'country', 'award_info'];
+// Extra workflow columns copied into the published JSON in addition to
+// PUBLIC_FIELDS. These are surfaced on demand by the frontend (e.g. the
+// fee-details hover popup) but are deliberately NOT part of the leading
+// public-column contract, so the Sheet column order (SHEET_HEADERS) is
+// unaffected — no Sheet migration required to publish them.
+export const PUBLISHED_EXTRA_FIELDS = ['fee_details', 'eligibility_details'];
 export const WORKFLOW_FIELDS = [
     'id',
     'status',

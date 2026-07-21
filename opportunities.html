@@ -20,8 +20,17 @@
         </header>
 
         <div class="field columns">
-            <div class="repo">
-                <div class="repobox"></div>
+            <div class="repo-column">
+                <div class="repo-toolbar">
+                    <div class="pagination-tab" aria-live="polite">Page 1</div>
+                    <div class="pagination-arrows">
+                        <button type="button" class="page-arrow page-prev" aria-label="Previous page" disabled>◀</button>
+                        <button type="button" class="page-arrow page-next" aria-label="Next page">▶</button>
+                    </div>
+                </div>
+                <div class="repo">
+                    <div class="repobox"></div>
+                </div>
             </div>
             <div class="filters">
                 <div class="filter-selectors">
@@ -32,10 +41,14 @@
                     <select class="filter-dropdown visually-hidden" name="type" tabindex="-1" aria-hidden="true">
                         <option disabled selected value="TYPE_LABEL">Type</option>
                     </select>
-                    <div>
+                    <div class="checkbox-filters">
                         <label class="filter-dropdown checkbox-label">
                             <input id="hide-fees-toggle" class="checkbox-input" type="checkbox" />
                             <span class="checkbox-text">Hide Fees</span>
+                        </label>
+                        <label class="filter-dropdown checkbox-label">
+                            <input id="rolling-toggle" class="checkbox-input" type="checkbox" />
+                            <span class="checkbox-text">Only rolling</span>
                         </label>
                     </div>
                 </div>

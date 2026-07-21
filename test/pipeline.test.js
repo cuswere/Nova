@@ -731,16 +731,18 @@ test('AI enrichment uses structured evidence without inventing unsupported costs
 
 test('publisher exports only valid approved rows and keeps browser-safe dates', () => {
     const result = buildPublishedRows([
-        { name: 'Good Grant', deadline: '2026-08-01', link: 'https://example.org/good', type: 'Grant', fees: 'n', country: 'International', award_info: 'Up to $10,000', status: 'publish' },
+        { name: 'Good Grant', deadline: '2026-08-01', link: 'https://example.org/good', type: 'Grant', fees: 'y', country: 'International', award_info: 'Up to $10,000', fee_details: '$35 entry fee', eligibility_details: 'Open to US residents', status: 'publish' },
         { name: 'Future Job Listing', deadline: '2026-08-02', link: 'https://example.org/job', type: 'Job', fees: 'n', country: 'International', status: 'publish' },
         { name: 'Needs Review', deadline: '2026-08-02', link: 'https://example.org/review', type: 'Grant', fees: 'n', country: 'International', status: 'review' },
         { name: 'Unknown Fee', deadline: '2026-08-03', link: 'https://example.org/bad', type: 'Grant', fees: '', country: 'International', status: 'publish' },
         { name: 'Bad Type', deadline: '2026-08-03', link: 'https://example.org/bad-type', type: 'Other', fees: 'n', country: 'International', status: 'publish' },
         { name: 'Expired', deadline: '2026-07-01', link: 'https://example.org/expired', type: 'Grant', fees: 'n', country: 'International', status: 'publish' }
     ], today);
+    // fee_details/eligibility_details ride along in addition to the public fields;
+    // rows without them simply carry undefined (dropped on JSON serialization).
     assert.deepEqual(result.published, [
-        { name: 'Good Grant', deadline: '8/1/2026', link: 'https://example.org/good', type: 'Grant', fees: 'n', country: 'International', award_info: 'Up to $10,000' },
-        { name: 'Unknown Fee', deadline: '8/3/2026', link: 'https://example.org/bad', type: 'Grant', fees: '', country: 'International', award_info: undefined }
+        { name: 'Good Grant', deadline: '8/1/2026', link: 'https://example.org/good', type: 'Grant', fees: 'y', country: 'International', award_info: 'Up to $10,000', fee_details: '$35 entry fee', eligibility_details: 'Open to US residents' },
+        { name: 'Unknown Fee', deadline: '8/3/2026', link: 'https://example.org/bad', type: 'Grant', fees: '', country: 'International', award_info: undefined, fee_details: undefined, eligibility_details: undefined }
     ]);
     assert.equal(result.rejected.length, 3);
     assert.deepEqual(result.rejected.find((row) => row.name === 'Future Job Listing')?.errors, ['type is not yet public']);

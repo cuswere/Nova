@@ -2,8 +2,13 @@
 let opportunities = [];
 let activeFilters = {
     type: [],
-    hideFees: false
+    hideFees: false,
+    onlyRolling: false
 };
+
+// Client-side pagination: render at most PAGE_SIZE cards per page.
+const PAGE_SIZE = 50;
+let currentPage = 1;
 
 // --- Feedback form config ---
 // Paste your Google Form's formResponse URL and entry.XXXXXXXXX field IDs here.
@@ -159,6 +164,10 @@ function applyFiltersFromUrl() {
         if (params.has('hideFees')) {
             const v = params.get('hideFees');
             activeFilters.hideFees = (v === '1' || v === 'true');
+        }
+        if (params.has('rolling')) {
+            const v = params.get('rolling');
+            activeFilters.onlyRolling = (v === '1' || v === 'true');
         }
     } catch (err) {
         // ignore URL parsing errors
@@ -454,6 +463,64 @@ function scheduleOpportunityLinkBackgrounds(container) {
     });
 }
 
+// A fee-details value is only worth surfacing when it names an actual figure.
+// Purely descriptive text (no digits) is treated as blank/invalid.
+function feeDetailsText(item) {
+    const raw = String((item && item.fee_details) || '').trim();
+    return /\d/.test(raw) ? raw : '';
+}
+
+// Build the "+" affordance (straddling the token's top border) and its hover
+// popup carrying the fee details.
+function attachFeeDetails(feeCell, details) {
+    feeCell.classList.add('has-fee-details');
+
+    const marker = document.createElement('span');
+    marker.className = 'fee-details-marker';
+    marker.textContent = '+';
+    marker.tabIndex = 0;
+    marker.setAttribute('role', 'button');
+    marker.setAttribute('aria-label', `Fee details: ${details}`);
+
+    const popup = document.createElement('span');
+    popup.className = 'fee-details-popup';
+    popup.setAttribute('role', 'tooltip');
+    popup.textContent = details;
+
+    feeCell.appendChild(marker);
+    feeCell.appendChild(popup);
+}
+
+// Open each fee-details popup up or down depending on where its token sits in
+// the scroll viewport, so it isn't clipped at the list's top or bottom edge.
+function setupFeePopups() {
+    const box = document.querySelector('.repobox');
+    if (!box) return;
+
+    const place = (cell) => {
+        const popup = cell.querySelector('.fee-details-popup');
+        if (!popup) return;
+        // The popup is already rendered (via :hover / :focus-within) when this
+        // runs, so offsetHeight reflects its true height.
+        const boxRect = box.getBoundingClientRect();
+        const cellRect = cell.getBoundingClientRect();
+        const popupHeight = popup.offsetHeight;
+        const spaceBelow = boxRect.bottom - cellRect.bottom;
+        const spaceAbove = cellRect.top - boxRect.top;
+        const openUp = spaceBelow < popupHeight + 14 && spaceAbove > spaceBelow;
+        cell.classList.toggle('popup-up', openUp);
+        cell.classList.toggle('popup-down', !openUp);
+    };
+
+    const handle = (event) => {
+        const cell = event.target.closest && event.target.closest('.fee-cell.has-fee-details');
+        if (cell && box.contains(cell)) place(cell);
+    };
+
+    box.addEventListener('mouseover', handle);
+    box.addEventListener('focusin', handle);
+}
+
 // Populate opportunities table
 function populateOpportunitiesMainTable() {
     const container = document.querySelector('.repobox');
@@ -471,6 +538,12 @@ function populateOpportunitiesMainTable() {
     // Optionally hide fee-charged opportunities when the toggle is enabled
     if (activeFilters.hideFees) {
         filtered = filtered.filter(opp => ((opp.fees || '').toLowerCase() !== 'y'));
+    }
+
+    // Optionally restrict to rolling-deadline opportunities (those without a
+    // fixed calendar date — currently surfaced as "Rolling" in the data).
+    if (activeFilters.onlyRolling) {
+        filtered = filtered.filter(opp => /rolling/i.test(String(opp.deadline || '')));
     }
 
     // Filter out opportunities whose deadline is before today and sort by
@@ -496,11 +569,20 @@ function populateOpportunitiesMainTable() {
     })();
 
     if (filtered.length === 0) {
+        currentPage = 1;
+        updatePaginationControls(1, 1);
         container.appendChild(makeStatusMessage('Nothing matches these filters.'));
         return;
     }
 
-    filtered.forEach((item) => {
+    // Clamp the page into range (a filter change can shrink the result set) and
+    // render only the current card window.
+    const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+    currentPage = Math.min(Math.max(currentPage, 1), totalPages);
+    const pageItems = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+    updatePaginationControls(currentPage, totalPages);
+
+    pageItems.forEach((item) => {
         const card = document.createElement('div');
         card.className = 'opportunity-card';
 
@@ -551,7 +633,7 @@ function populateOpportunitiesMainTable() {
         titleColumnDiv.appendChild(link);
         card.appendChild(titleColumnDiv);
 
-        // Static metadata badges (type, country, and fee status)
+        // Static metadata badges (type and fee status)
         const topRightGrid = document.createElement('div');
         topRightGrid.className = 'top-right-grid';
 
@@ -560,17 +642,10 @@ function populateOpportunitiesMainTable() {
         typeCell.innerHTML = `${item.type || '-'}`;
         topRightGrid.appendChild(typeCell);
 
-        if (item.country) {
-            const countryCell = document.createElement('div');
-            countryCell.className = 'grid-cell field country-cell';
-            countryCell.innerHTML = item.country;
-            topRightGrid.appendChild(countryCell);
-        }
-
         // Normalize fees to make comparisons case-insensitive
         const feeFlag = (item.fees || '').toLowerCase();
-        // Only show fee cell when fees is not 'n' (don't display for 'n')
-        if (feeFlag !== 'n') {
+        // Only show fee cell when fees is known and not 'n' (don't display for 'n' or blank)
+        if (feeFlag !== 'n' && feeFlag !== '') {
             const feeCell = document.createElement('div');
             feeCell.className = 'grid-cell field fee-cell';
 
@@ -580,6 +655,11 @@ function populateOpportunitiesMainTable() {
             } else {
                 feeCell.innerHTML = '-';
             }
+
+            // When the row carries usable fee details, thread a "+" marker
+            // through the token's top border that reveals them on hover.
+            const details = feeDetailsText(item);
+            if (details) attachFeeDetails(feeCell, details);
 
             topRightGrid.appendChild(feeCell);
         }
@@ -614,6 +694,34 @@ function populateOpportunitiesMainTable() {
     scheduleOpportunityLinkBackgrounds(container);
 }
 
+// Reflect the current page in the tab label and disable the arrow that would
+// run past the first/last page (a disabled button keeps its pressed-in look).
+function updatePaginationControls(page, totalPages) {
+    const tab = document.querySelector('.pagination-tab');
+    const prev = document.querySelector('.page-prev');
+    const next = document.querySelector('.page-next');
+    if (tab) tab.textContent = `Pg. ${page}`;
+    if (prev) prev.disabled = page <= 1;
+    if (next) next.disabled = page >= totalPages;
+}
+
+// Wire the Prev/Next arrows. Each moves one page, re-renders, and returns the
+// scroll position to the top so the new page starts from its first card.
+function setupPagination() {
+    const prev = document.querySelector('.page-prev');
+    const next = document.querySelector('.page-next');
+
+    const changePage = (delta) => {
+        currentPage += delta;
+        populateOpportunitiesMainTable(); // clamps currentPage into range
+        const box = document.querySelector('.repobox');
+        if (box) box.scrollTop = 0;
+    };
+
+    if (prev) prev.addEventListener('click', () => changePage(-1));
+    if (next) next.addEventListener('click', () => changePage(1));
+}
+
 // Update applied filters display
 function updateAppliedFiltersDisplay() {
     const container = document.querySelector('.applied-filters');
@@ -628,7 +736,7 @@ function updateAppliedFiltersDisplay() {
     container.style.overflow = 'hidden';
 
     // If no filters (including hideFees), show "no filters"
-    const hasFilters = (activeFilters.type && activeFilters.type.length > 0) || activeFilters.hideFees;
+    const hasFilters = (activeFilters.type && activeFilters.type.length > 0) || activeFilters.hideFees || activeFilters.onlyRolling;
 
     container.innerHTML = '';
 
@@ -653,6 +761,7 @@ function updateAppliedFiltersDisplay() {
                 removeBtn.setAttribute('aria-label', `Remove ${typeValue} filter`);
                 removeBtn.onclick = () => {
                     activeFilters.type = activeFilters.type.filter(t => t !== typeValue);
+                    currentPage = 1;
                     populateTypeDropdown();  // Refresh dropdown options
                     updateAppliedFiltersDisplay();
                     populateOpportunitiesMainTable();
@@ -678,7 +787,34 @@ function updateAppliedFiltersDisplay() {
             removeBtn.setAttribute('aria-label', 'Remove fee filter');
             removeBtn.onclick = () => {
                 activeFilters.hideFees = false;
+                currentPage = 1;
                 const cb = document.querySelector('#hide-fees-toggle');
+                if (cb) cb.checked = false;
+                updateAppliedFiltersDisplay();
+                populateOpportunitiesMainTable();
+            };
+
+            filterItem.appendChild(filterText);
+            filterItem.appendChild(removeBtn);
+            container.appendChild(filterItem);
+        }
+
+        // Display only-rolling active filter (an inclusion token)
+        if (activeFilters.onlyRolling) {
+            const filterItem = document.createElement('div');
+            filterItem.className = 'filter-item active-filter rolling-filter';
+
+            const filterText = document.createElement('span');
+            filterText.textContent = 'Rolling Deadline';
+
+            const removeBtn = document.createElement('button');
+            removeBtn.textContent = '×';
+            removeBtn.className = 'remove-filter-btn';
+            removeBtn.setAttribute('aria-label', 'Remove rolling deadline filter');
+            removeBtn.onclick = () => {
+                activeFilters.onlyRolling = false;
+                currentPage = 1;
+                const cb = document.querySelector('#rolling-toggle');
                 if (cb) cb.checked = false;
                 updateAppliedFiltersDisplay();
                 populateOpportunitiesMainTable();
@@ -718,6 +854,7 @@ function setupFilterListeners() {
                     activeFilters.type.push(val);
                 }
             }
+            currentPage = 1;
             populateTypeDropdown();  // Refresh dropdown options
             updateAppliedFiltersDisplay();
             populateOpportunitiesMainTable();
@@ -739,6 +876,19 @@ function setupFilterListeners() {
         hideFeesCheckbox.checked = Boolean(activeFilters.hideFees);
         hideFeesCheckbox.addEventListener('change', (e) => {
             activeFilters.hideFees = e.target.checked;
+            currentPage = 1;
+            updateAppliedFiltersDisplay();
+            populateOpportunitiesMainTable();
+        });
+    }
+
+    // Rolling-deadlines checkbox: restrict the list to rolling opportunities
+    const rollingCheckbox = document.querySelector('#rolling-toggle');
+    if (rollingCheckbox) {
+        rollingCheckbox.checked = Boolean(activeFilters.onlyRolling);
+        rollingCheckbox.addEventListener('change', (e) => {
+            activeFilters.onlyRolling = e.target.checked;
+            currentPage = 1;
             updateAppliedFiltersDisplay();
             populateOpportunitiesMainTable();
         });
@@ -812,6 +962,8 @@ function setupOptionDetails() {
 function init() {
     if (document.querySelector('.repobox')) loadOpportunities();
     setupNavigationState();
+    setupPagination();
+    setupFeePopups();
     setupFilterListeners();
     setupFeedbackForm();
     setupOptionDetails();

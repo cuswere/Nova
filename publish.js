@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { pathToFileURL } from 'node:url';
-import { NON_PUBLIC_TYPES, PUBLIC_FIELDS } from './opportunity-pipeline/config.js';
+import { NON_PUBLIC_TYPES, PUBLIC_FIELDS, PUBLISHED_EXTRA_FIELDS } from './opportunity-pipeline/config.js';
 import { formatPublicDeadline, normalizeDeadline, validatePublishable } from './opportunity-pipeline/normalize.js';
 import { readRows } from './opportunity-pipeline/sheets.js';
 
@@ -27,7 +27,8 @@ export function buildPublishedRows(rows, now = new Date()) {
             continue;
         }
         normalized.deadline = formatPublicDeadline(normalized.deadline);
-        published.push(Object.fromEntries(PUBLIC_FIELDS.map((field) => [field, normalized[field]])));
+        const publishedFields = [...PUBLIC_FIELDS, ...PUBLISHED_EXTRA_FIELDS];
+        published.push(Object.fromEntries(publishedFields.map((field) => [field, normalized[field]])));
     }
     published.sort((left, right) => {
         if (left.deadline === 'Rolling') return 1;
