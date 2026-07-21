@@ -11,11 +11,12 @@ const PAGE_SIZE = 50;
 let currentPage = 1;
 
 // --- Feedback form config ---
-// Paste your Google Form's formResponse URL and entry.XXXXXXXXX field IDs here.
-// See README.md for how to find them. Leave blank to show a "not connected" notice.
-const FEEDBACK_FORM_ACTION = '';
-const FEEDBACK_ENTRY_NAME = '';
-const FEEDBACK_ENTRY_SUGGESTION = '';
+// Apps Script web-app /exec URL that appends rows to the feedback spreadsheet.
+// Source of the script: tools/feedback-apps-script.gs (deploy it, paste the URL
+// here). Leave the action blank to show a "not connected" notice instead.
+const FEEDBACK_FORM_ACTION = 'https://script.google.com/macros/s/AKfycbzlRGwFvvOxhwLVMfcbah_PhqAkTENbD6A2MEzTpojI7HdRhT4HRa4FPnbIcHa9adY/exec';
+const FEEDBACK_ENTRY_NAME = 'name';
+const FEEDBACK_ENTRY_SUGGESTION = 'message';
 
 // A short stepped wipe marks a new document without delaying interaction.
 // Removing the overlay after its final staggered frame keeps it out of the
@@ -463,11 +464,17 @@ function scheduleOpportunityLinkBackgrounds(container) {
     });
 }
 
+// Sources state amounts as "5.00 USD"; the site prefers "$5.00". Purely a
+// display concern, so the stored record keeps whatever the source wrote.
+function formatFeeAmounts(text) {
+    return text.replace(/\b(\d[\d,]*(?:\.\d+)?)\s*USD\b/g, '$$$1');
+}
+
 // A fee-details value is only worth surfacing when it names an actual figure.
 // Purely descriptive text (no digits) is treated as blank/invalid.
 function feeDetailsText(item) {
     const raw = String((item && item.fee_details) || '').trim();
-    return /\d/.test(raw) ? raw : '';
+    return /\d/.test(raw) ? formatFeeAmounts(raw) : '';
 }
 
 function eligibilityPopupInfo(item) {
@@ -506,9 +513,15 @@ function attachTokenDetails(cell, labelText, details, ariaPrefix) {
     popupTail.className = 'details-popup-tail';
     popupTail.setAttribute('aria-hidden', 'true');
 
+    // The text sits in its own span so the caret cursor covers the words only,
+    // not the content box's padding.
+    const popupText = document.createElement('span');
+    popupText.className = 'details-popup-text';
+    popupText.textContent = details;
+
     const popupContent = document.createElement('span');
     popupContent.className = 'details-popup-content';
-    popupContent.textContent = details;
+    popupContent.appendChild(popupText);
     popup.append(popupTail, popupContent);
 
     cell.replaceChildren(label, fold, popup);
@@ -523,7 +536,7 @@ function setupDetailsPopups() {
     const place = (cell) => {
         const popup = cell.querySelector('.details-popup');
         if (!popup) return;
-        // The popup is already rendered (via :hover / :focus-within) when this
+        // The popup is already rendered (via :hover / :focus-visible) when this
         // runs, so offsetHeight reflects its true height.
         const boxRect = box.getBoundingClientRect();
         const cellRect = cell.getBoundingClientRect();
@@ -542,24 +555,47 @@ function setupDetailsPopups() {
         // placement can incorrectly cancel it.
         popup.style.setProperty('--popup-shift-x', '0px');
         const popupRect = popup.getBoundingClientRect();
-        const inset = 4;
+        const fold = cell.querySelector('.detail-token-fold');
+        const tail = popup.querySelector('.details-popup-tail');
+        const inset = 8;
+        // `.repobox` reserves a scrollbar gutter (scrollbar-gutter: stable)
+        // inside its border box. boxRect.right lands past that gutter, so
+        // clamping to it lets the popup collide with the gutter; clientWidth
+        // excludes the gutter, giving the true content edge.
+        const contentLeft = boxRect.left + box.clientLeft;
+        const contentRight = contentLeft + box.clientWidth;
         let shiftX = 0;
-        if (popupRect.left < boxRect.left + inset) {
-            shiftX = boxRect.left + inset - popupRect.left;
-        } else if (popupRect.right > boxRect.right - inset) {
-            shiftX = boxRect.right - inset - popupRect.right;
+        if (cell.classList.contains('eligibility-cell')) {
+            // The eligibility token is inset from the pane's right edge; let its
+            // dialogue reclaim that strip and sit flush to the pane instead.
+            shiftX = contentRight - inset - popupRect.right;
+        } else if (popupRect.right > contentRight - inset) {
+            shiftX = contentRight - inset - popupRect.right;
+        }
+
+        // The tail belongs near the dialogue's right edge — no further in than a
+        // third of the way to its center. When the fold sits further left than
+        // that, slide the whole dialogue left to meet the tail rather than
+        // letting the tail wander toward the middle.
+        const foldRect = fold ? fold.getBoundingClientRect() : null;
+        if (foldRect && tail) {
+            const foldCenter = foldRect.left + foldRect.width / 2;
+            const maxFromRight = Math.max(popupRect.width / 6, tail.offsetWidth);
+            const overshoot = popupRect.right + shiftX - foldCenter - maxFromRight;
+            if (overshoot > 0) shiftX -= overshoot;
+        }
+        if (popupRect.left + shiftX < contentLeft + inset) {
+            shiftX = contentLeft + inset - popupRect.left;
         }
         popup.style.setProperty('--popup-shift-x', `${shiftX}px`);
 
         // A dialogue may be centered (fee) or edge-aligned (eligibility), and
         // may then shift to stay within the pane. Position the tail after that
         // final placement so its point always meets the fold's center.
-        const fold = cell.querySelector('.detail-token-fold');
-        const tail = popup.querySelector('.details-popup-tail');
-        if (fold && tail) {
+        if (foldRect && tail) {
             const finalPopupRect = popup.getBoundingClientRect();
-            const foldRect = fold.getBoundingClientRect();
-            const tailLeft = foldRect.left + foldRect.width / 2 - finalPopupRect.left - tail.offsetWidth / 2;
+            const rawLeft = foldRect.left + foldRect.width / 2 - finalPopupRect.left - tail.offsetWidth / 2;
+            const tailLeft = Math.max(1, Math.min(rawLeft, finalPopupRect.width - tail.offsetWidth - 1));
             popup.style.setProperty('--tail-left', `${tailLeft}px`);
         }
     };
@@ -601,6 +637,14 @@ function setupDetailsPopups() {
         if (event.target.closest && event.target.closest('.details-popup')) return;
         const cell = event.target.closest && event.target.closest('.detail-token.has-details');
         if (cell && box.contains(cell)) togglePinned(cell);
+    });
+    // A tap anywhere else in the document closes a pinned dialogue. The token's
+    // own click already bubbles to here, so skip when the tap landed inside it.
+    document.addEventListener('click', (event) => {
+        const cell = event.target.closest && event.target.closest('.detail-token.has-details');
+        box.querySelectorAll('.detail-token.popup-pinned').forEach((other) => {
+            if (other !== cell) setPinned(other, false);
+        });
     });
     box.addEventListener('keydown', (event) => {
         const cell = event.target.closest && event.target.closest('.detail-token.has-details');
@@ -1015,49 +1059,159 @@ function setupFilterListeners() {
 }
 
 
-// Wire up the feedback form to submit to a Google Form's formResponse endpoint.
+// Wire up the feedback form to submit to the Apps Script feedback endpoint.
 function setupFeedbackForm() {
     const form = document.querySelector('.feedback-form');
     if (!form) return;
     const status = form.querySelector('.form-status');
     const submitBtn = form.querySelector('.form-submit');
 
+    // Disabling the button covers ordinary double-clicks, but a form can also be
+    // submitted by other routes (Enter, requestSubmit), so the real re-entry
+    // guard is this flag — without it a spammed button sends duplicate rows.
+    let isSubmitting = false;
+
+    const setStatus = (text, kind) => {
+        if (!status) return;
+        status.textContent = text;
+        status.className = kind ? `form-status form-status-${kind}` : 'form-status';
+    };
+
+    const setLoading = () => {
+        if (!status) return;
+        status.className = 'form-status form-status-loading';
+        status.textContent = '';
+        const spinner = document.createElement('span');
+        spinner.className = 'form-spinner';
+        spinner.setAttribute('aria-hidden', 'true');
+        status.append(spinner, 'Sending…');
+    };
+
+    // Success isn't one label but a row of them that pop in left to right, each
+    // one clickable: it opens a single-option menu whose option retires that
+    // label. The stagger and the fade are CSS; this only builds and toggles.
+    const THANKS_COUNT = 3;
+    const THANKS_STAGGER_MS = 50;
+    const THANKS_FADE_MS = 200;
+
+    const closeThanksMenus = (except) => {
+        if (!status) return;
+        status.querySelectorAll('.thanks-item.is-open').forEach(item => {
+            if (item === except) return;
+            item.classList.remove('is-open');
+            const label = item.querySelector('.thanks-label');
+            if (label) label.setAttribute('aria-expanded', 'false');
+        });
+    };
+
+    const dismissThanks = (item) => {
+        closeThanksMenus();
+        item.classList.add('is-leaving');
+        // The node stays in the row after the fade rather than being removed:
+        // removing it would slide the remaining labels leftward, so a dismissed
+        // middle label would hand its spot to the one on its right.
+        window.setTimeout(() => item.classList.add('is-gone'), THANKS_FADE_MS);
+    };
+
+    const makeThanksItem = (index) => {
+        const item = document.createElement('span');
+        item.className = 'thanks-item';
+        // Each label simply becomes visible on its turn — the sequencing is the
+        // effect, with no transition on the label itself.
+        window.setTimeout(() => item.classList.add('is-in'), index * THANKS_STAGGER_MS);
+
+        // type=button matters: these live inside the form, and the default
+        // submit type would re-post the feedback on every click.
+        const label = document.createElement('button');
+        label.type = 'button';
+        label.className = 'thanks-label';
+        label.textContent = 'THANK YOU';
+        label.setAttribute('aria-haspopup', 'true');
+        label.setAttribute('aria-expanded', 'false');
+        label.addEventListener('click', () => {
+            const open = !item.classList.contains('is-open');
+            closeThanksMenus(item);
+            item.classList.toggle('is-open', open);
+            label.setAttribute('aria-expanded', String(open));
+        });
+
+        const menu = document.createElement('span');
+        menu.className = 'thanks-menu';
+
+        const option = document.createElement('button');
+        option.type = 'button';
+        option.className = 'thanks-menu-option';
+        option.textContent = "You're welcome";
+        option.addEventListener('click', () => dismissThanks(item));
+
+        menu.appendChild(option);
+        item.append(label, menu);
+        return item;
+    };
+
+    const renderThanks = () => {
+        if (!status) return;
+        status.textContent = '';
+        status.className = 'form-status form-status-thanks';
+        const stack = document.createElement('span');
+        stack.className = 'thanks-stack';
+        for (let i = 0; i < THANKS_COUNT; i += 1) stack.appendChild(makeThanksItem(i));
+        status.appendChild(stack);
+    };
+
+    // An open menu should not survive a click elsewhere or an Escape press.
+    document.addEventListener('click', (event) => {
+        if (!event.target.closest('.thanks-item')) closeThanksMenus();
+    });
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') closeThanksMenus();
+    });
+
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
+        if (isSubmitting) return;
+
+        // The form is `novalidate`, so the empty-message check is ours to make.
+        const suggestion = form.querySelector('#suggestion');
+        const message = suggestion ? suggestion.value.trim() : '';
+        if (!message) {
+            setStatus('There needs to be a message.', 'error');
+            if (suggestion) suggestion.focus();
+            return;
+        }
 
         if (!FEEDBACK_FORM_ACTION || !FEEDBACK_ENTRY_SUGGESTION) {
-            if (status) {
-                status.textContent = 'Feedback form is not yet connected — see README.md to set it up.';
-                status.className = 'form-status form-status-error';
-            }
+            setStatus('Feedback form is not yet connected — see tools/feedback-apps-script.gs to set it up.', 'error');
             return;
         }
 
         const body = new URLSearchParams();
         if (FEEDBACK_ENTRY_NAME) body.set(FEEDBACK_ENTRY_NAME, form.querySelector('#name').value);
-        body.set(FEEDBACK_ENTRY_SUGGESTION, form.querySelector('#suggestion').value);
+        body.set(FEEDBACK_ENTRY_SUGGESTION, message);
 
+        isSubmitting = true;
         if (submitBtn) submitBtn.disabled = true;
+        setLoading();
         try {
-            // Google Forms doesn't return a readable CORS response, so we fire-and-forget with no-cors.
-            await fetch(FEEDBACK_FORM_ACTION, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body
-            });
+            // Apps Script doesn't return a readable CORS response, so this is
+            // fire-and-forget with no-cors. The floor keeps a fast round-trip
+            // from flashing the spinner for a single frame.
+            await Promise.all([
+                fetch(FEEDBACK_FORM_ACTION, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body
+                }),
+                new Promise(resolve => window.setTimeout(resolve, 500))
+            ]);
             form.reset();
-            if (status) {
-                status.textContent = 'Thanks — sent.';
-                status.className = 'form-status form-status-success';
-            }
+            renderThanks();
         } catch (error) {
             console.error('Error submitting feedback:', error);
-            if (status) {
-                status.textContent = 'Something went wrong — please try again.';
-                status.className = 'form-status form-status-error';
-            }
+            setStatus('Something went wrong — please try again.', 'error');
         } finally {
+            isSubmitting = false;
             if (submitBtn) submitBtn.disabled = false;
         }
     });

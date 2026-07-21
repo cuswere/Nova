@@ -90,6 +90,11 @@ review rather than triggering paid model calls. (`openai` is a dependency but do
 - **Work directly on `main`; ask before creating feature branches.**
 - No build step / no framework / minimal deps — keep it that way.
 - Prefer relative links so the site works from any hosting path.
+- For simple, well-scoped frontend changes (a CSS tweak, a small copy/markup
+  edit), just make the edit — don't spin up a preview server or run browser
+  checks. Save that verification effort for changes with real behavioral risk
+  (new interaction logic, event wiring, layout/stacking fixes) where a visual
+  or DOM check would actually catch something a code read wouldn't.
 
 ## Snapshot (2026-07-20 — VOLATILE, re-check before trusting)
 

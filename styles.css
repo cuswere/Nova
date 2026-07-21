@@ -14,6 +14,11 @@
     --raise: inset -1px -1px #161616, inset 1px 1px #fff, inset -2px -2px #888, inset 2px 2px #ddd;
     --sink: inset -1px -1px #fff, inset 1px 1px #7b7b7b, inset -2px -2px #ddd, inset 2px 2px #202020;
     --sink-shallow: inset -1px -1px #fff, inset 1px 1px #7b7b7b;
+    /* Same bevel structure as --raise/--sink, retinted for a saturated blue
+       face. The grey ramps assume a #c5c5c5 background: on blue their white
+       highlight blows out and their two shadow steps collapse into one. */
+    --raise-blue: inset -1px -1px #00002e, inset 1px 1px #a8a8ff, inset -2px -2px #000090, inset 2px 2px #5a5aff;
+    --sink-blue: inset -1px -1px #a8a8ff, inset 1px 1px #000090, inset -2px -2px #5a5aff, inset 2px 2px #00002e;
     --label-bevel: inset -1px -1px #888, inset 1px 1px #eee;
     --mono: monospace;
 }
@@ -100,7 +105,9 @@ button { cursor: pointer; }
 .title-options { display: flex; gap: 6px; margin-left: auto; }
 .title-option { display: inline-flex; align-items: center; min-height: 23px; padding: 4px 10px; color: var(--ink); background: var(--face); box-shadow: var(--raise); font-size: 12px; }
 .title-option:hover { color: var(--ink); background: var(--face-light); text-decoration: none; }
-.title-option:active, .title-option.is-navigating { box-shadow: var(--sink); }
+/* Pressing nudges the label 1px down-right, as on .page-arrow: the padding
+   totals are unchanged, so only the content shifts and the box holds size. */
+.title-option:active, .title-option.is-navigating { box-shadow: var(--sink); padding: 5px 9px 3px 11px; }
 
 .home-wordmark { display: flex; width: fit-content; margin: 0 auto 15px; color: var(--ink); font-size: clamp(30px, 5vw, 50px); font-weight: 600; letter-spacing: -.12em; line-height: 1; }
 .home-wordmark span { padding: 5px 12px; }
@@ -149,7 +156,14 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
    .repobox itself sits behind its children, so the cards conceal it as they
    scroll. This non-scrolling overlay preserves the double recessed frame. */
 .repo::after { content: ""; position: absolute; z-index: 1; inset: 3px; box-shadow: var(--sink); pointer-events: none; }
-.repobox { height: 100%; max-height: 70vh; min-height: 70vh; overflow-x: hidden; overflow-y: scroll; scrollbar-gutter: stable; background: var(--field); padding: 4px; }
+/* isolation: isolate walls off every z-index used inside (card links z-index:2,
+   detail-token folds z-index:3, popups z-index:40/41) into their own stacking
+   context. Without it those values are compared directly against .repo::after's
+   z-index:1 sink overlay above, and every one of them is higher — so folds and
+   popups would poke out past the recessed frame instead of being covered by it
+   like the rest of the card content. Isolated, the whole repobox paints as one
+   auto-stacked unit that the overlay's z-index:1 simply sits in front of. */
+.repobox { isolation: isolate; height: 100%; max-height: 70vh; min-height: 70vh; overflow-x: hidden; overflow-y: scroll; scrollbar-gutter: stable; background: var(--field); padding: 4px; }
 .repo-status-message { margin: auto; padding: 20px; color: var(--muted); text-align: center; }
 .opportunity-card { display: grid; grid-template-columns: minmax(0, 1.5fr) 1fr; column-gap: 14px; padding: 12px; border-bottom: 1px solid #999; background: var(--field); }
 .opportunity-main-column, .opportunity-details-column { display: flex; flex-direction: column; gap: 8px; min-width: 0; align-self: start; }
@@ -184,10 +198,30 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
    cell reserves matching right-side padding to keep the centered label clear
    of its footprint. Both reveal the details on hover/focus, flipping
    up/down to avoid clipping. */
-.detail-token.has-details { --detail-tail-length: 8px; --detail-tail-width: 12px; --detail-fold-size: 13px; --detail-fold-center-offset: 7.5px; position: relative; overflow: visible; padding-right: 16px; cursor: help; }
+.detail-token.has-details { --detail-tail-length: 8px; --detail-tail-width: 12px; --detail-fold-size: 13px; --detail-fold-center-offset: 7.5px; position: relative; overflow: visible; padding-right: 16px; cursor: help; user-select: none; }
 .detail-token.has-details:focus-visible { outline: 1px dotted var(--ink); outline-offset: 2px; }
+/* Pressing the token dims it briefly — the only motion in an otherwise static
+   affordance, so a click reads as registered before the popup pins. A `filter`
+   on the token itself would dim its whole subtree, including the corner fold
+   (z-index 3) and any already-open popup (z-index 40), bleeding their colors
+   into the darkened layer. This overlay sits above the plain label (z-index
+   auto) but below both, so it dims only the token's own face. Excluded when
+   the popup itself is the thing under the pointer: the popup is a DOM
+   descendant of the token, so :active on it bubbles to the token too, and
+   without the :has() guard a press inside the popup would dim the token. */
+.detail-token.has-details:active:not(:has(.details-popup:hover))::before { content: ""; position: absolute; inset: 0; z-index: 1; background: rgba(0, 0, 0, .15); pointer-events: none; }
 .detail-token-label { position: relative; display: inline-block; }
-.detail-token-label::after { content: ""; position: absolute; left: 0; right: -4px; bottom: -1px; height: 2px; background-image: linear-gradient(to right, var(--ink) 0 2px, transparent 2px 5px); background-size: 5px 2px; background-position: left center; background-repeat: round no-repeat; }
+/* The underline is a hover-only cue: the corner fold already advertises that
+   details exist at rest. currentColor so it survives the pinned inversion. */
+.detail-token-label::after { content: ""; position: absolute; left: 0; right: -4px; bottom: -1px; height: 2px; display: none; background-image: linear-gradient(to right, currentColor 0 2px, transparent 2px 5px); background-size: 5px 2px; background-position: left center; background-repeat: round no-repeat; }
+/* Focus styling keys off :focus-visible, never :focus-within. Clicking
+   anywhere inside the token — including inside its popup — hands the token
+   browser focus, since it is the nearest focusable ancestor. Reacting to that
+   would make a click in the popup restyle the token as if hovered.
+   :focus-visible matches keyboard focus only, so the keyboard affordance
+   survives while mouse-driven focus stays invisible. */
+.detail-token.has-details:hover .detail-token-label::after,
+.detail-token.has-details:focus-visible .detail-token-label::after { display: block; }
 /* Sits flush against the INSIDE of the cell's border (top/right: 0 lands
    exactly on the padding edge) rather than extending out over it, so the
    cell's own border stays visible unbroken. Only the inner two sides get
@@ -195,17 +229,46 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
    instead of a second coincident line, so there's nothing to drift at
    different zoom levels. */
 .detail-token-fold { position: absolute; top: 0; right: 0; width: var(--detail-fold-size, 13px); height: var(--detail-fold-size, 13px); display: grid; place-items: center; color: var(--ink); background: inherit; border-bottom: 1px solid var(--ink); border-left: 1px solid var(--ink); font-size: 12px; font-weight: 700; line-height: 1; z-index: 3; }
-.detail-token.popup-pinned .detail-token-fold { color: #fff; background: var(--blue-bright); }
-.details-popup { position: absolute; right: -1px; bottom: 100%; transform: translateX(calc(var(--popup-inline-offset, 0px) + var(--popup-shift-x, 0px))); z-index: 40; display: none; width: max-content; min-width: 150px; max-width: min(340px, 75vw); padding-bottom: var(--detail-tail-length); color: var(--ink); font-size: 12px; font-weight: 400; line-height: 1.4; text-align: left; text-transform: none; letter-spacing: 0; cursor: text; }
+/* Hover inks the fold in; the eligibility token additionally clears its own
+   field wash so the filled corner reads against plain white. */
+.detail-token.has-details:hover .detail-token-fold,
+.detail-token.has-details:focus-visible .detail-token-fold { color: #fff; background: var(--ink); }
+.eligibility-cell.detail-token.has-details:hover,
+.eligibility-cell.detail-token.has-details:focus-visible { background: #fff; }
+/* Pinned is the full inversion, and must win over the hover/focus rules. */
+.detail-token.popup-pinned,
+.eligibility-cell.detail-token.has-details.popup-pinned:hover,
+.eligibility-cell.detail-token.has-details.popup-pinned:focus-visible { color: #fff; background: var(--ink); }
+/* The fold stays black-filled whenever pinned, hover/focus notwithstanding —
+   no white-border variant. */
+.detail-token.popup-pinned .detail-token-fold { color: #fff; background: var(--ink); }
+.details-popup { position: absolute; right: -1px; bottom: 100%; transform: translateX(calc(var(--popup-inline-offset, 0px) + var(--popup-shift-x, 0px))); z-index: 40; display: none; width: max-content; min-width: 150px; max-width: min(340px, 75vw); padding-bottom: var(--detail-tail-length); color: var(--ink); font-size: 14px; font-weight: 400; line-height: 1.4; text-align: left; text-transform: none; letter-spacing: 0; cursor: default; user-select: text; }
+/* An actively hovered popup always wins over a merely pinned one that happens
+   to sit later in paint order. */
+.detail-token.has-details:hover .details-popup,
+.detail-token.has-details:focus-visible:not(.popup-pinned) .details-popup { z-index: 41; }
 .fee-cell .details-popup { --dialogue-background: var(--amber); --popup-inline-offset: 50%; right: var(--detail-fold-center-offset); }
-.details-popup-content { position: relative; z-index: 1; display: block; max-height: 220px; overflow-y: auto; padding: 8px 10px; white-space: pre-line; overflow-wrap: anywhere; background: var(--dialogue-background, #fff); border: 1px solid var(--ink); box-shadow: none; }
+.fee-cell .details-popup-content { text-align: center; font-size: 18px; }
+.details-popup-content { position: relative; z-index: 1; display: block; max-height: 220px; overflow-y: auto; padding: 4px 10px; white-space: pre-line; overflow-wrap: anywhere; background: var(--dialogue-background, #fff); border: 1px solid var(--ink); box-shadow: 2px 2px 0px var(--ink); cursor: default; }
+/* No separate track gutter — just the thumb, floating on the popup's own
+   background. Its right edge sits flush against the popup's real border (the
+   scrollbar occupies the padding box, right up against it), so that side of
+   the thumb's own border is dropped to avoid doubling into a 2px line. */
+.details-popup-content::-webkit-scrollbar-track { background: transparent; }
+.details-popup-content::-webkit-scrollbar-thumb { border-right: none; }
+/* Only the glyphs themselves take the text caret; the padding and the box
+   around them stay a plain pointer. */
+.details-popup-text { cursor: text; }
 .details-popup-tail { position: absolute; left: var(--tail-left, 0px); bottom: 0; z-index: 0; width: var(--detail-tail-width); height: var(--detail-tail-length); background: var(--ink); box-shadow: none; filter: none; clip-path: polygon(0 0, 100% 0, 50% 100%); }
 .details-popup-tail::after { content: ""; position: absolute; top: 0; left: 1px; width: calc(var(--detail-tail-width) - 2px); height: calc(var(--detail-tail-length) - 1px); background: var(--dialogue-background, #fff); clip-path: polygon(0 0, 100% 0, 50% 100%); }
-.detail-token.popup-down .details-popup { top: var(--detail-fold-size, 13px); bottom: auto; padding-top: var(--detail-tail-length); padding-bottom: 0; }
+/* Opening downward, the tail hangs from the token's own bottom border rather
+   than from the fold's — the fold's lower edge sits mid-cell, and a tail
+   starting there would cross the token's remaining height. */
+.detail-token.popup-down .details-popup { top: calc(100% + 1px); bottom: auto; padding-top: var(--detail-tail-length); padding-bottom: 0; }
 .detail-token.popup-down .details-popup-tail { top: 0; bottom: auto; clip-path: polygon(50% 0, 100% 100%, 0 100%); }
 .detail-token.popup-down .details-popup-tail::after { top: 1px; clip-path: polygon(50% 0, 100% 100%, 0 100%); }
 .detail-token.has-details:hover .details-popup,
-.detail-token.has-details:focus-within .details-popup,
+.detail-token.has-details:focus-visible .details-popup,
 .detail-token.popup-pinned .details-popup { display: block; }
 .detail-token.popup-dismissed .details-popup { display: none !important; }
 .eligibility-cell { align-self: flex-end; min-height: 20px; padding: 3px 5px; color: var(--ink); background: var(--field); box-shadow: none; margin-right: 10px; }
@@ -283,11 +346,51 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
 .form-textarea { min-height: 160px; resize: vertical; }
 .form-input:focus, .form-textarea:focus { outline: 1px dotted var(--ink); outline-offset: -4px; }
 .form-row.name { max-width: 360px !important; }
-.form-submit { align-self: flex-start; padding: 7px 12px; color: #fff; background: var(--blue); border: 0; box-shadow: var(--raise); font-weight: 600; }
-.form-submit:hover { background: var(--blue-bright); }
-.form-submit:active { box-shadow: var(--sink); }
-.form-status { min-height: 1.35em; margin: 9px 0 0; font-size: 12px; }
-.form-status-success { color: var(--green); }.form-status-error { color: var(--red); }
+/* The only raised control not sitting on --face, so it carries the blue bevel. */
+.form-submit { align-self: flex-start; padding: 7px 12px; color: var(--ink); background: var(--face); outline: 1px solid var(--ink); outline-offset: -1px; border: 0; box-shadow: var(--raise); font-weight: 600; }
+/* Lightens on hover the way the face buttons go --face → --face-light. */
+.form-submit:hover { background: var(--face); }
+.form-submit:active { box-shadow: var(--sink); padding: 8px 11px 6px 13px; }
+.form-submit:focus-visible { outline: 1px dotted #fff; outline-offset: -4px; }
+.form-submit[disabled] { background: var(--face); box-shadow: var(--sink); opacity: 0.6; cursor: default; }
+.form-submit[disabled]:hover { background: var(--face); }
+/* The status sits beside the button rather than under it, so the row is the
+   one horizontal form-row; it wraps on narrow screens instead of squeezing. */
+.feedback-form .form-row.form-actions { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 12px; min-height: 60px}
+.form-actions .form-submit { align-self: center; }
+.form-status { min-height: 1.35em; margin: 0; font-size: 14px; padding: 7px; font-weight: bold; color: var(--ink); background: var(--amber); box-shadow: var(--sink-shallow);}
+.form-status:empty { display: none; }
+.form-status-success, .thanks-label { background: var(--green); color: #fff; font-size: 24px; box-shadow: none;}
+.form-status-error {  font-weight: normal; }
+
+/* Success is a row of THANK YOU labels, so the status itself stops being the
+   box and each label carries the green. They pop in left to right on a
+   per-item delay, and each opens a one-option menu that retires it. */
+.form-status-thanks { padding: 0; background: none; box-shadow: none; }
+.thanks-stack { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+/* Hidden rather than absent, both before a label's turn and after it is
+   dismissed, so the row's slots never shift. */
+.thanks-item { position: relative; display: inline-flex; visibility: hidden; }
+.thanks-item.is-in { visibility: visible; }
+.thanks-item.is-gone { visibility: hidden; }
+.thanks-label { padding: 8px; border: 0; font: inherit; font-size: 24px; font-weight: bold; line-height: 1.35; }
+.thanks-label:hover, .thanks-label:focus-visible { outline: 2px dashed #fff; outline-offset: -5px; }
+.thanks-menu { position: absolute; top: calc(100% + 3px); left: 0; z-index: 40; display: none; }
+.thanks-item.is-open .thanks-menu { display: block; }
+.thanks-menu-option { display: block; width: 100%; padding: 4px 10px; color: var(--ink); background: #fff; border: 1px solid var(--ink); box-shadow: 2px 2px 0 var(--ink); font-size: 14px; font-weight: 400; text-align: left; white-space: nowrap; }
+.thanks-menu-option:hover { color: #fff; background: var(--blue-bright); }
+.thanks-menu-option:active { box-shadow: none; transform: translate(2px, 2px); }
+.thanks-item.is-leaving { pointer-events: none; animation: thanks-fade 200ms steps(2, end) forwards; }
+@keyframes thanks-fade { from { opacity: 1; } to { opacity: 0; } }
+/* The spinner shares the status slot, so the final message simply replaces it. */
+.form-status-loading { font-size: 14px; font-weight: 600; background: none;}
+.form-spinner { display: inline-block; width: 14px; height: 14px; margin-right: 8px; vertical-align: -1px; background: #fff; box-shadow: var(--raise); animation: form-spinner-step 40ms steps(4, end) infinite; }
+@keyframes form-spinner-step { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+    .form-spinner { animation: none; }
+    /* Labels still appear and still leave — just without the fade. */
+    .thanks-item.is-leaving { opacity: 0; animation: none; }
+}
 
 ::-webkit-scrollbar { width: 14px; height: 14px; }
 ::-webkit-scrollbar-track { background: var(--face); }

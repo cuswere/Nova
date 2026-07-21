@@ -66,17 +66,26 @@ The Sheet's first six columns are the public site contract: `name`, `deadline`, 
 
 ## Feedback form setup
 
-`feedback.html` posts to a Google Form so responses land in a Sheet you own. To connect it:
+`feedback.html` posts `name` and `message` to a Google Apps Script web app, which
+appends them to a "Feedback" tab in a spreadsheet you own. No Google Form, no
+backend. To connect it:
 
-1. Create a Google Form with a short-answer "Name" field and a paragraph "Suggestion" field.
-2. Open the form's live URL, right-click each field → Inspect, and find its `name="entry.NNNNNNNN"` attribute. (Or use the form's "Get pre-filled link" option, fill in placeholder values, and read the entry IDs out of the generated URL.)
-3. Take the form's `/viewform` URL and swap it for `/formResponse`.
-4. In [app.js](app.js), fill in:
+1. Open the feedback spreadsheet → **Extensions → Apps Script**, and replace the
+   starter `Code.gs` with the contents of
+   [tools/feedback-apps-script.gs](tools/feedback-apps-script.gs). Save.
+2. **Deploy → New deployment → Web app**, with *Execute as: Me* and
+   *Who has access: Anyone*. Authorize when prompted (the "unverified app"
+   warning is expected for your own script — continue past it).
+3. Copy the deployment's `/exec` URL and put it in [app.js](app.js):
    ```js
-   const FEEDBACK_FORM_ACTION = 'https://docs.google.com/forms/d/e/YOUR_FORM_ID/formResponse';
-   const FEEDBACK_ENTRY_NAME = 'entry.111111111';
-   const FEEDBACK_ENTRY_SUGGESTION = 'entry.222222222';
+   const FEEDBACK_FORM_ACTION = 'https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec';
    ```
+   The two entry constants below it are already set to `name` / `message` and
+   don't need changing.
+
+The script creates the "Feedback" tab and its header row on the first submission.
+Re-deploying after any script edit requires **Deploy → Manage deployments → Edit
+→ Version: New version**, otherwise the old code keeps serving.
 
 Until these are filled in, the form shows a "not yet connected" notice instead of pretending to submit.
 
