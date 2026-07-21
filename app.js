@@ -470,35 +470,53 @@ function feeDetailsText(item) {
     return /\d/.test(raw) ? raw : '';
 }
 
-// Build the "+" affordance (straddling the token's top border) and its hover
-// popup carrying the fee details.
-function attachFeeDetails(feeCell, details) {
-    feeCell.classList.add('has-fee-details');
-
-    const marker = document.createElement('span');
-    marker.className = 'fee-details-marker';
-    marker.textContent = '+';
-    marker.tabIndex = 0;
-    marker.setAttribute('role', 'button');
-    marker.setAttribute('aria-label', `Fee details: ${details}`);
-
-    const popup = document.createElement('span');
-    popup.className = 'fee-details-popup';
-    popup.setAttribute('role', 'tooltip');
-    popup.textContent = details;
-
-    feeCell.appendChild(marker);
-    feeCell.appendChild(popup);
+function eligibilityDetailsText(item) {
+    return String((item && item.eligibility_details) || '').trim();
 }
 
-// Open each fee-details popup up or down depending on where its token sits in
+// Telegraph extra details on a token: a dotted underline on the label
+// plus a "+" badge folded into the top-right corner (both crisp, anchored on
+// whole-pixel offsets — no floating half-pixel-centered element), revealing a
+// hover/focus popup. The whole token is the target, so it's keyboard-focusable.
+function attachTokenDetails(cell, labelText, details, ariaPrefix) {
+    cell.classList.add('detail-token', 'has-details');
+    cell.tabIndex = 0;
+    cell.setAttribute('aria-label', `${ariaPrefix}: ${details}`);
+
+    // Wrap the existing label ("fee"/"-") so only the word carries the underline.
+    const label = document.createElement('span');
+    label.className = 'detail-token-label';
+    label.textContent = labelText;
+
+    const fold = document.createElement('span');
+    fold.className = 'detail-token-fold';
+    fold.textContent = '+';
+    fold.setAttribute('aria-hidden', 'true');
+
+    const popup = document.createElement('span');
+    popup.className = 'details-popup';
+    popup.setAttribute('role', 'tooltip');
+
+    const popupTail = document.createElement('span');
+    popupTail.className = 'details-popup-tail';
+    popupTail.setAttribute('aria-hidden', 'true');
+
+    const popupContent = document.createElement('span');
+    popupContent.className = 'details-popup-content';
+    popupContent.textContent = details;
+    popup.append(popupTail, popupContent);
+
+    cell.replaceChildren(label, fold, popup);
+}
+
+// Open each details popup up or down depending on where its token sits in
 // the scroll viewport, so it isn't clipped at the list's top or bottom edge.
-function setupFeePopups() {
+function setupDetailsPopups() {
     const box = document.querySelector('.repobox');
     if (!box) return;
 
     const place = (cell) => {
-        const popup = cell.querySelector('.fee-details-popup');
+        const popup = cell.querySelector('.details-popup');
         if (!popup) return;
         // The popup is already rendered (via :hover / :focus-within) when this
         // runs, so offsetHeight reflects its true height.
@@ -507,13 +525,29 @@ function setupFeePopups() {
         const popupHeight = popup.offsetHeight;
         const spaceBelow = boxRect.bottom - cellRect.bottom;
         const spaceAbove = cellRect.top - boxRect.top;
-        const openUp = spaceBelow < popupHeight + 14 && spaceAbove > spaceBelow;
+        // Up is the normal direction. Only fall back to opening down when the
+        // popup will not fit above and the lower side has more room.
+        const openUp = !(spaceAbove < popupHeight + 14 && spaceBelow > spaceAbove);
         cell.classList.toggle('popup-up', openUp);
         cell.classList.toggle('popup-down', !openUp);
+
+        // Keep wide dialogue windows inside the scrolling results pane. The
+        // tail moves back by the same amount, preserving its connection to the
+        // token's top-right "+" corner after the window shifts horizontally.
+        const popupRect = popup.getBoundingClientRect();
+        const inset = 4;
+        let shiftX = 0;
+        if (popupRect.left < boxRect.left + inset) {
+            shiftX = boxRect.left + inset - popupRect.left;
+        } else if (popupRect.right > boxRect.right - inset) {
+            shiftX = boxRect.right - inset - popupRect.right;
+        }
+        popup.style.setProperty('--popup-shift-x', `${shiftX}px`);
+        popup.style.setProperty('--tail-shift-x', `${shiftX}px`);
     };
 
     const handle = (event) => {
-        const cell = event.target.closest && event.target.closest('.fee-cell.has-fee-details');
+        const cell = event.target.closest && event.target.closest('.detail-token.has-details');
         if (cell && box.contains(cell)) place(cell);
     };
 
@@ -633,14 +667,18 @@ function populateOpportunitiesMainTable() {
         titleColumnDiv.appendChild(link);
         card.appendChild(titleColumnDiv);
 
-        // Static metadata badges (type and fee status)
+        // Right-side details are their own stack, independent from how many
+        // lines the title uses in the left column.
         const topRightGrid = document.createElement('div');
         topRightGrid.className = 'top-right-grid';
+
+        const metadataRow = document.createElement('div');
+        metadataRow.className = 'details-summary-row';
 
         const typeCell = document.createElement('div');
         typeCell.className = 'grid-cell field type-cell';
         typeCell.innerHTML = `${item.type || '-'}`;
-        topRightGrid.appendChild(typeCell);
+        metadataRow.appendChild(typeCell);
 
         // Normalize fees to make comparisons case-insensitive
         const feeFlag = (item.fees || '').toLowerCase();
@@ -659,9 +697,19 @@ function populateOpportunitiesMainTable() {
             // When the row carries usable fee details, thread a "+" marker
             // through the token's top border that reveals them on hover.
             const details = feeDetailsText(item);
-            if (details) attachFeeDetails(feeCell, details);
+            if (details) attachTokenDetails(feeCell, feeCell.textContent, details, 'Fee details');
 
-            topRightGrid.appendChild(feeCell);
+            metadataRow.appendChild(feeCell);
+        }
+
+        topRightGrid.appendChild(metadataRow);
+
+        const eligibilityDetails = eligibilityDetailsText(item);
+        if (eligibilityDetails) {
+            const eligibilityCell = document.createElement('div');
+            eligibilityCell.className = 'grid-cell field eligibility-cell';
+            attachTokenDetails(eligibilityCell, 'Eligibility', eligibilityDetails, 'Eligibility details');
+            topRightGrid.appendChild(eligibilityCell);
         }
 
         card.appendChild(topRightGrid);
@@ -963,7 +1011,7 @@ function init() {
     if (document.querySelector('.repobox')) loadOpportunities();
     setupNavigationState();
     setupPagination();
-    setupFeePopups();
+    setupDetailsPopups();
     setupFilterListeners();
     setupFeedbackForm();
     setupOptionDetails();
