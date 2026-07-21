@@ -2,7 +2,7 @@ import * as cheerio from 'cheerio';
 import { SOURCE_DEFINITIONS } from './config.js';
 import { absoluteUrl, cleanText, fetchText, postJson } from './http.js';
 import { htmlToText, resolveEligibility, resolveProseEligibility } from './eligibility.js';
-import { canonicalizeUrl, inferFee, inferType } from './normalize.js';
+import { canonicalizeUrl, inferFee, inferFeeDetails, inferType } from './normalize.js';
 
 const CREATIVE_WEST_QUERY = `
 query GetSearchOpportunities($input: SearchOpportunitiesInput!) {
@@ -80,6 +80,20 @@ function artworkArchiveCountry(eligibility, eligibilityDetails) {
     return '';
 }
 
+function artworkArchiveFeeStatus(fee, description = '') {
+    const direct = String(fee || '').trim();
+    if (!direct) return inferFee(description);
+
+    // `Entry Fee` is structured source metadata, so it outranks potentially
+    // stale or contradictory prose. Artwork Archive sometimes supplies a bare
+    // number such as "50" without a currency marker.
+    const directStatus = inferFee(direct);
+    if (directStatus) return directStatus;
+    const amount = direct.match(/(?:USD|AUD|CAD|GBP|EUR)?\s*(?:[$€£]\s*)?(\d[\d,]*(?:\.\d+)?)/i)?.[1];
+    if (amount) return Number(amount.replace(/,/g, '')) === 0 ? 'n' : 'y';
+    return '';
+}
+
 export function parseArtworkArchive(html, definition = source('artwork_archive')) {
     const $ = cheerio.load(html);
     const rows = [];
@@ -106,7 +120,7 @@ export function parseArtworkArchive(html, definition = source('artwork_archive')
             link: canonicalUrl,
             sourceListingUrl: absoluteUrl(card.attr('data-nova-source-link') || listingUrl, definition.url),
             type: detail('type') || field('Type:'),
-            fees: inferFee(`Entry Fee: ${fee} ${description}`),
+            fees: artworkArchiveFeeStatus(fee, description),
             country: artworkArchiveCountry(eligibility, eligibilityDetails),
             hostLocation: detail('location') || field('Location:'),
             feeDetails: fee,
@@ -363,7 +377,7 @@ export function parseHyperallergicArticle(html, definition = source('hyperallerg
                 fees: inferFee(text),
                 country: eligibility.country,
                 hostLocation: '',
-                feeDetails: text.match(/(?:application|entry|submission)?\s*fee\b[^.]{0,70}/i)?.[0]?.trim() || '',
+                feeDetails: inferFeeDetails(text),
                 awardInfo: award.awardInfo,
                 description,
                 source: definition.name,

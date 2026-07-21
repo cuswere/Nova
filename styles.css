@@ -165,10 +165,9 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
    auto-stacked unit that the overlay's z-index:1 simply sits in front of. */
 .repobox { isolation: isolate; height: 100%; max-height: 70vh; min-height: 70vh; overflow-x: hidden; overflow-y: scroll; scrollbar-gutter: stable; background: var(--field); padding: 4px; }
 .repo-status-message { margin: auto; padding: 20px; color: var(--muted); text-align: center; }
-.opportunity-card { display: grid; grid-template-columns: minmax(0, 1.5fr) 1fr; column-gap: 14px; padding: 12px; border-bottom: 1px solid #999; background: var(--field); }
+.opportunity-card { display: grid; grid-template-columns: minmax(0, 1.5fr) 1fr; column-gap: 14px; padding: 12px; border-bottom: 1px solid #999; background: var(--field); min-height:135px; }
 .opportunity-main-column, .opportunity-details-column { display: flex; flex-direction: column; gap: 8px; min-width: 0; align-self: start; }
-.opportunity-main-column {  gap: 16px;}
-.opportunity-main-column { align-items: flex-start; }
+.opportunity-main-column {  gap: 16px; margin-bottom: 8px; align-items: flex-start; }
 .opportunity-details-column { align-items: stretch; }
 .opportunity-card:hover {  }
 .opportunity-card a { font-size: 18px; font-weight: 600;  position: relative; isolation: isolate; display: inline-block; min-width: 0; max-width: 100%; padding: 8px; background: var(--desktop); color: #fff; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 2px; vertical-align: top; }
@@ -233,10 +232,14 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
    field wash so the filled corner reads against plain white. */
 .detail-token.has-details:hover .detail-token-fold,
 .detail-token.has-details:focus-visible .detail-token-fold { color: #fff; background: var(--ink); }
+.award-cell.detail-token.has-details:hover,
+.award-cell.detail-token.has-details:focus-visible,
 .eligibility-cell.detail-token.has-details:hover,
 .eligibility-cell.detail-token.has-details:focus-visible { background: #fff; }
 /* Pinned is the full inversion, and must win over the hover/focus rules. */
 .detail-token.popup-pinned,
+.award-cell.detail-token.has-details.popup-pinned:hover,
+.award-cell.detail-token.has-details.popup-pinned:focus-visible,
 .eligibility-cell.detail-token.has-details.popup-pinned:hover,
 .eligibility-cell.detail-token.has-details.popup-pinned:focus-visible { color: #fff; background: var(--ink); }
 /* The fold stays black-filled whenever pinned, hover/focus notwithstanding —
@@ -271,7 +274,11 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
 .detail-token.has-details:focus-visible .details-popup,
 .detail-token.popup-pinned .details-popup { display: block; }
 .detail-token.popup-dismissed .details-popup { display: none !important; }
-.eligibility-cell { align-self: flex-end; min-height: 20px; padding: 3px 5px; color: var(--ink); background: var(--field); box-shadow: none; margin-right: 10px; }
+/* Award info sits to the left of eligibility in a shared right-aligned row;
+   the 10px inset is carried by the row so both tokens keep the same gap from
+   the pane edge the eligibility token used to hold on its own. */
+.detail-token-row { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: flex-start; gap: 4px; margin-right: 10px; }
+.award-cell, .eligibility-cell { min-height: 20px; padding: 3px 5px; color: var(--ink); background: var(--field); box-shadow: none; }
 .date-cell { border: 1px solid var(--ink); padding: 4px; width: fit-content; color: var(--ink); text-align: left; box-shadow: none; background: transparent; text-transform: none; letter-spacing: 0; font-size: 14px; }
 .date-cell strong { color: var(--ink); font-weight: 600; }
 
@@ -347,9 +354,9 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
 .form-input:focus, .form-textarea:focus { outline: 1px dotted var(--ink); outline-offset: -4px; }
 .form-row.name { max-width: 360px !important; }
 /* The only raised control not sitting on --face, so it carries the blue bevel. */
-.form-submit { align-self: flex-start; padding: 7px 12px; color: var(--ink); background: var(--face); outline: 1px solid var(--ink); outline-offset: -1px; border: 0; box-shadow: var(--raise); font-weight: 600; }
+.form-submit { align-self: flex-start; padding: 7px 12px; color: var(--ink); background: var(--field); outline: 1px solid var(--ink); outline-offset: -1px; border: 0; box-shadow: var(--raise); font-weight: 600; }
 /* Lightens on hover the way the face buttons go --face → --face-light. */
-.form-submit:hover { background: var(--face); }
+.form-submit:hover {  }
 .form-submit:active { box-shadow: var(--sink); padding: 8px 11px 6px 13px; }
 .form-submit:focus-visible { outline: 1px dotted #fff; outline-offset: -4px; }
 .form-submit[disabled] { background: var(--face); box-shadow: var(--sink); opacity: 0.6; cursor: default; }
@@ -378,13 +385,13 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
 .thanks-menu { position: absolute; top: calc(100% + 3px); left: 0; z-index: 40; display: none; }
 .thanks-item.is-open .thanks-menu { display: block; }
 .thanks-menu-option { display: block; width: 100%; padding: 4px 10px; color: var(--ink); background: #fff; border: 1px solid var(--ink); box-shadow: 2px 2px 0 var(--ink); font-size: 14px; font-weight: 400; text-align: left; white-space: nowrap; }
-.thanks-menu-option:hover { color: #fff; background: var(--blue-bright); }
+.thanks-menu-option:hover { text-decoration: underline; }
 .thanks-menu-option:active { box-shadow: none; transform: translate(2px, 2px); }
 .thanks-item.is-leaving { pointer-events: none; animation: thanks-fade 200ms steps(2, end) forwards; }
 @keyframes thanks-fade { from { opacity: 1; } to { opacity: 0; } }
 /* The spinner shares the status slot, so the final message simply replaces it. */
 .form-status-loading { font-size: 14px; font-weight: 600; background: none;}
-.form-spinner { display: inline-block; width: 14px; height: 14px; margin-right: 8px; vertical-align: -1px; background: #fff; box-shadow: var(--raise); animation: form-spinner-step 40ms steps(4, end) infinite; }
+.form-spinner { display: inline-block; width: 14px; height: 14px; margin-right: 8px; vertical-align: -1px; background: #fff; box-shadow: var(--raise); animation: form-spinner-step 240ms steps(4, end) infinite; }
 @keyframes form-spinner-step { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) {
     .form-spinner { animation: none; }
@@ -406,7 +413,7 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
     .repo, .repobox { min-height: 380px; }
     .opportunity-card { grid-template-columns: 1fr; }
     .top-right-grid { width: 100%; }
-    .eligibility-cell { align-self: flex-start; }
+    .detail-token-row { justify-content: flex-start; }
 }
 
 @media (max-width: 430px) {

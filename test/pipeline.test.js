@@ -29,6 +29,7 @@ import {
     formatPublicDeadline,
     inferAwardInfo,
     inferFee,
+    inferFeeDetails,
     inferType,
     inferTitleType,
     isAutoPublishSource,
@@ -265,14 +266,23 @@ test('maps Artwork Archive national eligibility to the United States without a g
     assert.equal(parseArtworkArchive(contextualOnly)[0].country, '');
 });
 
-test('Artwork Archive fee prose overrides unlabeled detail amounts', () => {
-    const noFee = fixture('artwork-archive.html')
+test('Artwork Archive Entry Fee metadata is authoritative, including bare numeric values', () => {
+    const directFee = fixture('artwork-archive.html')
         .replace('data-nova-fee-details="$35"', 'data-nova-fee-details="$25"')
         .replace('A detailed opportunity description.', 'There are no application fees for open calls.');
-    assert.equal(parseArtworkArchive(noFee)[0].fees, 'n');
+    assert.equal(parseArtworkArchive(directFee)[0].fees, 'y');
+
+    const bareNumber = fixture('artwork-archive.html')
+        .replace('data-nova-fee-details="$35"', 'data-nova-fee-details="50"');
+    assert.equal(parseArtworkArchive(bareNumber)[0].fees, 'y');
+
+    const zero = fixture('artwork-archive.html')
+        .replace('data-nova-fee-details="$35"', 'data-nova-fee-details="0"');
+    assert.equal(parseArtworkArchive(zero)[0].fees, 'n');
 
     const juryFree = fixture('artwork-archive.html')
-        .replace('data-nova-fee-details="$35"', 'data-nova-fee-details=""')
+        .replaceAll('$35', '')
+        .replaceAll('$25', '')
         .replace('A detailed opportunity description.', 'There is no jury submission fee.');
     assert.equal(parseArtworkArchive(juryFree)[0].fees, 'n');
 
@@ -460,12 +470,27 @@ test('inferFee recognizes bare fee labels and free applications without misreadi
     assert.equal(inferFee('There is no jury submission fee.'), 'n');
     assert.equal(inferFee('Membership is $25, with no application fees for open calls.'), 'n');
     assert.equal(inferFee('Six artists will receive $1,800 stipends.'), '');
+    assert.equal(inferFeeDetails('There is a $10 application fee.'), '$10 application fee');
+    assert.equal(inferFeeDetails('Application fee: $40.'), 'Application fee: $40');
+    assert.equal(inferFeeDetails('Application Fee 700 US Dollar (USD)'), 'Application Fee 700 US Dollar (USD)');
+    assert.equal(inferFeeDetails('An application fee applies.'), '');
 });
 
 test('extracts actionable compensation without treating costs as awards', () => {
     assert.match(inferAwardInfo('The selected artist will receive a $9,500 stipend covering all project costs.'), /\$9,500 stipend/);
     assert.match(inferAwardInfo('Commission Budget: $29,100. Design Stipend: $300.'), /\$29,100/);
     assert.equal(inferAwardInfo('The application fee is $40. Residency cost is $650 per week.'), '');
+    const benefits = inferAwardInfo(
+        'What selected photographers receive\n' +
+        'During the residency, photographers will have:\n' +
+        'Complimentary lodging\n' +
+        'A weekly stipend of $250 for living expenses.\n' +
+        'Other exhibition opportunities may be available.\n' +
+        'In addition:\n' +
+        'One photographer will receive a $500 honorarium.'
+    );
+    assert.match(benefits, /photographers will have:\nComplimentary lodging\nA weekly stipend/);
+    assert.match(benefits, /expenses\.\n\nIn addition:/);
 });
 
 test('resolveProseEligibility resolves country conservatively and flags conflicts', () => {

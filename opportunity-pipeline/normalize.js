@@ -184,16 +184,42 @@ export function inferFee(text = '') {
     return '';
 }
 
+export function inferFeeDetails(text = '') {
+    const amount = String.raw`(?:(?:USD|AUD|CAD|GBP|EUR)\s*(?:[$€£]\s*)?\d[\d,.]*|[$€£]\s*\d[\d,.]*(?:\s*(?:USD|AUD|CAD|GBP|EUR))?|\d[\d,.]*\s+(?:US Dollars?|USD|Australian Dollars?|AUD|Canadian Dollars?|CAD|Euros?|EUR|Pounds?|GBP)(?:\s*\([^)]*\))?)`;
+    const label = String.raw`(?:(?:application|entry|submission)\s+)?fees?`;
+    const patterns = [
+        new RegExp(`(${amount}\\s+${label}\\b)`, 'i'),
+        new RegExp(`(${label}\\b[^.!?\\n]{0,40}?${amount})`, 'i')
+    ];
+    for (const pattern of patterns) {
+        const match = String(text || '').match(pattern)?.[1];
+        if (match) return match.replace(/\s+/g, ' ').replace(/[.,;:]$/, '').trim();
+    }
+    return '';
+}
+
+function normalizeMultilineText(value = '') {
+    return String(value || '')
+        .replace(/\r\n?/g, '\n')
+        .replace(/[^\S\n]+/g, ' ')
+        .replace(/ *\n */g, '\n')
+        .replace(/\n{3,}/g, '\n\n')
+        .trim();
+}
+
 export function inferAwardInfo(text = '') {
-    const clauses = String(text || '').match(/[^.!?\n]+[.!?]?/g) || [];
+    // Keep source line breaks inside a qualifying clause. Creative West often
+    // represents headings and benefit lists as block elements without terminal
+    // punctuation; excluding newlines here would discard that useful structure.
+    const clauses = String(text || '').match(/[^.!?]+[.!?]?/g) || [];
     const amount = /(?:USD|AUD|CAD|GBP|EUR)?\s*(?:\$|£|€)\s*\d[\d,.]*|\b\d[\d,.]*\s*(?:USD|AUD|CAD|GBP|EUR)\b/i;
     const label = /\b(?:award|budget|grant|stipend|honorarium|prize|project funds?|commission budget)\b/i;
     return clauses
-        .map((clause) => clause.replace(/\s+/g, ' ').trim())
+        .map(normalizeMultilineText)
         .filter((clause) => amount.test(clause) && label.test(clause))
         .filter((clause) => !/\b(?:tuition|residency cost|for sale|sales price)\b/i.test(clause) || /\b(?:award|stipend|honorarium|grant)\b/i.test(clause))
         .slice(0, 2)
-        .join(' ');
+        .join('\n\n');
 }
 
 export function normalizeCountry(value = '') {
@@ -217,7 +243,8 @@ export function normalizeCandidate(raw, now = new Date()) {
         .replace(/\bHV award\b/i, (match) => /\bVH AWARD\b/i.test(String(raw.description || '')) ? match.replace(/HV/i, 'VH') : match);
     const link = canonicalizeUrl(raw.link || raw.sourceUrl);
     const deadline = normalizeDeadline(raw.deadline);
-    const description = String(raw.description || '').replace(/\s+/g, ' ').trim();
+    const rawDescription = String(raw.description || '');
+    const description = rawDescription.replace(/\s+/g, ' ').trim();
     const candidate = {
         name,
         deadline,
@@ -226,7 +253,7 @@ export function normalizeCandidate(raw, now = new Date()) {
         fees: (['y', 'n'].includes(String(raw.fees || '').toLowerCase()) ?
             String(raw.fees).toLowerCase() : inferFee(`${description} ${raw.feeDetails || ''}`)),
         country: normalizeCountry(raw.country),
-        award_info: String(raw.awardInfo || raw.award_info || inferAwardInfo(description)).replace(/\s+/g, ' ').trim(),
+        award_info: normalizeMultilineText(raw.awardInfo || raw.award_info || inferAwardInfo(rawDescription)),
         status: 'review',
         source: raw.source || '',
         source_url: canonicalizeUrl(raw.sourceUrl || raw.link),

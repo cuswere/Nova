@@ -466,7 +466,7 @@ function scheduleOpportunityLinkBackgrounds(container) {
 
 // Sources state amounts as "5.00 USD"; the site prefers "$5.00". Purely a
 // display concern, so the stored record keeps whatever the source wrote.
-function formatFeeAmounts(text) {
+function formatCurrencyAmounts(text) {
     return text.replace(/\b(\d[\d,]*(?:\.\d+)?)\s*USD\b/g, '$$$1');
 }
 
@@ -474,7 +474,14 @@ function formatFeeAmounts(text) {
 // Purely descriptive text (no digits) is treated as blank/invalid.
 function feeDetailsText(item) {
     const raw = String((item && item.fee_details) || '').trim();
-    return /\d/.test(raw) ? formatFeeAmounts(raw) : '';
+    return /\d/.test(raw) ? formatCurrencyAmounts(raw) : '';
+}
+
+// Award info is free prose (stipends, budgets, prize breakdowns), so unlike
+// fee details it is worth surfacing whether or not it names a figure.
+function awardInfoText(item) {
+    const raw = String((item && item.award_info) || '').trim();
+    return raw ? formatCurrencyAmounts(raw) : '';
 }
 
 function eligibilityPopupInfo(item) {
@@ -819,13 +826,29 @@ function populateOpportunitiesMainTable() {
         topRightGrid.appendChild(metadataRow);
         detailsColumnDiv.appendChild(topRightGrid);
 
+        // Award info and eligibility share a right-aligned row beneath the
+        // summary grid; either may be absent, and the row itself is skipped
+        // when neither has anything to say.
+        const detailTokenRow = document.createElement('div');
+        detailTokenRow.className = 'detail-token-row';
+
+        const awardText = awardInfoText(item);
+        if (awardText) {
+            const awardCell = document.createElement('div');
+            awardCell.className = 'grid-cell field award-cell';
+            attachTokenDetails(awardCell, 'Award Info', awardText, 'Award info');
+            detailTokenRow.appendChild(awardCell);
+        }
+
         const eligibilityInfo = eligibilityPopupInfo(item);
         if (eligibilityInfo) {
             const eligibilityCell = document.createElement('div');
             eligibilityCell.className = 'grid-cell field eligibility-cell';
             attachTokenDetails(eligibilityCell, 'Eligibility', eligibilityInfo.text, eligibilityInfo.ariaPrefix);
-            detailsColumnDiv.appendChild(eligibilityCell);
+            detailTokenRow.appendChild(eligibilityCell);
         }
+
+        if (detailTokenRow.childElementCount) detailsColumnDiv.appendChild(detailTokenRow);
 
         // Format date as "Feb 2, '26'" when possible; otherwise display raw text
         let deadlineText = '-';
@@ -1071,6 +1094,30 @@ function setupFeedbackForm() {
     // guard is this flag — without it a spammed button sends duplicate rows.
     let isSubmitting = false;
 
+    // How long the spinner is shown. Deliberately independent of the network:
+    // see sendFeedback for why waiting on the request buys nothing.
+    const FEEDBACK_PENDING_MS = 800;
+
+    // sendBeacon hands the POST to the browser and returns at once, and the
+    // request still completes if the tab closes — which an in-flight fetch does
+    // not. URLSearchParams goes out as application/x-www-form-urlencoded, the
+    // encoding the Apps Script endpoint already reads. Returns whether the
+    // send was accepted; success of the write itself is never observable,
+    // since a no-cors response is opaque.
+    const sendFeedback = (body) => {
+        if (navigator.sendBeacon && navigator.sendBeacon(FEEDBACK_FORM_ACTION, body)) return true;
+        // Browsers that refuse the beacon (or a full queue) fall back to fetch,
+        // unawaited for the same reason: an opaque response is not worth
+        // waiting on, and a rejection here is the only failure we can report.
+        fetch(FEEDBACK_FORM_ACTION, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body
+        }).catch(error => console.error('Error submitting feedback:', error));
+        return true;
+    };
+
     const setStatus = (text, kind) => {
         if (!status) return;
         status.textContent = text;
@@ -1193,18 +1240,11 @@ function setupFeedbackForm() {
         if (submitBtn) submitBtn.disabled = true;
         setLoading();
         try {
-            // Apps Script doesn't return a readable CORS response, so this is
-            // fire-and-forget with no-cors. The floor keeps a fast round-trip
-            // from flashing the spinner for a single frame.
-            await Promise.all([
-                fetch(FEEDBACK_FORM_ACTION, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body
-                }),
-                new Promise(resolve => window.setTimeout(resolve, 500))
-            ]);
+            if (!sendFeedback(body)) throw new Error('Feedback could not be queued for sending');
+            // A fixed beat, not a measurement: the response is unreadable
+            // either way, so the spinner shows for its own sake rather than
+            // holding the THANK YOUs hostage to Apps Script's cold start.
+            await new Promise(resolve => window.setTimeout(resolve, FEEDBACK_PENDING_MS));
             form.reset();
             renderThanks();
         } catch (error) {
