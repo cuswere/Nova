@@ -3,6 +3,7 @@
     --face-light: #e6e6e1;
     --field: #e5e4e1;
     --ink: #101010;
+    --white: #fff;
     --muted: #565656;
     --blue: #0000c8;
     --blue-bright: #1010ff;
@@ -159,11 +160,18 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
    auto-stacked unit that the overlay's z-index:1 simply sits in front of. */
 .repobox { isolation: isolate; height: 100%; max-height: 70vh; min-height: 70vh; overflow-x: hidden; overflow-y: scroll; scrollbar-gutter: stable; background: var(--field); padding: 4px; }
 .repo-status-message { margin: auto; padding: 20px; color: var(--muted); text-align: center; }
+/* Deliberately NOT a stacking context: popups (z-index 40) must be free to
+   overflow this card and paint above the cards below it. */
 .opportunity-card { display: grid; grid-template-columns: minmax(0, 1.5fr) 1fr; column-gap: 14px; padding: 12px; border-bottom: 1px solid #999; background: var(--field); min-height:135px; }
 .opportunity-main-column, .opportunity-details-column { display: flex; flex-direction: column; gap: 8px; min-width: 0; align-self: start; }
 .opportunity-main-column {  gap: 16px; margin-bottom: 8px; align-items: flex-start; }
 .opportunity-details-column { align-items: stretch; }
-.opportunity-card a { font-size: 18px; font-weight: 600;  position: relative; isolation: isolate; display: inline-block; min-width: 0; max-width: 100%; padding: 8px; background: var(--desktop); color: #fff; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 2px; vertical-align: top; }
+/* z-index raises the title above the deadline connector line (see
+   .date-cell::before), which would otherwise paint over it by DOM order. The
+   isolation here already makes the link an atomic stacking context — it exists
+   to contain .link-line-backgrounds' z-index: -1 — so the whole title subtree
+   lifts as one unit, and 1 still sits well below the popups' 40. */
+.opportunity-card a { font-size: 18px; font-weight: 600;  position: relative; isolation: isolate; z-index: 1; display: inline-block; min-width: 0; max-width: 100%; padding: 8px; background: var(--desktop); color: #fff; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 2px; vertical-align: top; }
 .link-text { display: inline; }
 .link-line-backgrounds { position: absolute; z-index: -1; inset: 0; pointer-events: none; }
 .link-line-background { position: absolute; display: block; background: var(--desktop); pointer-events: auto; }
@@ -180,7 +188,8 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
 .grid-cell, .date-cell { min-width: 0; padding: 4px 5px; text-align: center; font-size: 14px; text-transform: uppercase; letter-spacing: .04em; }
 .grid-cell { background: none; border: 1px solid var(--ink); flex: 0 1 auto; display: flex; align-items: center; justify-content: center; max-width: 100%; overflow: hidden; overflow-wrap: anywhere; line-height: 1.15; box-shadow: none; }
 .fee-cell { min-height: 26px; padding: 3px 5px; color: var(--ink); background: var(--amber); box-shadow: none; }
-
+.type-cell { border-color: var(--blue-bright) !important; color: var(--white); background: var(--blue-bright)}
+.type-cell::selection { background: #fff; color: var(--ink); }
 /* Shared details affordance: a dotted underline on the token label (hard-edged
    square dots via a sharp-stop gradient, not soft radial circles, so they stay
    pixel-crisp; round-tiled so the row always ends on a whole dot rather than
@@ -247,11 +256,13 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
 .fee-cell .details-popup-content { text-align: center; font-size: 18px; }
 .details-popup-content { position: relative; z-index: 1; display: block; max-height: 220px; overflow-y: auto; padding: 6px 10px; overflow-wrap: anywhere; background: var(--dialogue-background, #fff); border: 1px solid var(--ink); box-shadow: 2px 2px 0px var(--ink); cursor: default; }
 /* No separate track gutter — just the thumb, floating on the popup's own
-   background. Its right edge sits flush against the popup's real border (the
-   scrollbar occupies the padding box, right up against it), so that side of
-   the thumb's own border is dropped to avoid doubling into a 2px line. */
+   background. Its edges can sit flush against the popup's real border on any
+   side depending on scroll position (the scrollbar occupies the padding box,
+   right up against it) — border-side rules can't target only the sides that
+   happen to be touching, so the thumb goes borderless entirely rather than
+   doubling into a 2px line wherever it does touch. */
 .details-popup-content::-webkit-scrollbar-track { background: transparent; }
-.details-popup-content::-webkit-scrollbar-thumb { border-right: none; }
+.details-popup-content::-webkit-scrollbar-thumb { border: none; }
 /* Only the glyphs themselves take the text caret; the padding and the box
    around them stay a plain pointer. */
 .details-popup-text { cursor: text; }
@@ -277,7 +288,14 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
    the pane edge the eligibility token used to hold on its own. */
 .detail-token-row { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: flex-start; gap: 4px; margin-right: 10px; }
 .award-cell, .eligibility-cell { min-height: 20px; padding: 3px 5px; color: var(--ink); background: var(--field); box-shadow: none; }
-.date-cell { border: 1px solid var(--ink); padding: 4px; width: fit-content; color: var(--ink); text-align: left; box-shadow: none; background: transparent; text-transform: none; letter-spacing: 0; font-size: 14px; }
+/* Connects the deadline token up to the title link above it. .opportunity-title
+   is the immediately preceding flex sibling with a fixed 16px gap, so a 16px
+   line anchored to the date-cell's own top border reaches exactly its bottom
+   border with no extra math. */
+.date-cell { position: relative; border: 1px solid var(--ink); padding: 4px; width: fit-content; color: var(--ink); text-align: left; box-shadow: none; background: transparent; text-transform: none; letter-spacing: 0; font-size: 14px; }
+/* Stays at z-index auto so it paints above the card's own background and stays
+   visible; the title lifts itself above it instead (see .opportunity-card a). */
+.date-cell::before { content: ""; position: absolute; left: 75px; bottom: 100%; width: 1px; height: 19px; background: var(--ink); }
 .date-cell strong { color: var(--ink); font-weight: 600; }
 
 /* Filters */

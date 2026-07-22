@@ -45,4 +45,4 @@ AI enrichment is intentionally disabled during beta. Missing or ambiguous fields
 - Work directly on `main`; ask before creating a feature branch.
 - Preserve the no-build, no-framework architecture and minimal dependencies.
 - Prefer relative links so the site works from any hosting path.
-- Use browser checks for interaction, event-wiring, or layout changes; simple copy and style edits do not require a preview.
+- simple edits do not require a browser preview; be economical with usage until an issue is reported.
