@@ -1,6 +1,9 @@
 import { initSharedPage } from './shared.js';
 
-const PAGE_SIZE = 50;
+// Matches the mobile breakpoint the stylesheet switches on (max-width: 700px);
+// a full 50-card page is a lot of scrolling once cards stack to one column.
+const MOBILE_BREAKPOINT = '(max-width: 700px)';
+const pageSize = () => (window.matchMedia(MOBILE_BREAKPOINT).matches ? 25 : 50);
 const state = {
     opportunities: [],
     filters: { types: [], hideFees: false, onlyRolling: false },
@@ -427,9 +430,10 @@ function renderOpportunities() {
         return;
     }
 
-    const pageCount = Math.ceil(rows.length / PAGE_SIZE);
+    const size = pageSize();
+    const pageCount = Math.ceil(rows.length / size);
     state.page = Math.max(1, Math.min(state.page, pageCount));
-    const pageRows = rows.slice((state.page - 1) * PAGE_SIZE, state.page * PAGE_SIZE);
+    const pageRows = rows.slice((state.page - 1) * size, state.page * size);
     container.replaceChildren(...pageRows.map(opportunityCard));
     updatePagination(state.page, pageCount);
     observeTitleBackgrounds(container);
@@ -450,6 +454,29 @@ function setupPagination() {
     };
     document.querySelector('.page-prev').addEventListener('click', () => changePage(-1));
     document.querySelector('.page-next').addEventListener('click', () => changePage(1));
+}
+
+const CONNECTOR_X = 75;
+const CONNECTOR_CLEARANCE = 12;
+
+/* The connector runs up the title at a fixed column and is hidden wherever the
+   title's own background covers it, so it reads as meeting whichever line it
+   first disappears behind. When that column lands within a hair of a line's
+   right edge the meeting looks like a miss instead — the line grazes the corner
+   and carries on past it. Pull the column a clear 12px inside that edge so it
+   plainly terminates on the line, or if the line is too short to take it, push
+   12px clear so it plainly passes and meets the next one up. Re-checking after
+   each nudge catches the case where the new column grazes a different line. */
+function connectorOffset(lines, linkLeft) {
+    let x = CONNECTOR_X;
+    for (let pass = 0; pass < lines.length; pass += 1) {
+        const edges = lines.map((line) => ({ left: line.left - linkLeft - 8, right: line.right - linkLeft + 8 }));
+        const grazed = edges.find((edge) => Math.abs(edge.right - x) < CONNECTOR_CLEARANCE);
+        if (!grazed) break;
+        const inside = grazed.right - CONNECTOR_CLEARANCE;
+        x = inside >= grazed.left + CONNECTOR_CLEARANCE ? inside : grazed.right + CONNECTOR_CLEARANCE;
+    }
+    return Math.max(x, 0);
 }
 
 function drawTitleBackground(link) {
@@ -483,6 +510,9 @@ function drawTitleBackground(link) {
         return background;
     }));
     link.classList.toggle('line-background-ready', Boolean(lines.length));
+
+    const title = link.closest('.opportunity-title');
+    if (title && lines.length) title.style.setProperty('--connector-x', `${connectorOffset(lines, linkRect.left)}px`);
 }
 
 function scheduleTitleBackgrounds(container) {
@@ -507,7 +537,11 @@ function setupDetailsPopups() {
         const popup = cell.querySelector('.details-popup');
         const fold = cell.querySelector('.detail-token-fold');
         const tail = popup?.querySelector('.details-popup-tail');
-        if (!popup) return;
+        // A hidden popup measures as a zero rect, which yields a bogus shift that
+        // stays applied until the next placement. Touch devices make that visible:
+        // focusin lands on the tap while the popup is still display: none, and the
+        // corrected placement only arrives with the click that pins it.
+        if (!popup || !popup.offsetWidth) return;
 
         const boxRect = box.getBoundingClientRect();
         const cellRect = cell.getBoundingClientRect();
@@ -602,6 +636,33 @@ function setupFilterInputs() {
     rolling.addEventListener('change', () => { state.filters.onlyRolling = rolling.checked; updateView(); });
 }
 
+/* Publishes the room left below the results box as --repobox-fit, which the
+   mobile stylesheet caps its height against. Measured from the document rather
+   than the viewport so the answer describes the page scrolled to the top — the
+   position where the box is meant to read as a whole, framed object — and stays
+   put no matter where the reader has since scrolled to. Desktop never reads the
+   var; the work here is cheap enough not to bother gating it. */
+function fitRepoHeight() {
+    const repo = document.querySelector('.repo');
+    if (!repo) return;
+    const box = repo.querySelector('.repobox');
+    const documentTop = repo.getBoundingClientRect().top + window.scrollY;
+    // The var sizes .repobox, so the frame .repo wraps around it comes off the top.
+    const frame = box ? repo.offsetHeight - box.offsetHeight : 0;
+    const room = window.innerHeight - documentTop - frame - 8;
+    repo.style.setProperty('--repobox-fit', `${Math.max(room, 200)}px`);
+}
+
+function setupRepoFit() {
+    fitRepoHeight();
+    window.addEventListener('resize', fitRepoHeight);
+    window.addEventListener('orientationchange', fitRepoHeight);
+    // On mobile the filters stack above the box, so their applied-chip list
+    // growing pushes it further down the page.
+    const filters = document.querySelector('.filters');
+    if (filters && window.ResizeObserver) new ResizeObserver(fitRepoHeight).observe(filters);
+}
+
 function init() {
     initSharedPage();
     parseUrlFilters();
@@ -609,6 +670,9 @@ function init() {
     setupFilterInputs();
     setupPagination();
     setupDetailsPopups();
+    setupRepoFit();
+    // Re-page only on an actual breakpoint crossing, not every resize pixel.
+    window.matchMedia(MOBILE_BREAKPOINT).addEventListener('change', renderOpportunities);
     loadOpportunities();
 }
 

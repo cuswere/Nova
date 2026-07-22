@@ -166,8 +166,18 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
 .opportunity-main-column, .opportunity-details-column { display: flex; flex-direction: column; gap: 8px; min-width: 0; align-self: start; }
 .opportunity-main-column {  gap: 16px; margin-bottom: 8px; align-items: flex-start; }
 .opportunity-details-column { align-items: stretch; }
+/* Connects the deadline token up to the title. Anchoring the line to the title
+   rather than the deadline lets it span the title's full height whatever the
+   wrap, so a short last line can't leave it hanging in the gap; the -16px
+   bottom is the main column's gap, landing it exactly on the deadline's top
+   border. position: relative without a z-index keeps this a plain containing
+   block, so the line still paints under the link (z-index: 1) below.
+   --connector-x is nudged by drawTitleBackground when the default column would
+   graze the end of a wrapped line; see connectorOffset there. */
+.opportunity-title { position: relative; }
+.opportunity-title::after { content: ""; position: absolute; left: var(--connector-x, 75px); top: 4px; bottom: -16px; width: 1px; background: var(--ink); }
 /* z-index raises the title above the deadline connector line (see
-   .date-cell::before), which would otherwise paint over it by DOM order. The
+   .opportunity-title::after), which would otherwise paint over it by DOM order. The
    isolation here already makes the link an atomic stacking context — it exists
    to contain .link-line-backgrounds' z-index: -1 — so the whole title subtree
    lifts as one unit, and 1 still sits well below the popups' 40. */
@@ -178,11 +188,13 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
 .opportunity-card a.line-background-ready { background: transparent; pointer-events: none; }
 .opportunity-card a.line-background-ready .link-text { pointer-events: auto; }
 .opportunity-card a .link-text svg { fill: none; stroke: currentColor; }
+.opportunity-card a:not(.line-background-ready) .link-text, .opportunity-card .link-text { outline: 0px solid var(--ink); outline-offset: 7px; }
 .opportunity-card a:not(.line-background-ready):hover .link-text,
 .opportunity-card a.line-background-ready:has(.link-text:hover, .link-line-background:hover) .link-text { text-decoration-thickness: 2px; outline: 2px solid var(--blue-bright); outline-offset: 6px; }
 .opportunity-card a:not(.line-background-ready):hover { color: var(--blue-bright); background: var(--field); }
 .opportunity-card a.line-background-ready:has(.link-text:hover, .link-line-background:hover) { color: var(--blue-bright); text-decoration-color: var(--blue-bright); }
 .opportunity-card a.line-background-ready:has(.link-text:hover, .link-line-background:hover) .link-line-background { background: var(--field); }
+
 .top-right-grid { border: 1px solid var(--ink); padding: 8px; min-width: 0; max-width: 100%; }
 .details-summary-row { display: flex; justify-content: flex-start; align-items: flex-start; align-self: stretch; flex-wrap: wrap; gap: 4px; }
 .grid-cell, .date-cell { min-width: 0; padding: 4px 5px; text-align: center; font-size: 14px; text-transform: uppercase; letter-spacing: .04em; }
@@ -221,7 +233,6 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
    would make a click in the popup restyle the token as if hovered.
    :focus-visible matches keyboard focus only, so the keyboard affordance
    survives while mouse-driven focus stays invisible. */
-.detail-token.has-details:hover .detail-token-label::after,
 .detail-token.has-details:focus-visible .detail-token-label::after { display: block; }
 /* Sits flush against the INSIDE of the cell's border (top/right: 0 lands
    exactly on the padding edge) rather than extending out over it, so the
@@ -232,11 +243,8 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
 .detail-token-fold { position: absolute; top: 0; right: 0; width: var(--detail-fold-size, 13px); height: var(--detail-fold-size, 13px); display: grid; place-items: center; color: var(--ink); background: inherit; border-bottom: 1px solid var(--ink); border-left: 1px solid var(--ink); font-size: 12px; font-weight: 700; line-height: 1; z-index: 3; }
 /* Hover inks the fold in; the eligibility token additionally clears its own
    field wash so the filled corner reads against plain white. */
-.detail-token.has-details:hover .detail-token-fold,
 .detail-token.has-details:focus-visible .detail-token-fold { color: #fff; background: var(--ink); }
-.award-cell.detail-token.has-details:hover,
 .award-cell.detail-token.has-details:focus-visible,
-.eligibility-cell.detail-token.has-details:hover,
 .eligibility-cell.detail-token.has-details:focus-visible { background: #fff; }
 /* Pinned is the full inversion, and must win over the hover/focus rules. */
 .detail-token.popup-pinned,
@@ -250,7 +258,6 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
 .details-popup { position: absolute; right: -1px; bottom: 100%; transform: translateX(calc(var(--popup-inline-offset, 0px) + var(--popup-shift-x, 0px))); z-index: 40; display: none; width: max-content; min-width: 150px; max-width: min(340px, 75vw); padding-bottom: var(--detail-tail-length); color: var(--ink); font-size: 14px; font-weight: 400; line-height: 1.4; text-align: left; text-transform: none; letter-spacing: 0; cursor: default; user-select: text; }
 /* An actively hovered popup always wins over a merely pinned one that happens
    to sit later in paint order. */
-.detail-token.has-details:hover .details-popup,
 .detail-token.has-details:focus-visible:not(.popup-pinned) .details-popup { z-index: 41; }
 .fee-cell .details-popup { --dialogue-background: var(--amber); --popup-inline-offset: 50%; right: var(--detail-fold-center-offset); }
 .fee-cell .details-popup-content { text-align: center; font-size: 18px; }
@@ -279,23 +286,28 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
 .detail-token.popup-down .details-popup { top: calc(100% + 1px); bottom: auto; padding-top: var(--detail-tail-length); padding-bottom: 0; }
 .detail-token.popup-down .details-popup-tail { top: 0; bottom: auto; clip-path: polygon(50% 0, 100% 100%, 0 100%); }
 .detail-token.popup-down .details-popup-tail::after { top: 1px; clip-path: polygon(50% 0, 100% 100%, 0 100%); }
-.detail-token.has-details:hover .details-popup,
 .detail-token.has-details:focus-visible .details-popup,
 .detail-token.popup-pinned .details-popup { display: block; }
 .detail-token.popup-dismissed .details-popup { display: none !important; }
+/* Every hover affordance lives here rather than beside its focus twin above,
+   because touch browsers synthesize hover from incidental contact — a finger
+   passing over a token mid-scroll would open and restyle it. Gated on a real
+   hovering pointer, touch is left with the deliberate tap (which only fires on
+   press and release together) as the single way in, and desktop is unchanged.
+   These trail the pinned rules, but pinned wins on specificity, not order. */
+@media (hover: hover) {
+    .detail-token.has-details:hover .detail-token-label::after { display: block; }
+    .detail-token.has-details:hover .detail-token-fold { color: #fff; background: var(--ink); }
+    .award-cell.detail-token.has-details:hover,
+    .eligibility-cell.detail-token.has-details:hover { background: #fff; }
+    .detail-token.has-details:hover .details-popup { z-index: 41; display: block; }
+}
 /* Award info sits to the left of eligibility in a shared right-aligned row;
    the 10px inset is carried by the row so both tokens keep the same gap from
    the pane edge the eligibility token used to hold on its own. */
 .detail-token-row { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: flex-start; gap: 4px; margin-right: 10px; }
 .award-cell, .eligibility-cell { min-height: 20px; padding: 3px 5px; color: var(--ink); background: var(--field); box-shadow: none; }
-/* Connects the deadline token up to the title link above it. .opportunity-title
-   is the immediately preceding flex sibling with a fixed 16px gap, so a 16px
-   line anchored to the date-cell's own top border reaches exactly its bottom
-   border with no extra math. */
-.date-cell { position: relative; border: 1px solid var(--ink); padding: 4px; width: fit-content; color: var(--ink); text-align: left; box-shadow: none; background: transparent; text-transform: none; letter-spacing: 0; font-size: 14px; }
-/* Stays at z-index auto so it paints above the card's own background and stays
-   visible; the title lifts itself above it instead (see .opportunity-card a). */
-.date-cell::before { content: ""; position: absolute; left: 75px; bottom: 100%; width: 1px; height: 19px; background: var(--ink); }
+.date-cell { border: 1px solid var(--ink); padding: 4px; width: fit-content; color: var(--ink); text-align: left; box-shadow: none; background: transparent; text-transform: none; letter-spacing: 0; font-size: 14px; }
 .date-cell strong { color: var(--ink); font-weight: 600; }
 
 /* Filters */
@@ -325,7 +337,7 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
 .custom-select.open .custom-selected:active { background: var(--face); }
 .custom-options { position: absolute; z-index: 20; top: 100%; right: 0; left: 0; display: none; margin: 1px 0 0; padding: 2px; list-style: none; background: #fff; border: 1px solid var(--ink); box-shadow: 2px 2px 0 rgba(0,0,0,.5); }
 .custom-options[aria-hidden="false"] { display: block; }
-.custom-options li { position: relative; padding: 4px 6px; cursor: pointer; font-size: 14px; line-height: 16px; }
+.custom-options li { position: relative; padding: 4px 6px; cursor: pointer; font-size: 14px; }
 .custom-options li:hover, .custom-options li[aria-selected="true"] { color: var(--field); background: var(--blue-bright); outline: 0px solid var(--ink); }
 .custom-options li:active .opt-label { display: inline-block; transform: translate(1px, 1px); }
 .custom-options li.clear-filter-option { color: var(--red); }
@@ -340,6 +352,9 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
     flex: 0 0 13px;
     appearance: none;
     -webkit-appearance: none;
+    /* iOS Safari keeps its own rounded corners on an appearance: none checkbox. */
+    border: 0;
+    border-radius: 0;
     background: #fff;
     box-shadow: var(--sink);
     cursor: pointer;
@@ -417,10 +432,24 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
     .filters { order: -1; }
     .filter-selectors { display: grid; grid-template-columns: 1fr 1fr; align-items: center; }
     .checkbox-filters { grid-column: 1 / -1; }
-    .repo, .repobox { min-height: 380px; }
+    /* 380px is the intended height, but a short phone can only show so much
+       before the recessed frame runs off the bottom of the screen. fitRepoHeight
+       measures how much room is actually left below the box and publishes it as
+       --repobox-fit, so the box gives up height only when it would otherwise be
+       clipped. The var is read nowhere outside this query, so desktop keeps the
+       70vh sizing from the base rule untouched. */
+    .repo { min-height: 0; }
+    .repobox { min-height: 0; max-height: none; height: max(380px, var(--repobox-fit, 380px)); }
     .opportunity-card { grid-template-columns: 1fr; }
     .top-right-grid { width: 100%; }
     .detail-token-row { justify-content: flex-start; }
+}
+
+/* Safari zooms the page in whenever a focused field's text measures under 16px,
+   and offers no way back out. Keyed to the pointer rather than the width so a
+   narrow desktop window keeps the 14px body type in its form. */
+@media (pointer: coarse) {
+    .form-input, .form-textarea { font-size: 16px; }
 }
 
 @media (max-width: 430px) {
