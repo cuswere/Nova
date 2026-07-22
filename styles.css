@@ -120,7 +120,7 @@ button { cursor: pointer; }
 .page-title::before { content: "PRAXIS NOVA /"; align-self: stretch; display: flex; align-items: center; padding: 0 3px; margin-right: 6px; font-size: 14px; font-weight: 600; letter-spacing: .05em; }
 .title { color: inherit; font-size: 14px; font-weight: 600; letter-spacing: .05em; }
 .title-options { display: flex; gap: 6px; margin-left: auto; }
-.title-option { display: inline-flex; align-items: center; min-height: 23px; padding: 4px 10px; color: var(--white); background: var(--praxis-blue); box-shadow: var(--raise); font-size: 12px; outline: 1px solid var(--ink); outline-offset: -1px; }
+.title-option { display: inline-flex; align-items: center; min-height: 23px; padding: 4px 10px; color: var(--ink); background: var(--face); box-shadow: var(--raise); font-size: 12px; outline: 1px solid var(--ink); outline-offset: -1px; }
 @media (hover: hover) {
     .title-option:hover { text-decoration: underline; }
 }
