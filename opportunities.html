@@ -35,12 +35,9 @@
             <div class="filters">
                 <div class="filter-selectors">
                     <div class="custom-select" aria-hidden="false">
-                        <div class="custom-selected" tabindex="0" aria-haspopup="listbox" aria-expanded="false"><span class="custom-selected-label">Category</span></div>
+                        <button class="custom-selected" type="button" aria-haspopup="listbox" aria-expanded="false"><span class="custom-selected-label">Category</span></button>
                         <ul class="custom-options" role="listbox" aria-hidden="true"></ul>
                     </div>
-                    <select class="filter-dropdown visually-hidden" name="type" tabindex="-1" aria-hidden="true">
-                        <option disabled selected value="TYPE_LABEL">Type</option>
-                    </select>
                     <div class="checkbox-filters">
                         <label class="filter-dropdown checkbox-label">
                             <input id="hide-fees-toggle" class="checkbox-input" type="checkbox" />
@@ -61,6 +58,6 @@
             </div>  
         </div>
     </div>
-    <script src="app.js" defer></script>
+    <script type="module" src="scripts/opportunities.js"></script>
 </body>
 </html>

@@ -26,10 +26,8 @@ concurrency:
 
 jobs:
   gate:
-    # Manual runs always proceed. Scheduled runs only proceed if the
-    # AUTOMATION_ACTIVE repo variable is "true" and today matches the
-    # FREQUENCY_DAYS cadence. Edit both under Settings > Secrets and
-    # variables > Actions > Variables - no code changes needed.
+    # Manual runs always proceed. Scheduled runs default to active/daily;
+    # AUTOMATION_ACTIVE can disable them and FREQUENCY_DAYS can reduce cadence.
     runs-on: ubuntu-latest
     outputs:
       should_run: ${{ steps.check.outputs.should_run }}

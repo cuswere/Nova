@@ -13,6 +13,7 @@ import {
     discoverArtworkArchiveExport,
     discoverCreativeWest,
     discoverHyperallergic,
+    discoverSource,
     mapCreativeWestItem,
     parseArtworkArchive,
     parseCreativeCapital,
@@ -23,7 +24,7 @@ import { areSameOpportunity, deduplicateCandidates, deduplicateCandidatesWithSum
 import { enrichCandidate } from '../opportunity-pipeline/enrich.js';
 import { htmlToText, resolveEligibility, resolveProseEligibility } from '../opportunity-pipeline/eligibility.js';
 import { postJson } from '../opportunity-pipeline/http.js';
-import { findLatestArtworkArchiveExport, readArtworkArchiveExport } from '../opportunity-pipeline/artwork-archive-export.js';
+import { candidatesFromArtworkArchiveExport, findLatestArtworkArchiveExport, readArtworkArchiveExport } from '../opportunity-pipeline/artwork-archive-export.js';
 import {
     canonicalizeUrl,
     formatPublicDeadline,
@@ -44,7 +45,6 @@ import {
 import { columnLetter, escapeSheetValue, mergeCandidate, rowValues, upsertCandidates } from '../opportunity-pipeline/sheets.js';
 import { SHEET_HEADERS } from '../opportunity-pipeline/config.js';
 import { buildPublishedRows } from '../publish.js';
-import { candidatesFromArtworkArchiveExport } from '../import-artwork-archive.js';
 
 const fixtures = path.join(path.dirname(fileURLToPath(import.meta.url)), 'fixtures');
 const fixture = (name) => fs.readFileSync(path.join(fixtures, name), 'utf8');
@@ -347,8 +347,10 @@ test('interprets Hyperallergic roundup sections, awards, fees, rolling deadlines
     assert.deepEqual(rows.map((row) => row.name).sort(), [
         'Big Prize',
         'Budget Only Grant',
+        'Euro Tuition Trap Grant',
         'Hyundai Motor Group – The 7th VH Award',
         'New York Fellowship',
+        'Pound Residency Cost Grant',
         'Tuition Trap Grant',
         'Vermont Studio Center Residency'
     ]);
@@ -385,6 +387,8 @@ test('interprets Hyperallergic roundup sections, awards, fees, rolling deadlines
     assert.equal(byName['Budget Only Grant'].issue, '');
     assert.equal(byName['Tuition Trap Grant'].awardInfo, '');
     assert.equal(byName['Tuition Trap Grant'].issue, '');
+    assert.equal(byName['Euro Tuition Trap Grant'].awardInfo, '');
+    assert.equal(byName['Pound Residency Cost Grant'].awardInfo, '');
 
     // Entries without an independent external link (missing / internal) are dropped.
     assert.ok(!rows.some((row) => row.name === 'No Link Award'));
@@ -432,13 +436,22 @@ test('discoverHyperallergic reads the latest roundups newest-first, skips non-ro
     assert.deepEqual(rows.map((row) => row.name).sort(), [
         'Big Prize',
         'Budget Only Grant',
+        'Euro Tuition Trap Grant',
         'Hyundai Motor Group – The 7th VH Award',
         'New York Fellowship',
+        'Pound Residency Cost Grant',
         'Tuition Trap Grant',
         'Vermont Studio Center Residency'
     ]);
     assert.equal(rows.find((row) => row.name === 'Big Prize').sourceUrl, 'https://hyperallergic.com/opportunities-in-july-2026/');
     assert.equal(rows.find((row) => /7th VH Award/.test(row.name)).link, 'https://example.org/vh-award');
+});
+
+test('rejects unsupported source adapters explicitly', async () => {
+    await assert.rejects(
+        () => discoverSource({ id: 'missing_adapter', url: 'https://example.org' }),
+        /Unsupported opportunity source: missing_adapter/
+    );
 });
 
 test('normalizeDeadline resolves ranges to the end date and rejects impossible dates', () => {

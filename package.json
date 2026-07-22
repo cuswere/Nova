@@ -7,7 +7,6 @@
   "scripts": {
     "publish-data": "node publish.js",
     "sync-opportunities": "node sync-opportunities.js",
-    "import-artwork-archive": "node import-artwork-archive.js",
     "dry-run-opportunities": "node sync-opportunities.js --dry-run",
     "test": "node --test"
   },

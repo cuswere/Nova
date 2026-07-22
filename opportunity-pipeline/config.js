@@ -2,11 +2,7 @@ export const SPREADSHEET_ID = '120ZqG_0qZR76b4kYHdzPK-4OKecjk7MaZcKuQRRLcbI';
 export const SHEET_NAME = 'Opportunities';
 
 export const PUBLIC_FIELDS = ['name', 'deadline', 'link', 'type', 'fees', 'country', 'award_info'];
-// Extra workflow columns copied into the published JSON in addition to
-// PUBLIC_FIELDS. These are surfaced on demand by the frontend (e.g. the
-// fee-details hover popup) but are deliberately NOT part of the leading
-// public-column contract. New extras are appended to the workflow schema so
-// the leading public-column contract remains stable.
+// Published extras stay after the leading public-column contract.
 export const PUBLISHED_EXTRA_FIELDS = ['fee_details', 'eligibility_details', 'eligibility_tier'];
 export const WORKFLOW_FIELDS = [
     'id',
@@ -69,11 +65,7 @@ export const SOURCE_DEFINITIONS = [
         apiUrl: 'https://opportunities-api.wearecreativewest.org/graphql',
         enabled: true,
         pageSize: 100,
-        // Not a fixed page count - discoverCreativeWest always computes the real
-        // number of pages from the API's live `total` every run. This is purely a
-        // sanity ceiling against a malformed/runaway response (see the "page
-        // ceiling" test in pipeline.test.js), sized well above any total Creative
-        // West realistically reaches so it doesn't need bumping as listings grow.
+        // Sanity ceiling only; collection stops at the API's live total.
         maxPages: 50,
         autoPublish: true
     },
@@ -95,5 +87,5 @@ export const SOURCE_DEFINITIONS = [
     }
 ];
 
-export const USER_AGENT = 'NovaOpportunityBot/1.0 (+https://github.com/wormmanfriend/Nova)';
+export const USER_AGENT = 'NovaOpportunityBot/1.0 (+https://github.com/cuswere/Nova)';
 export const DEFAULT_MODEL = process.env.OPENAI_MODEL || 'gpt-5.4-nano';

@@ -14,9 +14,7 @@
     --raise: inset -1px -1px #161616, inset 1px 1px #fff, inset -2px -2px #888, inset 2px 2px #ddd;
     --sink: inset -1px -1px #fff, inset 1px 1px #7b7b7b, inset -2px -2px #ddd, inset 2px 2px #202020;
     --sink-shallow: inset -1px -1px #fff, inset 1px 1px #7b7b7b;
-    /* Same bevel structure as --raise/--sink, retinted for a saturated blue
-       face. The grey ramps assume a #c5c5c5 background: on blue their white
-       highlight blows out and their two shadow steps collapse into one. */
+    /* Blue controls need their own bevel ramp; the neutral highlight washes out. */
     --raise-blue: inset -1px -1px #00002e, inset 1px 1px #a8a8ff, inset -2px -2px #000090, inset 2px 2px #5a5aff;
     --sink-blue: inset -1px -1px #a8a8ff, inset 1px 1px #000090, inset -2px -2px #5a5aff, inset 2px 2px #00002e;
     --label-bevel: inset -1px -1px #888, inset 1px 1px #eee;
@@ -50,16 +48,13 @@ button { cursor: pointer; }
 .page-arrow,
 .form-submit { user-select: none; -webkit-user-select: none; }
 
-/* Short, stepped page-change signal. The cover clears as the new page is
-   refreshed from its top edge down, rather than splitting into shutters. */
+/* Short, stepped page-change signal. */
 .screen-refresh {
     position: absolute;
     z-index: 9999;
     inset: 0;
-    /* Shown during the 50ms animation delay. */
     background: var(--face);
     pointer-events: none;
-    /* Brief full-frame flash, then reveal the new page from top to bottom. */
     animation: screen-refresh-down 150ms steps(4, end) 100ms forwards;
 }
 .screen-refresh span { display: none; }
@@ -105,8 +100,7 @@ button { cursor: pointer; }
 .title-options { display: flex; gap: 6px; margin-left: auto; }
 .title-option { display: inline-flex; align-items: center; min-height: 23px; padding: 4px 10px; color: var(--ink); background: var(--face); box-shadow: var(--raise); font-size: 12px; }
 .title-option:hover { color: var(--ink); background: var(--face-light); text-decoration: none; }
-/* Pressing nudges the label 1px down-right, as on .page-arrow: the padding
-   totals are unchanged, so only the content shifts and the box holds size. */
+/* Pressed labels move without changing the box dimensions. */
 .title-option:active, .title-option.is-navigating { box-shadow: var(--sink); padding: 5px 9px 3px 11px; }
 
 .home-wordmark { display: flex; width: fit-content; margin: 0 auto 15px; color: var(--ink); font-size: clamp(30px, 5vw, 50px); font-weight: 600; letter-spacing: -.12em; line-height: 1; }
@@ -169,7 +163,6 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
 .opportunity-main-column, .opportunity-details-column { display: flex; flex-direction: column; gap: 8px; min-width: 0; align-self: start; }
 .opportunity-main-column {  gap: 16px; margin-bottom: 8px; align-items: flex-start; }
 .opportunity-details-column { align-items: stretch; }
-.opportunity-card:hover {  }
 .opportunity-card a { font-size: 18px; font-weight: 600;  position: relative; isolation: isolate; display: inline-block; min-width: 0; max-width: 100%; padding: 8px; background: var(--desktop); color: #fff; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 2px; vertical-align: top; }
 .link-text { display: inline; }
 .link-line-backgrounds { position: absolute; z-index: -1; inset: 0; pointer-events: none; }
@@ -298,7 +291,7 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
 .filter-selectors { display: flex; flex-direction: column; gap: 9px; padding: 8px 4px; }
 .checkbox-filters { display: flex; flex-wrap: wrap; gap: 9px 14px; }
 .custom-select { position: relative; width: 100%; }
-.custom-selected { position: relative; width: 100%; min-height: 23px; padding: 4px 29px 4px 7px; color: var(--ink); background: #fff; box-shadow: var(--sink); cursor: pointer; font-size: 14px; line-height: 15px; }
+.custom-selected { position: relative; width: 100%; min-height: 23px; padding: 4px 29px 4px 7px; border: 0; color: var(--ink); background: #fff; box-shadow: var(--sink); cursor: pointer; font-size: 14px; line-height: 15px; text-align: left; }
 .custom-selected::after { content: "▼"; position: absolute; top: 2px; right: 2px; bottom: 2px; display: grid; place-items: center; width: 19px; color: var(--ink); background: var(--face); box-shadow: var(--raise); font-size: 9px; line-height: 1; }
 .custom-selected:active { background: var(--face); }
 .custom-selected:active::after { box-shadow: var(--sink); padding-top: 1px; }
@@ -353,16 +346,12 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
 .form-textarea { min-height: 160px; resize: vertical; }
 .form-input:focus, .form-textarea:focus { outline: 1px dotted var(--ink); outline-offset: -4px; }
 .form-row.name { max-width: 360px !important; }
-/* The only raised control not sitting on --face, so it carries the blue bevel. */
 .form-submit { align-self: flex-start; padding: 7px 12px; color: var(--ink); background: var(--field); outline: 1px solid var(--ink); outline-offset: -1px; border: 0; box-shadow: var(--raise); font-weight: 600; }
-/* Lightens on hover the way the face buttons go --face → --face-light. */
-.form-submit:hover {  }
 .form-submit:active { box-shadow: var(--sink); padding: 8px 11px 6px 13px; }
 .form-submit:focus-visible { outline: 1px dotted #fff; outline-offset: -4px; }
 .form-submit[disabled] { background: var(--face); box-shadow: var(--sink); opacity: 0.6; cursor: default; }
 .form-submit[disabled]:hover { background: var(--face); }
-/* The status sits beside the button rather than under it, so the row is the
-   one horizontal form-row; it wraps on narrow screens instead of squeezing. */
+/* Status and button share a row, then wrap on narrow screens. */
 .feedback-form .form-row.form-actions { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 12px; min-height: 60px}
 .form-actions .form-submit { align-self: center; }
 .form-status { min-height: 1.35em; margin: 0; font-size: 14px; padding: 7px; font-weight: bold; color: var(--ink); background: var(--amber); box-shadow: var(--sink-shallow);}
@@ -370,13 +359,10 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
 .form-status-success, .thanks-label { background: var(--green); color: #fff; font-size: 24px; box-shadow: none;}
 .form-status-error {  font-weight: normal; }
 
-/* Success is a row of THANK YOU labels, so the status itself stops being the
-   box and each label carries the green. They pop in left to right on a
-   per-item delay, and each opens a one-option menu that retires it. */
+/* Each success label carries its own color and dismissal menu. */
 .form-status-thanks { padding: 0; background: none; box-shadow: none; }
 .thanks-stack { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 10px; }
-/* Hidden rather than absent, both before a label's turn and after it is
-   dismissed, so the row's slots never shift. */
+/* Hidden labels keep their slots so dismissal does not shift the row. */
 .thanks-item { position: relative; display: inline-flex; visibility: hidden; }
 .thanks-item.is-in { visibility: visible; }
 .thanks-item.is-gone { visibility: hidden; }
@@ -389,13 +375,11 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
 .thanks-menu-option:active { box-shadow: none; transform: translate(2px, 2px); }
 .thanks-item.is-leaving { pointer-events: none; animation: thanks-fade 200ms steps(2, end) forwards; }
 @keyframes thanks-fade { from { opacity: 1; } to { opacity: 0; } }
-/* The spinner shares the status slot, so the final message simply replaces it. */
 .form-status-loading { font-size: 14px; font-weight: 600; background: none;}
 .form-spinner { display: inline-block; width: 14px; height: 14px; margin-right: 8px; vertical-align: -1px; background: #fff; box-shadow: var(--raise); animation: form-spinner-step 240ms steps(4, end) infinite; }
 @keyframes form-spinner-step { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) {
     .form-spinner { animation: none; }
-    /* Labels still appear and still leave — just without the fade. */
     .thanks-item.is-leaving { opacity: 0; animation: none; }
 }
 

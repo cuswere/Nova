@@ -1,5 +1,6 @@
 param(
     [string]$ExportPath,
+    [string]$KeyPath,
     [switch]$DryRun,
     [switch]$Pause
 )
@@ -19,15 +20,18 @@ if (-not (Test-Path -LiteralPath $ExportPath)) { throw "Export not found: $Expor
 Write-Host "Syncing the latest Artwork Archive export: $ExportPath"
 
 if (-not $env:GOOGLE_SERVICE_ACCOUNT_JSON) {
-    $keyPath = Join-Path $downloads 'nova-opportunities-aab1e980a6bd.json'
-    if (-not (Test-Path -LiteralPath $keyPath)) { throw "Service-account key not found: $keyPath" }
-    $env:GOOGLE_SERVICE_ACCOUNT_JSON = Get-Content -Raw -LiteralPath $keyPath
+    if (-not $KeyPath) {
+        throw 'Set GOOGLE_SERVICE_ACCOUNT_JSON or pass an explicit -KeyPath.'
+    }
+    if (-not (Test-Path -LiteralPath $KeyPath)) { throw "Service-account key not found: $KeyPath" }
+    $credentials = Get-Content -Raw -LiteralPath $KeyPath
+    $credentialObject = $credentials | ConvertFrom-Json
+    if ($credentialObject.type -ne 'service_account') { throw "Not a Google service-account key: $KeyPath" }
+    $env:GOOGLE_SERVICE_ACCOUNT_JSON = $credentials
 }
 
 Push-Location (Join-Path $PSScriptRoot '..')
 try {
-    # The launcher passes the chosen file explicitly. Running sync-opportunities
-    # without this switch still selects the newest matching Downloads file itself.
     $arguments = @('run', 'sync-opportunities', '--', '--source', 'artwork_archive', '--artwork-archive-export', $ExportPath)
     if ($DryRun) { $arguments += '--dry-run' }
     & npm.cmd @arguments

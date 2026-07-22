@@ -6,12 +6,11 @@
  * Apps Script), then Deploy → New deployment → Web app, with
  *   Execute as: Me
  *   Who has access: Anyone
- * and put the resulting /exec URL into FEEDBACK_FORM_ACTION in app.js.
+ * and put the resulting /exec URL into FORM_ACTION in scripts/feedback.js.
  *
  * The frontend posts url-encoded `name` / `message` fields with mode:'no-cors',
  * so nothing here needs CORS headers and the response body is never read.
  *
- * Sheet: https://docs.google.com/spreadsheets/d/1lDQtA_lTx7tHwkmpTP8Tj2xYiqY8Z72b8CpD0cPJVPs/edit
  */
 
 var SHEET_NAME = 'Feedback';

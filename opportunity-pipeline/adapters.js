@@ -303,7 +303,7 @@ function hyperallergicAwardInfo(lines) {
     for (const raw of sentences) {
         const sentence = cleanText(raw).replace(/\s*Read more on Hyperallergic\.?$/i, '');
         if (/\bfee\b/i.test(sentence) || !/(?:\$|€|£)\s?\d/.test(sentence)) continue;
-        const amountIsCost = /\b(?:tuition|residency costs?|sales? (?:price|value)|reimburse\w*)\b[^.!?]{0,25}(?:\$|â‚¬|Â£)\s?\d|(?:\$|â‚¬|Â£)\s?\d[^.!?]{0,25}\b(?:tuition|residency costs?|sales? (?:price|value)|reimburse\w*)\b/i.test(sentence);
+        const amountIsCost = /\b(?:tuition|residency costs?|sales? (?:price|value)|reimburse\w*)\b[^.!?]{0,25}(?:\$|€|£)\s?\d|(?:\$|€|£)\s?\d[^.!?]{0,25}\b(?:tuition|residency costs?|sales? (?:price|value)|reimburse\w*)\b/i.test(sentence);
         if (amountIsCost) continue;
         if (/\b(?:award|prize|stipend|grant|honorarium|funding|receiv)/i.test(sentence) || /up to\s*(?:\$|€|£)/i.test(sentence)) {
             return { awardInfo: sentence, issue: '' };
@@ -552,10 +552,7 @@ export async function discoverSource(definition) {
     if (definition.id === 'creative_west') return discoverCreativeWest(definition);
     if (definition.id === 'hyperallergic') return discoverHyperallergic(definition);
     if (definition.id === 'transartists') return discoverTransArtists(definition);
-    const { text } = await fetchText(definition.url, { delayMs: definition.delayMs || 0 });
-    switch (definition.id) {
-        default: return [];
-    }
+    throw new Error(`Unsupported opportunity source: ${definition.id}`);
 }
 
 export async function discoverCreativeWest(definition = source('creative_west'), { poster = postJson, fetcher = fetchText } = {}) {
