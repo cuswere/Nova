@@ -48,6 +48,18 @@
     "eligibility_tier": ""
   },
   {
+    "name": "Royal Society of Marine Artists Annual Exhibition 2026",
+    "deadline": "7/24/2026",
+    "link": "https://mallgalleries.org.uk/open-calls/royal-society-marine-artists",
+    "type": "Exhibition",
+    "fees": "y",
+    "country": "International",
+    "award_info": "GBP £5,000 total awards including The Baltic Exchange Award £2,000",
+    "fee_details": "GBP £22",
+    "eligibility_details": "Artists aged 18 and over may enter, from anywhere in the world. Artists may enter a maximum of six artworks each. Works should be no larger than 2.4m along the longest dimension. All works must be an original creation by the artist. Acceptable media: Oil, acrylic, watercolour, original prints of any media (excluding photography), mixed media, textiles, drawings, pastels, or sculpture.",
+    "eligibility_tier": "International"
+  },
+  {
     "name": "City of Lewisville College Street Enhancement Art Benches",
     "deadline": "7/25/2026",
     "link": "https://cityoflewisville.com/",
@@ -58,6 +70,54 @@
     "fee_details": "No Entry Fee 0.00 USD",
     "eligibility_details": "This project is open to United States-based artists (only), regardless of race, color, creed, gender, gender variance, national origin, age, religion, marital status, political opinion or affiliation, or disability.\nArtists working in a variety of 3-D and outdoor appropriate media are eligible to apply. This is not an appropriate call for artists working only in mural or 2-D art.",
     "eligibility_tier": ""
+  },
+  {
+    "name": "Artistic Vision",
+    "deadline": "7/26/2026",
+    "link": "https://hugorivera.com/",
+    "type": "Exhibition",
+    "fees": "y",
+    "country": "International",
+    "award_info": "",
+    "fee_details": "$35",
+    "eligibility_details": "Submissions are open to all artists 18 years and older, established and emerging artists.",
+    "eligibility_tier": "International"
+  },
+  {
+    "name": "Night Vision",
+    "deadline": "7/26/2026",
+    "link": "https://artlinkfw.org/calls-for-entry",
+    "type": "Competition",
+    "fees": "",
+    "country": "United States",
+    "award_info": "",
+    "fee_details": "",
+    "eligibility_details": "Artists must be 18+ and reside in the United States",
+    "eligibility_tier": "National"
+  },
+  {
+    "name": "16th Annual “Seascapes” Online Art Competition",
+    "deadline": "7/27/2026",
+    "link": "https://lightspacetime.art/",
+    "type": "Competition",
+    "fees": "y",
+    "country": "International",
+    "award_info": "Best in Show winner will receive a cash prize. Winners receive extensive worldwide publicity and promotion.",
+    "fee_details": "$18.00 for 1 to 2 entries / $26.00 for 3 to 5 entries.",
+    "eligibility_details": "The gallery invites both 2D and 3D artists (including photography & digital art), regardless of where they reside, to apply to this competition by submitting their best representational or abstract art.",
+    "eligibility_tier": "International"
+  },
+  {
+    "name": "2027 Solo and Group Exhibition Proposals, Rehoboth Art League",
+    "deadline": "7/27/2026",
+    "link": "https://rehobothartleague.org/call-for-entry/2027-solo-and-group-exhibition-proposals",
+    "type": "Commission",
+    "fees": "y",
+    "country": "",
+    "award_info": "",
+    "fee_details": "$25.00 RAL Members / $45.00 Non-Members (registration fee is non-refundable)",
+    "eligibility_details": "Open to all artists living in Delaware, Maryland, New Jersey, Pennsylvania, Virginia, West Virginia, and Washington, D.C.",
+    "eligibility_tier": "Regional"
   },
   {
     "name": "ATLT – Take One Action – Open Call",
@@ -96,6 +156,66 @@
     "eligibility_tier": ""
   },
   {
+    "name": "Off-Center: Art That Pushes Boundaries",
+    "deadline": "7/27/2026",
+    "link": "https://northvillearthouse.org/off-center",
+    "type": "Exhibition",
+    "fees": "y",
+    "country": "United States",
+    "award_info": "Awards: 1st-4th Place: $350, $200, $100, and $50; Honorable Mentions",
+    "fee_details": "$30 Member/$40 Non-member",
+    "eligibility_details": "Open to artists 18 and over in the continental U.S., maximum 3 original works up to 60 inches, no film/video/electronic/AI artwork",
+    "eligibility_tier": "National"
+  },
+  {
+    "name": "Out of Office",
+    "deadline": "7/27/2026",
+    "link": "https://supersecretprojects.com/current-open-call",
+    "type": "Exhibition",
+    "fees": "y",
+    "country": "",
+    "award_info": "",
+    "fee_details": "$28.00",
+    "eligibility_details": "",
+    "eligibility_tier": "Regional"
+  },
+  {
+    "name": "RISCA Call For Music: Eleanor Slater Hospital - Regan Unit",
+    "deadline": "7/27/2026",
+    "link": "https://arts.ri.gov/",
+    "type": "Commission",
+    "fees": "",
+    "country": "",
+    "award_info": "Selected composers will receive a $1,000 honorarium for the licensed use of their music.",
+    "fee_details": "",
+    "eligibility_details": "",
+    "eligibility_tier": "State"
+  },
+  {
+    "name": "RISCA Call For Photography: Eleanor Slater Hospital - Regan Unit",
+    "deadline": "7/27/2026",
+    "link": "https://arts.ri.gov/",
+    "type": "Commission",
+    "fees": "",
+    "country": "",
+    "award_info": "Selected photographers will receive a $500 honorarium for the licensed use of an image.",
+    "fee_details": "",
+    "eligibility_details": "",
+    "eligibility_tier": "State"
+  },
+  {
+    "name": "Series: One Thing After Another",
+    "deadline": "7/27/2026",
+    "link": "https://sitebrooklyn.com/",
+    "type": "Exhibition",
+    "fees": "y",
+    "country": "International",
+    "award_info": "",
+    "fee_details": "$26.00 + media fee $10.00",
+    "eligibility_details": "This is a juried exhibition for artists working in all media. This exhibition is open to all artists 18 years of age or older.",
+    "eligibility_tier": "International"
+  },
+  {
     "name": "Interior Artist Pool for Pediatric Hospital",
     "deadline": "7/28/2026",
     "link": "http://chandracerrito.com/",
@@ -130,6 +250,42 @@
     "fee_details": "Entry Fee 40.00 USD",
     "eligibility_details": "We welcome all artists and their submissions at HMVC Gallery New York.",
     "eligibility_tier": ""
+  },
+  {
+    "name": "Liberty Art Award",
+    "deadline": "7/29/2026",
+    "link": "https://artopps.co.uk/opportunities/libertyartaward2026",
+    "type": "Award",
+    "fees": "",
+    "country": "United States",
+    "award_info": "GBP £1,000 participation fee + professional development programme + £7,500 total in prizes",
+    "fee_details": "",
+    "eligibility_details": "Open to artists who graduated in 2025 or 2026",
+    "eligibility_tier": "National"
+  },
+  {
+    "name": "New York, I Love You",
+    "deadline": "7/29/2026",
+    "link": "http://yellowstudiony.com/",
+    "type": "Exhibition",
+    "fees": "y",
+    "country": "International",
+    "award_info": "",
+    "fee_details": "$25.00",
+    "eligibility_details": "",
+    "eligibility_tier": "International"
+  },
+  {
+    "name": "Online Drawing Development Year",
+    "deadline": "7/29/2026",
+    "link": "https://royaldrawingschool.org/courses/1-year-intensive",
+    "type": "Workshop",
+    "fees": "",
+    "country": "International",
+    "award_info": "",
+    "fee_details": "",
+    "eligibility_details": "Open to artists internationally",
+    "eligibility_tier": "International"
   },
   {
     "name": "The Homiens Art Prize",
@@ -168,6 +324,30 @@
     "eligibility_tier": ""
   },
   {
+    "name": "Nomad Prize",
+    "deadline": "7/30/2026",
+    "link": "https://nomadartprize.com/",
+    "type": "Competition",
+    "fees": "y",
+    "country": "International",
+    "award_info": "€ 1,000 cash prize",
+    "fee_details": "1 work € 50 · 2 works € 75 · 3 works € 95 Prizes",
+    "eligibility_details": "Open to: Artists of all nationalities, age 16+",
+    "eligibility_tier": "International"
+  },
+  {
+    "name": "2027 Tim Murphy Art Gallery Call for Artists",
+    "deadline": "7/31/2026",
+    "link": "https://merriam.org/Government/Departments/Parks-Rec/Tim-Murphy-Art-Gallery",
+    "type": "Exhibition",
+    "fees": "",
+    "country": "",
+    "award_info": "",
+    "fee_details": "",
+    "eligibility_details": "Open locally.",
+    "eligibility_tier": "Local"
+  },
+  {
     "name": "Art on the Corner, Downtown Grand Junction & Colorado Mesa University 2026",
     "deadline": "7/31/2026",
     "link": "https://gjcreates.org/aotc",
@@ -178,6 +358,30 @@
     "fee_details": "Downtown Grand Junction Art on the Corner 0.00 USD",
     "eligibility_details": "Eligibility:\nArtist must live within a reasonable driving distance of Grand Junction CO\nOnly 3D mediums accepted\nArtwork must be for sale\nArtwork previously shown with Art on the Corner is not eligible. Applications with previously shown work will be rejected.",
     "eligibility_tier": ""
+  },
+  {
+    "name": "Best of Tennessee Craft: 2026 Biennial",
+    "deadline": "7/31/2026",
+    "link": "https://tennesseecraft.org/",
+    "type": "Exhibition",
+    "fees": "y",
+    "country": "",
+    "award_info": "",
+    "fee_details": "$45",
+    "eligibility_details": "Open to all craft artists 18 years or older, who are current residents of Tennessee, including students",
+    "eligibility_tier": "Regional"
+  },
+  {
+    "name": "Cafe Gallery Art Exhibit 2026: \"Comfort\"",
+    "deadline": "7/31/2026",
+    "link": "https://brgeneral.org/medical-services/arts-in-medicine/call-for-art",
+    "type": "Competition",
+    "fees": "n",
+    "country": "",
+    "award_info": "Ribbons will be awarded for 1st Place, 2nd Place, 3rd Place, and Honorable Mentions. Additionally, one piece will receive the Arts in Medicine Fan Favorite award. This piece will receive special recognition and VIP placement within the exhibit and be marked as \"SOLD,\" as it will be purchased by Arts in Medicine and become part of its permanent collection.",
+    "fee_details": "",
+    "eligibility_details": "",
+    "eligibility_tier": "State"
   },
   {
     "name": "Call for City of Bothell Downtown District Artist Roster",
@@ -204,6 +408,18 @@
     "eligibility_tier": ""
   },
   {
+    "name": "CASA PIP Residency for Filmmakers",
+    "deadline": "7/31/2026",
+    "link": "https://casapip.com/apply",
+    "type": "Residency",
+    "fees": "y",
+    "country": "International",
+    "award_info": "Funded residency",
+    "fee_details": "€35",
+    "eligibility_details": "Open internationally.",
+    "eligibility_tier": "International"
+  },
+  {
     "name": "Center For Fiction Emerging Writer Fellowship",
     "deadline": "7/31/2026",
     "link": "https://centerforfiction.org/grants-awards/nyc-emerging-writers-fellowship",
@@ -216,6 +432,42 @@
     "eligibility_tier": ""
   },
   {
+    "name": "InResidency - Artist Residency CDMX",
+    "deadline": "7/31/2026",
+    "link": "http://bureauqueerart.com/",
+    "type": "Residency",
+    "fees": "y",
+    "country": "International",
+    "award_info": "",
+    "fee_details": "$25.00",
+    "eligibility_details": "Open internationally.",
+    "eligibility_tier": "International"
+  },
+  {
+    "name": "July Salon Art Prize",
+    "deadline": "7/31/2026",
+    "link": "https://thesalonartprize.com/archive",
+    "type": "Competition",
+    "fees": "y",
+    "country": "International",
+    "award_info": "$2,250 per month, $65,000 annually",
+    "fee_details": "Early Bird: $29/$12 Regular: $40/$16",
+    "eligibility_details": "Open internationally.",
+    "eligibility_tier": "International"
+  },
+  {
+    "name": "Marshall T. Steel Center @ Ellis Hall Exhibitions: Commodification of Nature",
+    "deadline": "7/31/2026",
+    "link": "https://hendrix.edu/steelcenter",
+    "type": "Exhibition",
+    "fees": "",
+    "country": "United States",
+    "award_info": "",
+    "fee_details": "",
+    "eligibility_details": "",
+    "eligibility_tier": "National"
+  },
+  {
     "name": "MUUS Collection Research Fellowship",
     "deadline": "7/31/2026",
     "link": "https://muuscollection.com/",
@@ -226,6 +478,18 @@
     "fee_details": "",
     "eligibility_details": "",
     "eligibility_tier": ""
+  },
+  {
+    "name": "NextGen InterArts Foundation Inc",
+    "deadline": "7/31/2026",
+    "link": "https://nextgeninterarts.org/musiconinterarts-terms",
+    "type": "Exhibition",
+    "fees": "y",
+    "country": "United States",
+    "award_info": "",
+    "fee_details": "$10 per work + exhibition fee if accepted",
+    "eligibility_details": "Open to creative student artists ages 6–18, young artists, emerging musicians, and composers under 30, ready to share original work in an interdisciplinary setting.",
+    "eligibility_tier": "National"
   },
   {
     "name": "Oolite Arts Cinematic Residency",
@@ -276,6 +540,42 @@
     "eligibility_tier": ""
   },
   {
+    "name": "TBQA - Join Collectivo Queer Art Ecosystem",
+    "deadline": "7/31/2026",
+    "link": "http://bureauqueerart.com/",
+    "type": "Exhibition",
+    "fees": "y",
+    "country": "International",
+    "award_info": "",
+    "fee_details": "$25.00",
+    "eligibility_details": "",
+    "eligibility_tier": "International"
+  },
+  {
+    "name": "The Residency at Casa Gracìa- International Artists",
+    "deadline": "7/31/2026",
+    "link": "https://casagracia.org/apply",
+    "type": "Residency",
+    "fees": "",
+    "country": "International",
+    "award_info": "Funded residency and some artists may be eligible for a stipend of €8,500 to help cover travel, living expenses, materials, and shipping.",
+    "fee_details": "",
+    "eligibility_details": "Open internationally.",
+    "eligibility_tier": "International"
+  },
+  {
+    "name": "The Residency at Casa Gracìa- Spanish Artists",
+    "deadline": "7/31/2026",
+    "link": "https://casagracia.org/apply",
+    "type": "Residency",
+    "fees": "",
+    "country": "United States",
+    "award_info": "Funded residency and some artists may be eligible for a stipend of €8,500 to help cover travel, living expenses, materials, and shipping.",
+    "fee_details": "",
+    "eligibility_details": "This residency is open to artists currently based in Menorca, the Balearic Islands, or mainland Spain.",
+    "eligibility_tier": "National"
+  },
+  {
     "name": "2026 Betty Bowen Award",
     "deadline": "8/1/2026",
     "link": "https://visitsam.org/bettybowen",
@@ -285,6 +585,54 @@
     "award_info": "The winner is awarded an unrestricted cash prize of $20,000 and a solo exhibition at the Seattle Art Museum.",
     "fee_details": "Entry Fee 10.00 USD",
     "eligibility_details": "Who is eligible for the award?\nThe award is open to visual artists in all media working in Washington, Oregon, or Idaho. Artists of diverse backgrounds are encouraged to apply.",
+    "eligibility_tier": ""
+  },
+  {
+    "name": "Call for Art – Salon Ori",
+    "deadline": "8/1/2026",
+    "link": "https://springboardforthearts.org/opportunity/call-for-art-salon-ori",
+    "type": "Exhibition",
+    "fees": "",
+    "country": "",
+    "award_info": "",
+    "fee_details": "",
+    "eligibility_details": "Open to artists local to Saint Paul, MN",
+    "eligibility_tier": "Local"
+  },
+  {
+    "name": "Figures & Faces 2026 Art Competition",
+    "deadline": "8/1/2026",
+    "link": "https://fusionartps.com/",
+    "type": "Competition",
+    "fees": "y",
+    "country": "International",
+    "award_info": "Choice of a cash prize or complimentary one-year membership to Fusion Art's Members Gallery for Best in Show winners.",
+    "fee_details": "$25 for 1-2 images / $40 for up to 5 images",
+    "eligibility_details": "2D and 3D artists, worldwide, are invited to submit their best art and photography depicting the human form - both figures & faces",
+    "eligibility_tier": "International"
+  },
+  {
+    "name": "Grant for Recent MFA Visual Art Graduate",
+    "deadline": "8/1/2026",
+    "link": "https://lllartistfund.com/",
+    "type": "Grant",
+    "fees": "",
+    "country": "United States",
+    "award_info": "USD $1,000 unrestricted grant",
+    "fee_details": "",
+    "eligibility_details": "Open to US-based recent MFA graduates in Visual Art with strong research-based practice",
+    "eligibility_tier": "National"
+  },
+  {
+    "name": "Occultus",
+    "deadline": "8/1/2026",
+    "link": "https://thevestibule.org/occultus-call-for-work",
+    "type": "Exhibition",
+    "fees": "",
+    "country": "",
+    "award_info": "",
+    "fee_details": "",
+    "eligibility_details": "",
     "eligibility_tier": ""
   },
   {
@@ -310,6 +658,30 @@
     "fee_details": "",
     "eligibility_details": "",
     "eligibility_tier": ""
+  },
+  {
+    "name": "Paddo Painting Prize 2026",
+    "deadline": "8/2/2026",
+    "link": "https://artsmidnorthcoast.com/paddo-landscape-painting-prize-2026",
+    "type": "Competition",
+    "fees": "",
+    "country": "",
+    "award_info": "The prize pool includes a $30,000 main award, a $3,000 Highly Commended Prize, and a $1,000 People’s Choice Award. These categories recognise excellence across the finalist group while encouraging audience engagement with the exhibition.",
+    "fee_details": "",
+    "eligibility_details": "Works must be paintings inspired by the Australian landscape. The Paddington Art Prize continues to support painters at all career stages, providing a respected platform within the national arts calendar and contributing to ongoing conversations around landscape in contemporary Australian art.",
+    "eligibility_tier": "National"
+  },
+  {
+    "name": "Sense of Place Open Call",
+    "deadline": "8/2/2026",
+    "link": "https://see.me/live-open-call/78415a5c-e6b0-47aa-8cca-bfd2c08bee35",
+    "type": "Exhibition",
+    "fees": "y",
+    "country": "International",
+    "award_info": "Inclusion in an NYC gallery exhibition, invitation to join the SeeMe digital gallery and Artsy collections, and custom social media promotion",
+    "fee_details": "38.00",
+    "eligibility_details": "Open to artists internationally",
+    "eligibility_tier": "International"
   },
   {
     "name": "Call for Articles: Printmaking",
@@ -348,10 +720,70 @@
     "eligibility_tier": ""
   },
   {
+    "name": "NOT YET! treat gallery's annual summer open call",
+    "deadline": "8/3/2026",
+    "link": "https://collegeart.org/jobs-and-opportunities/opportunities/listing/35922",
+    "type": "Exhibition",
+    "fees": "y",
+    "country": "International",
+    "award_info": "",
+    "fee_details": "$15 - $40",
+    "eligibility_details": "2D work not to exceed 26x20 inches framed; 3D work not to exceed 12x12x12 inches; work should be created between 2020-2026",
+    "eligibility_tier": "International"
+  },
+  {
+    "name": "San Diego's Finest Art Show 2026",
+    "deadline": "8/3/2026",
+    "link": "https://artscenewest.com/san-diegos-finest-art-show-2026",
+    "type": "Competition",
+    "fees": "y",
+    "country": "International",
+    "award_info": "Cash Prizes and Ribbons during 55 day gallery exhibition",
+    "fee_details": "$35",
+    "eligibility_details": "Open to artists internationally",
+    "eligibility_tier": "International"
+  },
+  {
+    "name": "September - October 2027 Murray Gallery",
+    "deadline": "8/3/2026",
+    "link": "http://scciowa.edu/",
+    "type": "Exhibition",
+    "fees": "",
+    "country": "United States",
+    "award_info": "",
+    "fee_details": "",
+    "eligibility_details": "",
+    "eligibility_tier": "National"
+  },
+  {
+    "name": "The New Emergence Art Prize 2026",
+    "deadline": "8/3/2026",
+    "link": "http://newemergenceart.com/",
+    "type": "Competition",
+    "fees": "y",
+    "country": "International",
+    "award_info": "• New Emergence Art Prize 2026: Grand Prize (£1,000 cash award) • NG Art Creative Residency: Emerging Artist Award (2-week residency in Provence, France, worth €2000) • The Art Ladder Prize (1 year subscription to The Art Ladder mentoring programme by Parker Harris - worth £800) • Staedtler UK Award (£300+ worth of Staedtler products) • Rosemary & Co Award (£300 Gift Card) • New Emergence Art Founder’s Prize (£300 cash) • GreatArt Award (£250 worth of materials) • Michael Harding Watercolour Prize (£150+ worth of materials) • Michael Harding Oil Painter’s Prize (£150+ worth of materials)",
+    "fee_details": "£15 for 1 artwork, £25 for 2 artworks, £30 for 3 artworks.",
+    "eligibility_details": "Open to artists internationally",
+    "eligibility_tier": "International"
+  },
+  {
     "name": "Apply to Join the Liberation Studios Founding Studio Cohort",
     "deadline": "8/4/2026",
     "link": "https://app.entrythingy.com/liberationgallery/apply-to-join-the-liberation-studios-founding-studio-cohort",
     "type": "Residency",
+    "fees": "",
+    "country": "",
+    "award_info": "",
+    "fee_details": "",
+    "eligibility_details": "",
+    "eligibility_tier": ""
+  },
+  {
+    "name": "Surface Labor",
+    "deadline": "8/4/2026",
+    "link": "http://riversidearts.org/",
+    "type": "Exhibition",
     "fees": "",
     "country": "",
     "award_info": "",
@@ -370,6 +802,18 @@
     "fee_details": "Application fee is $25",
     "eligibility_details": "",
     "eligibility_tier": ""
+  },
+  {
+    "name": "BRiGHT AfterParty: Call to Artists",
+    "deadline": "8/5/2026",
+    "link": "https://eugene-or.gov/5602/BRiGHT-AfterParty-Call-to-Artists",
+    "type": "Commission",
+    "fees": "",
+    "country": "",
+    "award_info": "Artist stipend between $300-$700 (based on scope - plug and play sculptures or simple installations will receive a smaller stipend, whereas larger-scale, immersive experiences will receive a larger stipend), Artist stipends will be provided at the end of BRiGHT AfterParty.",
+    "fee_details": "",
+    "eligibility_details": "",
+    "eligibility_tier": "State"
   },
   {
     "name": "2026 AICA International Incentive Prize for Art Critics",
@@ -396,6 +840,66 @@
     "eligibility_tier": ""
   },
   {
+    "name": "Society of Wildlife Artists 63rd Annual Exhibition: The Natural Eye",
+    "deadline": "8/7/2026",
+    "link": "https://mallgalleries.oess1.uk/",
+    "type": "Exhibition",
+    "fees": "y",
+    "country": "International",
+    "award_info": "GBP £5,000 total awards",
+    "fee_details": "There is a non-refundable submission fee of £22 per work, or £14.50 per work for artists aged 35 or under.",
+    "eligibility_details": "Artists aged 18 and over may enter, from anywhere in the world. Artists may enter a maximum of six works each. Work must have been completed within the last three years and not previously exhibited at Mall Galleries. Works should be no larger than 2.4m along the longest dimension. All works must be an original creation by the artist. Work may be in any medium (except photography) including drawing, painting, sculpture and original prints (if prints, please detail the edition total and availability).",
+    "eligibility_tier": "International"
+  },
+  {
+    "name": "The British Art Prize 2026",
+    "deadline": "8/7/2026",
+    "link": "https://artopps.co.uk/opportunities/britishartprize26",
+    "type": "Competition",
+    "fees": "y",
+    "country": "International",
+    "award_info": "Prize fund worth more than GBP £10,000 including cash, art materials and solo show",
+    "fee_details": "The entry fee for the first artwork is £24 and £19 for any additional artwork. You may enter up to 20 works.",
+    "eligibility_details": "All styles, media and techniques will be considered. Entries may include paintings, drawings, textile, prints or mixed media. Collaborative artworks can be submitted. No giclée reproductions, or copies of original works generated in other media will be accepted.. Open to everyone - amateur, emerging, or professional artists. AI art will not be considered.",
+    "eligibility_tier": "International"
+  },
+  {
+    "name": "44th Season Call for Entry",
+    "deadline": "8/8/2026",
+    "link": "https://buckhamgallery.org/2027-28-season-call-for-entry.html",
+    "type": "Exhibition",
+    "fees": "y",
+    "country": "United States",
+    "award_info": "Partial shipping reimbursement for selected artists",
+    "fee_details": "USD $35",
+    "eligibility_details": "Artists at any stage of their career can submit a proposal. Artists should submit a strong and consistent body of work. Selected proposals should not have been exhibited at Buckham Gallery previously.",
+    "eligibility_tier": "National"
+  },
+  {
+    "name": "fooLPRoof Art Gallery Rolling Artist Application",
+    "deadline": "8/9/2026",
+    "link": "https://foolproofcontemporaryart.com/",
+    "type": "Exhibition",
+    "fees": "y",
+    "country": "United States",
+    "award_info": "",
+    "fee_details": "$35.00",
+    "eligibility_details": "Open to artists based in the U.S.",
+    "eligibility_tier": "National"
+  },
+  {
+    "name": "Greenhouse Residency at Mendocino Art Center 2026/27",
+    "deadline": "8/9/2026",
+    "link": "https://mendocinoartcenter.org/",
+    "type": "Residency",
+    "fees": "y",
+    "country": "International",
+    "award_info": "",
+    "fee_details": "$20.00",
+    "eligibility_details": "",
+    "eligibility_tier": "International"
+  },
+  {
     "name": "Lions Park Nature Play Public Art Project",
     "deadline": "8/9/2026",
     "link": "https://cityofgolden.gov/community/art_culture_history/p",
@@ -406,6 +910,18 @@
     "fee_details": "No Entry Fee 0.00 USD",
     "eligibility_details": "This opportunity is open to professional artists and artist teams with experience in public art, landscape-integrated artwork, environmental art, play-based design, experiential installations, or related disciplines. Artists and/or teams must be based in Colorado or neighboring states (Utah, Arizona, New Mexico, Wyoming, Nebraska, Kansas, and Oklahoma). Emerging artists are encouraged to apply; however, applicants should demonstrate the ability to successfully complete projects of a similar scale and complexity.",
     "eligibility_tier": ""
+  },
+  {
+    "name": "Stolen Generations Marker Artist EOI",
+    "deadline": "8/9/2026",
+    "link": "https://mvcc.vic.gov.au/play/arts-and-culture/creative-highlights/stolen-generations-marker",
+    "type": "Commission",
+    "fees": "",
+    "country": "United States",
+    "award_info": "The overall budget for the Stolen Generation Marker project will be up to $300,000.",
+    "fee_details": "",
+    "eligibility_details": "Eligible applicants must be First Nations artists (individuals or in teams), who have a connection to Victoria, AUS.",
+    "eligibility_tier": "National"
   },
   {
     "name": "2027 Summer Exhibition",
@@ -430,6 +946,18 @@
     "fee_details": "No Entry Fee 0.00 USD",
     "eligibility_details": "Artists lacking public art experience may want to consider jointly submitting the qualifications of an experienced collaborator. Resumes/CVs of all collaborators must be uploaded to CaFÉ as a single PDF with multiple pages.\nEligibility is limited to professional visual artist teams or artists at least 18 years of age based in the United States. Preference will be given to artists based in the Kansas City Combined Statistical Area. The Kansas City CSA includes the Missouri counties of Andrew, Bates, Buchanan, Caldwell, Cass, Clay, Clinton, DeKalb, Jackson, Johnson, Lafayette, Platte, Ray and the Kansas counties of Atchison, Doniphan, Douglas, Franklin, Johnson, Leavenworth, Linn, Miami, Wyandotte.\nArtists who have completed a City of Kansas City, Missouri One Percent for Art commission within two years of their project’s contract date are not eligible.\nFull-time, permanent City of Kansas City, Missouri employees, General Services Department project consultants and their employees and sub-consultants are not eligible.",
     "eligibility_tier": ""
+  },
+  {
+    "name": "Expressions of Interest: 2027 South Side Festival Artist Commission (up to $5k)",
+    "deadline": "8/10/2026",
+    "link": "https://southsidefestival.com.au/About/Expressions-of-Interest",
+    "type": "Commission",
+    "fees": "",
+    "country": "United States",
+    "award_info": "The Artistic Commissions to be granted from a pool of $20,000.00 AUD. The maximum amount that can by applied for is $5,000.00 AUD (plus GST if applicable).",
+    "fee_details": "",
+    "eligibility_details": "Applicants must Live, work, and/or study in Frankston City, or demonstrate strong affiliation with Frankston City",
+    "eligibility_tier": "National"
   },
   {
     "name": "Los Altos Pistache Red",
@@ -466,6 +994,66 @@
     "fee_details": "",
     "eligibility_details": "",
     "eligibility_tier": ""
+  },
+  {
+    "name": "Frankston City Artist Project Grants 2026-2027",
+    "deadline": "8/11/2026",
+    "link": "https://artscentre.frankston.vic.gov.au/About/Featured-News/Artist-Grants-Now-Open-2026-2027",
+    "type": "Grant",
+    "fees": "",
+    "country": "",
+    "award_info": "up to $5,000 per recipient",
+    "fee_details": "",
+    "eligibility_details": "Applicants must Live, work, and/or study in Frankston City, or demonstrate strong affiliation with Frankston City",
+    "eligibility_tier": "Local"
+  },
+  {
+    "name": "Connections Through Culture Grants 2026",
+    "deadline": "8/12/2026",
+    "link": "https://arts.britishcouncil.org/connections-through-culture",
+    "type": "Grant",
+    "fees": "",
+    "country": "International",
+    "award_info": "GBP 5,000 to 15,000 grant",
+    "fee_details": "",
+    "eligibility_details": "Applications must include at least one UK-based partner and one partner from an eligible participating country.",
+    "eligibility_tier": "International"
+  },
+  {
+    "name": "RI Department of Health Laboratories- Call for Art",
+    "deadline": "8/12/2026",
+    "link": "https://arts.ri.gov/",
+    "type": "Exhibition",
+    "fees": "",
+    "country": "",
+    "award_info": "How much: $2,500 honorarium for the 6-month artwork loan The Rhode Island State Council on the Arts (“RISCA”), in conjunction with the RI State Health Laboratories (“RISHL ”) will exhibitartwork in the building's gallery corridor, through the Allocation for Art for Public Facilities Act.",
+    "fee_details": "",
+    "eligibility_details": "",
+    "eligibility_tier": "State"
+  },
+  {
+    "name": "Art 100 International",
+    "deadline": "8/13/2026",
+    "link": "https://visual-artists.org/vaa-art100-international-art-prize",
+    "type": "Competition",
+    "fees": "n",
+    "country": "International",
+    "award_info": "Selected artists will receive VAA Preferred Artist Status, formal recognition and International membership, access to Momentum: The Artist CEO Rise Programme, automatic entry to the Artist of the Year Awards 2027, and consideration for the VAA Art100 Industry Book – a curated publication shared with galleries, collectors, and art professionals. Selected winners from the USA will also receive a 6-month Artfinder subscription, tailored support to sell work via Direct from the Artist, Artfinder Artist Profiling, and Automatic Enrolment in Artfinder’s bonus scheme.",
+    "fee_details": "No Submission fee. If selected, you will be required to join the VAA Membership Programme for a subsidised annual rate. The subsidised membership rates are as follows: Premium Membership: £100 (normally £125); International Membership: £88 (normally £110)",
+    "eligibility_details": "Open to artists internationally",
+    "eligibility_tier": "International"
+  },
+  {
+    "name": "2026 Main Street Gallery Fine Art Show & Sale",
+    "deadline": "8/14/2026",
+    "link": "https://mainstreetcreatives.com/",
+    "type": "Exhibition",
+    "fees": "y",
+    "country": "United States",
+    "award_info": "",
+    "fee_details": "USD $35, Additional Entry : $10",
+    "eligibility_details": "Open to artists 18 years or older; work must be for sale and cannot exceed 36 inches in width including frame or 50 pounds in weight",
+    "eligibility_tier": "National"
   },
   {
     "name": "Mosaic Art Pieces - Large Scale Outdoor Concrete Planters",
@@ -516,6 +1104,18 @@
     "eligibility_tier": ""
   },
   {
+    "name": "UNSW Alumni Mural program - 2026 EOIs",
+    "deadline": "8/14/2026",
+    "link": "https://library.unsw.edu.au/about-unsw-library/exhibitions-program/alumni-mural-program/expressions-of-interest",
+    "type": "Commission",
+    "fees": "",
+    "country": "United States",
+    "award_info": "",
+    "fee_details": "",
+    "eligibility_details": "This program is open to all UNSW alumni (graduates of any degree program). They strongly encourage applications from Aboriginal and Torres Strait Islander artists.",
+    "eligibility_tier": "National"
+  },
+  {
     "name": "Artist In Residence Program: Palm Springs Preferred Small Hotels",
     "deadline": "8/15/2026",
     "link": "https://psartistresidency.com/",
@@ -538,6 +1138,18 @@
     "fee_details": "",
     "eligibility_details": "",
     "eligibility_tier": ""
+  },
+  {
+    "name": "Equisoain Art Residency: Space, Time, Matter",
+    "deadline": "8/15/2026",
+    "link": "https://equisoain.com/en/art-residency",
+    "type": "Residency",
+    "fees": "",
+    "country": "International",
+    "award_info": "European and Spanish-based artists may access possible funding support; self-funded international artists pay EUR 1,100-2,000 for a two-week stay with invitation letters provided",
+    "fee_details": "",
+    "eligibility_details": "Particular interest in artists working with natural pigments, dyes, fibres, wax, clay, and resin, and in land artists. Self-funded international artists are responsible for a program participation cost of EUR 1,100-2,000 for a two-week residency.",
+    "eligibility_tier": "International"
   },
   {
     "name": "Saratoga Gateway Sculpture Loan Program",
@@ -612,6 +1224,18 @@
     "eligibility_tier": ""
   },
   {
+    "name": "Open Call for Artists in Washington DC Area",
+    "deadline": "8/16/2026",
+    "link": "https://dcartsstudios.org/wearetheones.html",
+    "type": "Exhibition",
+    "fees": "y",
+    "country": "",
+    "award_info": "Best in show and runner up awards",
+    "fee_details": "$25",
+    "eligibility_details": "Open regionally.",
+    "eligibility_tier": "Regional"
+  },
+  {
     "name": "Signature Public Sculpture for Fort Pierce City Hall",
     "deadline": "8/16/2026",
     "link": "https://cityoffortpierce.com/",
@@ -660,6 +1284,30 @@
     "eligibility_tier": ""
   },
   {
+    "name": "NYFA Fiscal Sponsorship Program",
+    "deadline": "8/17/2026",
+    "link": "https://nyfa.org/fiscal-sponsorship",
+    "type": "Award",
+    "fees": "",
+    "country": "United States",
+    "award_info": "501(c)(3) nonprofit status for fundraising, plus free consultations and project support services",
+    "fee_details": "",
+    "eligibility_details": "Open to individual artists, unincorporated artist collectives, groups, or organizations. Project directors must have a US Taxpayer Identifying Number. Projects may take place outside the United States as long as the project provides a clear public benefit to US audiences. Artist projects must be specific projects rather than an artist's entire practice.",
+    "eligibility_tier": "National"
+  },
+  {
+    "name": "photographic call for entry | \"perspective\"",
+    "deadline": "8/17/2026",
+    "link": "https://asmithgallery.com/main-gallery-call-for-entry",
+    "type": "Competition",
+    "fees": "y",
+    "country": "International",
+    "award_info": "Both the Juror and Director Award’s will each receive a copy of the limited edition hardbound fine art book as well as an online solo exhibition and GalleryTalk. The Visitors’ Award is $100 and is selected by most Instagram likes.",
+    "fee_details": "$40 for the first 5 images and $5 for each additional image",
+    "eligibility_details": "Open internationally.",
+    "eligibility_tier": "International"
+  },
+  {
     "name": "Rosamond Park",
     "deadline": "8/17/2026",
     "link": "https://denverpublicart.org/",
@@ -682,6 +1330,18 @@
     "fee_details": "No Entry Fee 0.00 USD",
     "eligibility_details": "Artistic Direction & Opportunities\nWe are particularly interested in proposals that respond to the following ideas and qualities:\nHigh tactile value to support visitors with vision impairments\nShadow and light play, including dynamic, time-of-day experiences\nCanopy-based concepts, such as:\nStained glass or prism-effect light filtering\nCut metal pattern canopies casting intricate shadows\nOverhead armatures inspired by botanical or sculptural frameworks\nOrganic and nature-based forms, such as a willow dome or grove-like structures\nOpen, permeable designs with holes, gaps, or layered elements that allow visibility through the piece—encouraging interaction and connection\nGround plane engagement, including artistic surfacing or embedded elements\nSpatially immersive experiences that children can move through, under, and around\nMaterial exploration, including but not limited to combinations of metal, wood, and glass\nA sense of wonder and discovery, encouraging curiosity and imaginative play through opportunities for narrative exploration and storytelling\nThematic Considerations\nArtists are encouraged to explore a “Tree of Life” or related theme that reflects:\nThe natural character of the Pacific Northwest\nBothell’s local identity and community\nThe presence and symbolism of cedar groves and native landscapes\nLocation within the Park\nProposed artwork may be integrated in one or more of the following ways:\nLocated at the center of a circular gathering space, with 6 feet of clear pedestrian circulation on all sides\nAs a canopy or overhead structure spanning the full circle\nFinal placement will be determined collaboratively with the design team.\nProject Goals\nEnhance accessibility and inclusivity through sensory-rich design\nCreating a cohesive relationship between art, play, and landscape\nEnsure safety, durability, and long-term maintainability",
     "eligibility_tier": ""
+  },
+  {
+    "name": "Made in Chicago",
+    "deadline": "8/19/2026",
+    "link": "https://gallerygocm.com/",
+    "type": "Exhibition",
+    "fees": "y",
+    "country": "",
+    "award_info": "",
+    "fee_details": "$15.00",
+    "eligibility_details": "",
+    "eligibility_tier": "Local"
   },
   {
     "name": "Temporary Light-Based Installation",
@@ -708,6 +1368,30 @@
     "eligibility_tier": ""
   },
   {
+    "name": "Hornsby Art Prize 2026",
+    "deadline": "8/20/2026",
+    "link": "https://hornsby.nsw.gov.au/Community/Arts-and-culture/Hornsby-Art-Prize-2026",
+    "type": "Exhibition",
+    "fees": "y",
+    "country": "Australia",
+    "award_info": "AUD $23,000 total prize pool: Major Prize $10,000, Local Artist Award $5,000",
+    "fee_details": "AUD $40 per entry",
+    "eligibility_details": "Open to Australian residents aged 18 years and over. Categories include painting, drawing, printmaking, photography, and sculpture.",
+    "eligibility_tier": "National"
+  },
+  {
+    "name": "Photo Trouvée Virtual Artist Residency Fall 2026",
+    "deadline": "8/20/2026",
+    "link": "https://phototrouveemagazine.com/photo-trouve-virtual-residency-info",
+    "type": "Residency",
+    "fees": "y",
+    "country": "International",
+    "award_info": "",
+    "fee_details": "$650 Participation fee with partial scholarships available",
+    "eligibility_details": "Open Internationally.",
+    "eligibility_tier": "International"
+  },
+  {
     "name": "Senate Street Median Sculpture - Columbia, SC",
     "deadline": "8/20/2026",
     "link": "https://onecolumbiasc.com/",
@@ -718,6 +1402,18 @@
     "fee_details": "No Entry Fee 0.00 USD",
     "eligibility_details": "Artists are eligible if they:\nHave experience with public art or large-scale outdoor work\nAre able to work within the United States\nAre not currently enrolled as a student in a degree program\nAre current residents of South Carolina or who maintain an active studio in South Carolina.",
     "eligibility_tier": ""
+  },
+  {
+    "name": "2026 Pure Enjoyment",
+    "deadline": "8/21/2026",
+    "link": "https://springfieldarts.org/about/team",
+    "type": "Exhibition",
+    "fees": "",
+    "country": "International",
+    "award_info": "",
+    "fee_details": "",
+    "eligibility_details": "",
+    "eligibility_tier": "International"
   },
   {
     "name": "Call for Artists: Southern University at New Orleans Nursing & Allied Health Building (EXTERIOR)",
@@ -732,6 +1428,18 @@
     "eligibility_tier": ""
   },
   {
+    "name": "Meridian Scholar Program (10-Day Artist Residency)",
+    "deadline": "8/21/2026",
+    "link": "https://collegeart.org/jobs-and-opportunities/opportunities/listing/35934",
+    "type": "Residency",
+    "fees": "",
+    "country": "International",
+    "award_info": "",
+    "fee_details": "",
+    "eligibility_details": "This program is open to all practicing artists in the United States, but please note that this year’s application cycle exclusively solicits creative practitioners who seek to print, cast, or digitally fabricate multiple editions during the residency period.",
+    "eligibility_tier": "International"
+  },
+  {
     "name": "James Renwick Alliance for Craft – Chrysalis Award",
     "deadline": "8/23/2026",
     "link": "https://jracraft.org/chrysalis-application.html",
@@ -742,6 +1450,18 @@
     "fee_details": "",
     "eligibility_details": "",
     "eligibility_tier": ""
+  },
+  {
+    "name": "Accelerator Grant Program 2026, Ohio",
+    "deadline": "8/25/2026",
+    "link": "https://artscommission.grantplatform.com/",
+    "type": "Grant",
+    "fees": "",
+    "country": "",
+    "award_info": "Grant request amounts are not to exceed $1,000.",
+    "fee_details": "",
+    "eligibility_details": "Individual artists and artist collectives with a current residence or a creative studio within 30 miles of downtown Toledo may be eligible. The Accelerator Grant is open to artists across all mediums. Applicants who identify as Hobbyist or Emerging Artists are eligible to apply.",
+    "eligibility_tier": "Local"
   },
   {
     "name": "Owls Lookout Park Seating Area 2026",
@@ -768,6 +1488,66 @@
     "eligibility_tier": ""
   },
   {
+    "name": "Call for Art - PURE ABSTRACTION",
+    "deadline": "8/28/2026",
+    "link": "https://art-fluent.com/calls-for-art/pure-abstraction-prospectus",
+    "type": "Exhibition",
+    "fees": "y",
+    "country": "International",
+    "award_info": "All accepted pieces will be displayed in our online gallery at www.art-fluent.com Best of Show: $750 Two Director’s Choice awards: $250 each",
+    "fee_details": "$25 first entry/$10 for each additional entry",
+    "eligibility_details": "Open to artists internationally",
+    "eligibility_tier": "International"
+  },
+  {
+    "name": "Kangaroo Valley Art Prize 2026",
+    "deadline": "8/28/2026",
+    "link": "https://artsinthevalley.net.au/visualarts2026",
+    "type": "Exhibition",
+    "fees": "y",
+    "country": "Australia",
+    "award_info": "AUD $23,000 total prize pool including Kangaroo Valley Art Prize main award",
+    "fee_details": "An application fee of $30 for the first 2 artworks and $20 for the third (hung or video) is due with the application.",
+    "eligibility_details": "Any original work of visual art by an Australian artist or an artist residing in Australia is eligible for entering into the Kangaroo Valley Art Prize, including, but not limited to, painting in any medium, drawing, printmaking, photographic art, digital art, textile and fabric art, collage, multi-media, new media, video art, etc.",
+    "eligibility_tier": "National"
+  },
+  {
+    "name": "Lure of the Local 5 / Love Letters",
+    "deadline": "8/30/2026",
+    "link": "http://mundelein.org/LURE",
+    "type": "Exhibition",
+    "fees": "n",
+    "country": "",
+    "award_info": "We will be awarding: 1 Critic's Choice Award $150 prize+ 3 Honorable Mentions1 People's Choice Award $150 prize+ Runner upMAC 10th Anniversary Purchase Award",
+    "fee_details": "",
+    "eligibility_details": "",
+    "eligibility_tier": "Regional"
+  },
+  {
+    "name": "Quilt National '27",
+    "deadline": "8/30/2026",
+    "link": "https://dairybarn.org/quiltnational",
+    "type": "Exhibition",
+    "fees": "y",
+    "country": "International",
+    "award_info": "Selected award-winning quilts will be acquired by the International Quilt Museum in Lincoln, Nebraska, and added to its Quilt National Collection. The Purchase Award payment serves as both the award honorarium and the purchase price for the quilt. By accepting a Purchase Award, the artist agrees to transfer ownership of the quilt to the International Quilt Museum. Purchase Awards will be announced during opening weekend. Award-winning quilts will remain in the Quilt National exhibition tour for approximately two years before entering the International Quilt Museum’s permanent Quilt National Collection, where they will be preserved for exhibition, study, and research. Best of Show sponsored by MODA, $7,500; Most Innovative Use of Material sponsored by the James Family, $5,000 ; Award of Excellence sponsored by Aurifil, $5,000 ; Emerging Artist sponsored by the Pumphrey Family, $2,500",
+    "fee_details": "$50 – General application fee; $35 – Dairy Barn Members; free – First-Time applicants to Quilt National",
+    "eligibility_details": "Open to artists internationally",
+    "eligibility_tier": "International"
+  },
+  {
+    "name": "2026 Liu Shiming Artist Grants",
+    "deadline": "8/31/2026",
+    "link": "https://lsmartfund.org/artistgrants2026",
+    "type": "Grant",
+    "fees": "",
+    "country": "International",
+    "award_info": "Grants will be disbursed in two payments, with $3,000 by January 15, 2027 and the remaining $2,000 upon completion of the proposed project.",
+    "fee_details": "",
+    "eligibility_details": "To be eligible for consideration, applicants must have either received a degree in studio arts between 2016 and 2024, or had their debut show at a gallery or juried art exhibition between 2016 and 2026.",
+    "eligibility_tier": "International"
+  },
+  {
     "name": "Aesthetica Creative Writing Award",
     "deadline": "8/31/2026",
     "link": "https://aestheticamagazine.com/creative-writing-award",
@@ -780,6 +1560,90 @@
     "eligibility_tier": ""
   },
   {
+    "name": "AMAZÓNICA 2026 | Artist-in-Residence - Amazon Rainforest, Peru",
+    "deadline": "8/31/2026",
+    "link": "https://artjobs.com/open-calls/residency/peru/37904/amaz%C3%B3nica-2026-artist-residence-%E2%80%93-amazon-rainforest-peru",
+    "type": "Residency",
+    "fees": "",
+    "country": "International",
+    "award_info": "Four-week residency with accommodation, workshops, cultural immersion, and personalized curatorial guidance",
+    "fee_details": "",
+    "eligibility_details": "They welcome visual artists, performers, musicians, researchers, curators, and creative professionals from all disciplines to develop projects",
+    "eligibility_tier": "International"
+  },
+  {
+    "name": "Artist Call Out: Sculpture in the Garden Wollongong 2027",
+    "deadline": "8/31/2026",
+    "link": "https://wollongongbotanicgarden.com.au/events/sculpture-in-the-garden",
+    "type": "Commission",
+    "fees": "",
+    "country": "Australia",
+    "award_info": "This exhibition, held at Wollongong Botanic Garden every two years, includes the $40,000 Wollongong Acquisitive Sculpture Prize, a $3,000 People's Choice Award, and a $10,000 Ephemeral Prize.",
+    "fee_details": "",
+    "eligibility_details": "Sculpture in the Garden Wollongong is open to any artist living in Australia.",
+    "eligibility_tier": "National"
+  },
+  {
+    "name": "CALL FOR ART - Arch / Ture",
+    "deadline": "8/31/2026",
+    "link": "https://blu-art.com/",
+    "type": "Competition",
+    "fees": "y",
+    "country": "United States",
+    "award_info": "Best In Show: Blu Art membership (1 year) ($587 Value) Second Place: $100 Award Awards of Excellence for Mediums represented by three or more artworks",
+    "fee_details": "$35.00",
+    "eligibility_details": "",
+    "eligibility_tier": "National"
+  },
+  {
+    "name": "Call for Submissions - Exhibition",
+    "deadline": "8/31/2026",
+    "link": "https://collegeart.org/jobs-and-opportunities/opportunities/listing/35929",
+    "type": "Exhibition",
+    "fees": "",
+    "country": "United States",
+    "award_info": "Reasonable honorarium to assist with travel and shipping expenses",
+    "fee_details": "",
+    "eligibility_details": "Open to WIU students, faculty and staff, as well as the western Illinois region, to a variety of art forms in a wide range of mediums.",
+    "eligibility_tier": "National"
+  },
+  {
+    "name": "Economías del Deseo",
+    "deadline": "8/31/2026",
+    "link": "https://astahousemx.com/c%C3%B3mo-vender",
+    "type": "Exhibition",
+    "fees": "",
+    "country": "",
+    "award_info": "",
+    "fee_details": "",
+    "eligibility_details": "",
+    "eligibility_tier": ""
+  },
+  {
+    "name": "HALE ARTIST IN RESIDENCY",
+    "deadline": "8/31/2026",
+    "link": "https://nantucketarts.org/artists-in-residence",
+    "type": "Residency",
+    "fees": "",
+    "country": "United States",
+    "award_info": "Artists chosen receive $500 toward travel and a $2,000 stipend for materials and living expenses.",
+    "fee_details": "",
+    "eligibility_details": "Open to artists working in a variety of media",
+    "eligibility_tier": "National"
+  },
+  {
+    "name": "IMMORTAL Queer Art Fair - 2.0 - Dia de Muertos - & Artist Residency Programming",
+    "deadline": "8/31/2026",
+    "link": "http://bureauqueerart.com/",
+    "type": "Art Fair",
+    "fees": "y",
+    "country": "International",
+    "award_info": "",
+    "fee_details": "$20.00",
+    "eligibility_details": "Open internationally.",
+    "eligibility_tier": "International"
+  },
+  {
     "name": "JCMO Community Park Sculpture Series",
     "deadline": "8/31/2026",
     "link": "https://jcparks.com/",
@@ -790,6 +1654,18 @@
     "fee_details": "No Entry Fee 0.00 USD",
     "eligibility_details": "The project is open to anyone 18 years or over who is able to complete the application requirements as specified, including the designing, fabrication, and delivery of the artwork. The sculpture can be any shape, form or design, and should conform to an approximate 6 ft. by 6 ft. footprint but can be larger. The city engineers will review each design for safety and recommend modifications, if necessary. All sculptures need to be in the intended condition when delivered. All entries must be original work, and artists are encouraged to be creative in their selection of materials while considering safety and environmental factors common to publicly accessible works of art.",
     "eligibility_tier": ""
+  },
+  {
+    "name": "Künstler*dorf Schöppingen Foundation Residency",
+    "deadline": "8/31/2026",
+    "link": "https://stiftung-kuenstlerdorf.de/de/home",
+    "type": "Residency",
+    "fees": "",
+    "country": "International",
+    "award_info": "Scholarships amount to €1,500 per month, less approximately €100 to €200 for rent and operating costs.",
+    "fee_details": "",
+    "eligibility_details": "Professional visual artists, writers, and composers are eligible to apply. Since 2023, applications from collectives have also been accepted. The call for proposals is open to people of all nationalities and ages.",
+    "eligibility_tier": "International"
   },
   {
     "name": "O'Fallon Main Street Roundabout Sculpture Project",
@@ -814,6 +1690,18 @@
     "fee_details": "",
     "eligibility_details": "",
     "eligibility_tier": ""
+  },
+  {
+    "name": "Small Works",
+    "deadline": "8/31/2026",
+    "link": "https://northvillearthouse.org/small-works",
+    "type": "Exhibition",
+    "fees": "y",
+    "country": "United States",
+    "award_info": "$700+ in cash + prizes. 1st - 4th places & Honorable Mentions",
+    "fee_details": "$30 member/$40 non-member",
+    "eligibility_details": "Open to artists in the U.S., maximum 4 works 16 inches or less including frame, not previously exhibited at Art House",
+    "eligibility_tier": "National"
   },
   {
     "name": "96th Ave & Reunion Pkwy Corner & Underpass",
@@ -960,6 +1848,18 @@
     "eligibility_tier": ""
   },
   {
+    "name": "Point of Hue: 12th Annual National Exhibition",
+    "deadline": "9/11/2026",
+    "link": "https://arton30th.com/pages/national-show",
+    "type": "Competition",
+    "fees": "y",
+    "country": "United States",
+    "award_info": "Cash Prizes and Featured in a Printed Exhibit Catalog",
+    "fee_details": "$40 for the first entry and $5 for each additional image",
+    "eligibility_details": "Open nationally.",
+    "eligibility_tier": "National"
+  },
+  {
     "name": "31st Annual Gateway to the Rockies Art Show",
     "deadline": "9/14/2026",
     "link": "https://auroraartistsguild.com/",
@@ -1006,6 +1906,18 @@
     "fee_details": "",
     "eligibility_details": "",
     "eligibility_tier": ""
+  },
+  {
+    "name": "GALLERY jENSEITS: BI-ANNUAL OPEN CALL 2027",
+    "deadline": "9/15/2026",
+    "link": "http://galleryjenseits.com/",
+    "type": "Exhibition",
+    "fees": "",
+    "country": "International",
+    "award_info": "",
+    "fee_details": "",
+    "eligibility_details": "",
+    "eligibility_tier": "International"
   },
   {
     "name": "Jentel Artist Residency",
@@ -1140,6 +2052,18 @@
     "eligibility_tier": ""
   },
   {
+    "name": "Mayors Art Show Call to Artists 2027",
+    "deadline": "9/30/2026",
+    "link": "https://eugene-or.gov/5095/Mayors-Art-Show-Call-to-Artists",
+    "type": "Exhibition",
+    "fees": "",
+    "country": "",
+    "award_info": "Eight awards of $500 each will be presented to the selected artists in each of the following award categories: Mayor’s 2D Choice, Mayor’s 3D Choice, Jurors’ 2D Choice, Jurors’ 3D Choice, People’s Choice, Curator’s Choice, Hult Center's Choice and Best Depiction of Eugene.",
+    "fee_details": "",
+    "eligibility_details": "",
+    "eligibility_tier": "Local"
+  },
+  {
     "name": "SCG Artist in Residence & Teaching Program (SCG ART) 2027 - Regional",
     "deadline": "9/30/2026",
     "link": "http://bluelinearts.org/",
@@ -1162,6 +2086,18 @@
     "fee_details": "",
     "eligibility_details": "",
     "eligibility_tier": ""
+  },
+  {
+    "name": "Call for Art: 2027 Exhibition Opportunity",
+    "deadline": "10/1/2026",
+    "link": "https://gpcaac.org/",
+    "type": "Exhibition",
+    "fees": "",
+    "country": "United States",
+    "award_info": "",
+    "fee_details": "",
+    "eligibility_details": "",
+    "eligibility_tier": "National"
   },
   {
     "name": "Camargo Fellowship",
@@ -1198,6 +2134,42 @@
     "fee_details": "Entry Fee 35.00 USD",
     "eligibility_details": "This call is open to any artists over the age of 18 living and working in the United States. CAE welcomes artists working across disciplines and media, including visual artists, sculptors, musicians, writers, filmmakers, and more. Eligible artistic disciplines and media include drawing, painting, sculpture, dance, photography, film, video, new media, installation, fiction & nonfiction writing, spoken word/poetry and interdisciplinary. While digital media is welcomed, artists will need to bring their own equipment as the facility doesn’t offer these resources. All artist mediums are encouraged to apply. Please contact us for further clarification on your medium.",
     "eligibility_tier": ""
+  },
+  {
+    "name": "Shirley Hannan National Portrait Award 2026",
+    "deadline": "10/6/2026",
+    "link": "https://secca.com.au/event/shnpa-2026-entries",
+    "type": "Competition",
+    "fees": "y",
+    "country": "Australia",
+    "award_info": "The $50,000 biennial award is non-acquisitive and is among the higher-value portrait prizes in the country, attracting hundreds of entries from many of the nation’s leading artists.",
+    "fee_details": "$35 (GST incl.)",
+    "eligibility_details": "The award is open to Australian artists, or permanent residents, over the age of 18 at the time of entry.",
+    "eligibility_tier": "National"
+  },
+  {
+    "name": "Artisphere",
+    "deadline": "10/9/2026",
+    "link": "https://artisphere.org/applications",
+    "type": "Art Fair",
+    "fees": "y",
+    "country": "International",
+    "award_info": "$15,000",
+    "fee_details": "$45, booth fees apply, emerging artist scholarship available",
+    "eligibility_details": "Open Internationally.",
+    "eligibility_tier": "International"
+  },
+  {
+    "name": "Amy Breinich",
+    "deadline": "10/18/2026",
+    "link": "https://forms.cloud.microsoft/r/6StnX62GxQ",
+    "type": "Exhibition",
+    "fees": "",
+    "country": "United States",
+    "award_info": "$1500",
+    "fee_details": "",
+    "eligibility_details": "Open to artists based in the U.S.",
+    "eligibility_tier": "National"
   },
   {
     "name": "sƛ̓x̣etkʷ Artist-in-Residence Program, Round 3",
@@ -1260,6 +2232,18 @@
     "eligibility_tier": ""
   },
   {
+    "name": "Burnie Print Prize 2027",
+    "deadline": "10/30/2026",
+    "link": "https://burniearts.net/Exhibitions/2027-Exhibits/Burnie-Print-Prize-2027",
+    "type": "Competition",
+    "fees": "y",
+    "country": "Australia",
+    "award_info": "Total Prize money $24,000.",
+    "fee_details": "$50 (inc. GST)",
+    "eligibility_details": "Entries are open to artworks created in print media only. This includes works produced primarily using techniques such as relief, intaglio, planographic, and stencil printing. Open to Australian artists aged 18 years and over.",
+    "eligibility_tier": "National"
+  },
+  {
     "name": "Winter 2027 'Vintage' Issue: Open Call for Submissions",
     "deadline": "10/30/2026",
     "link": "https://pjasmag.org/",
@@ -1270,6 +2254,18 @@
     "fee_details": "Entry Fee 14.00 USD",
     "eligibility_details": "Submissions are open to artists and writers working across all disciplines, including visual art, poetry, and experimental or cross-disciplinary forms.\nOpen internationally\nAll career stages are welcome\nIndividual and collaborative submissions accepted\nAll work must be original and created by the submitting artist\nSubmissions are evaluated based on clarity of vision, formal or conceptual strength, and a distinct artistic perspective.",
     "eligibility_tier": ""
+  },
+  {
+    "name": "Artist Grant - November",
+    "deadline": "11/15/2026",
+    "link": "https://artistgrant.org/",
+    "type": "Grant",
+    "fees": "y",
+    "country": "International",
+    "award_info": "Artist Grant awards an unrestricted $1200 USD grant to one visual artist three times each year.",
+    "fee_details": "(USD) $30",
+    "eligibility_details": "Open to visual artists aged 18+ worldwide",
+    "eligibility_tier": "International"
   },
   {
     "name": "Women’s Studio Workshop Artist’s Book Residency",
@@ -1308,6 +2304,30 @@
     "eligibility_tier": ""
   },
   {
+    "name": "Trailhead Gallery – Call For Art",
+    "deadline": "11/30/2026",
+    "link": "https://springboardforthearts.org/opportunity/trailhead-gallery-call-for-art",
+    "type": "Exhibition",
+    "fees": "",
+    "country": "",
+    "award_info": "6 weeks- 2 months per exhibit",
+    "fee_details": "",
+    "eligibility_details": "Open to emerging and established artists in the Twin Cities and surrounding areas.",
+    "eligibility_tier": "State"
+  },
+  {
+    "name": "Savage 2027",
+    "deadline": "12/1/2026",
+    "link": "https://artmelanated.com/",
+    "type": "Competition",
+    "fees": "y",
+    "country": "International",
+    "award_info": "$10,000 Cash Award The highest honor of the SAVAGE Emerging Artist Competition, recognizing one exceptional artist whose work exemplifies this year's theme, UNLIMITED. In addition to a $10,000 cash award, the Grand Prize recipient will receive recognition at the SAVAGE exhibition and become part of the growing legacy of artists shaping the future of contemporary art.",
+    "fee_details": "$35.00",
+    "eligibility_details": "",
+    "eligibility_tier": "International"
+  },
+  {
     "name": "The Abbey Foundation Residencies",
     "deadline": "12/1/2026",
     "link": "https://abbeyfoundationforthearts.org/grants",
@@ -1332,6 +2352,18 @@
     "eligibility_tier": ""
   },
   {
+    "name": "Exhibition Opportunity at Public Sculpture Park",
+    "deadline": "12/31/2026",
+    "link": "https://sculptureforest.org/sculptors",
+    "type": "Exhibition",
+    "fees": "n",
+    "country": "United States",
+    "award_info": "",
+    "fee_details": "",
+    "eligibility_details": "Open to U.S. based sculptors",
+    "eligibility_tier": "National"
+  },
+  {
     "name": "Farm, Flock and Fiber Artist in Residence Program at A Wrinkle in Thyme Farm",
     "deadline": "12/31/2026",
     "link": "https://awrinkleinthymefarm.com/?page_id=1294",
@@ -1342,6 +2374,30 @@
     "fee_details": "",
     "eligibility_details": "",
     "eligibility_tier": ""
+  },
+  {
+    "name": "La Wayaka Current",
+    "deadline": "12/31/2026",
+    "link": "https://lawayakacurrent.com/",
+    "type": "Residency",
+    "fees": "",
+    "country": "International",
+    "award_info": "",
+    "fee_details": "",
+    "eligibility_details": "Open to artists internationally",
+    "eligibility_tier": "International"
+  },
+  {
+    "name": "Lacawac Artist Residency",
+    "deadline": "12/31/2026",
+    "link": "https://lacawac.org/lacawac-artists-residency.html",
+    "type": "Residency",
+    "fees": "y",
+    "country": "United States",
+    "award_info": "",
+    "fee_details": "There is a non-refundable $10 application fee. The cost of the residency is $300 for one week.",
+    "eligibility_details": "Open to artists working in a variety of media",
+    "eligibility_tier": "National"
   },
   {
     "name": "NARS Foundation International Residency",
@@ -1402,6 +2458,18 @@
     "fee_details": "No Entry Fee 0.00 USD",
     "eligibility_details": "ELIGIBILITY\nThis opportunity is open to all Chicago based professional artists, artists teams, and arts organizations.\nApplicants may indicate that they would like to be considered for both sites. However, if selected, an artist or artist team will be chosen as a finalist for only one site. Each site commission will be awarded to a different artist or artist team.\nSELECTION PROCESS\nFollowing the RFQ application deadline, DCASE will convene a selection panel of community representatives, arts professionals, and 35th Ward staff to review the applications.\nThe committee will select 3 finalists per site, who will be commissioned to develop public art proposals. Finalists will present their design proposals to the selection committee, and a final artist or artist team will be selected for each site.\nSELECTION CRITERIA\nApplications will be reviewed by a selection panel composed of community representatives, arts professionals, and 35th Ward staff. The panel will evaluate submissions using a rubric that considers the following general criteria:\nCreative Practice\nThe artistic quality, originality, and professional experience demonstrated through the applicant’s portfolio of past work, particularly large-scale exterior mural projects.\nCommunity Relevance\nThe artist’s ability to create work that is responsive to the surrounding community and demonstrates an understanding of place and public engagement.\nAdministrative and Project Management Capacity\nThe artist’s ability to successfully plan and execute a mural project, including collaboration with project partners, communication with stakeholders, and the management of timelines and project requirements.",
     "eligibility_tier": ""
+  },
+  {
+    "name": "Call for Latino Artists - Unidos por el Arte Artist Directory",
+    "deadline": "1/1/2030",
+    "link": "https://juliadeburgos.org/",
+    "type": "Open Call",
+    "fees": "",
+    "country": "",
+    "award_info": "",
+    "fee_details": "",
+    "eligibility_details": "",
+    "eligibility_tier": "Local"
   },
   {
     "name": "Creative Professionals Talent Recruitment Grant",
@@ -2277,6 +3345,174 @@
     "award_info": "",
     "fee_details": "Public Art Archive 0.00 USD",
     "eligibility_details": "The Public Art Archive accepts submissions of completed public art projects from artists and commissioning agencies. PAA defines public art as any work of art that is (or was at one time, if a temporary work) situated in a location that is accessible or viewable by the general public at no cost. Works of art that were commissioned and/or gifted by corporations, museums, educational institutions, private parties, and other entities may also be eligible. New media, performative, rotating, and portable works may be eligible if they meet the commonly known definition of public art or civic art and are/were accessible for public viewing free of charge. Gallery art and art exhibited inside galleries and museums is typically not eligible. If you have questions about your artwork’s eligibility, please contact the Public Art Archive team at PAArchive@westaf.org",
+    "eligibility_tier": ""
+  },
+  {
+    "name": "Community Gallery Proposals",
+    "deadline": "Rolling",
+    "link": "https://airtable.com/appmAV4WgwSlXkaoW/pagu4U35HFId54aS5/form",
+    "type": "Exhibition",
+    "fees": "",
+    "country": "United States",
+    "award_info": "",
+    "fee_details": "",
+    "eligibility_details": "This opportunity is open to Nebraska-based artists, collectives, and community groups only.",
+    "eligibility_tier": "State"
+  },
+  {
+    "name": "Arts Council National Lottery Project Grants",
+    "deadline": "Rolling",
+    "link": "https://artscouncil.org.uk/ProjectGrants",
+    "type": "Grant",
+    "fees": "",
+    "country": "United Kingdom",
+    "award_info": "Project Grants is always open for applications between £1,000 and £100,000.",
+    "fee_details": "",
+    "eligibility_details": "Open to all UK artists.",
+    "eligibility_tier": "National"
+  },
+  {
+    "name": "Creative Process Residency at Greywood Arts",
+    "deadline": "Rolling",
+    "link": "https://greywoodarts.org/residency_application",
+    "type": "Residency",
+    "fees": "",
+    "country": "International",
+    "award_info": "",
+    "fee_details": "",
+    "eligibility_details": "Open to all artists internationally. The signature self-directed option is open to all visual, performing and literary arts disciplines, as well as curators, researchers, creatives and curators.",
+    "eligibility_tier": "International"
+  },
+  {
+    "name": "Ano Asites Artist Residency",
+    "deadline": "Rolling",
+    "link": "https://anoasitesartistsresidency.weebly.com/",
+    "type": "Residency",
+    "fees": "",
+    "country": "International",
+    "award_info": "",
+    "fee_details": "",
+    "eligibility_details": "Open to artists internationally",
+    "eligibility_tier": "International"
+  },
+  {
+    "name": "Archipelago Art Residency in Korpo",
+    "deadline": "Rolling",
+    "link": "https://aark.fi/",
+    "type": "Residency",
+    "fees": "",
+    "country": "International",
+    "award_info": "",
+    "fee_details": "",
+    "eligibility_details": "Open to artists internationally",
+    "eligibility_tier": "International"
+  },
+  {
+    "name": "Black Artists Grant (BAG)",
+    "deadline": "Rolling",
+    "link": "https://creativedebuts.co.uk/bag",
+    "type": "Grant",
+    "fees": "",
+    "country": "United Kingdom",
+    "award_info": "£500 per recipient, awarded monthly",
+    "fee_details": "",
+    "eligibility_details": "Open to Black artists (those with Black heritage who identify as Black); not open to those identifying as politically Black, POC, or BAME., Applicants must be based in the United Kingdom All artistic disciplines welcome",
+    "eligibility_tier": "National"
+  },
+  {
+    "name": "Live/Work Studio in the Cotswolds",
+    "deadline": "Rolling",
+    "link": "https://thehide.co/the-studio",
+    "type": "Residency",
+    "fees": "",
+    "country": "International",
+    "award_info": "",
+    "fee_details": "",
+    "eligibility_details": "Open to artists internationally",
+    "eligibility_tier": "International"
+  },
+  {
+    "name": "Fish Factory, Creative Centre of Stöðvarfjörður",
+    "deadline": "Rolling",
+    "link": "https://inhere.is/residency/application-prices",
+    "type": "Residency",
+    "fees": "",
+    "country": "International",
+    "award_info": "",
+    "fee_details": "",
+    "eligibility_details": "Open to artists internationally",
+    "eligibility_tier": "International"
+  },
+  {
+    "name": "2026 Call to Exhibit at the Creston Arts Depot Gallery",
+    "deadline": "Rolling",
+    "link": "https://crestonarts.org/",
+    "type": "Exhibition",
+    "fees": "",
+    "country": "United States",
+    "award_info": "Exhibit at the Creston Arts Depot Gallery",
+    "fee_details": "",
+    "eligibility_details": "Open to U.S. based artists",
+    "eligibility_tier": "National"
+  },
+  {
+    "name": "Interlace Emergency Grants",
+    "deadline": "Rolling",
+    "link": "https://interlacefund.org/relief-grants",
+    "type": "Grant",
+    "fees": "",
+    "country": "",
+    "award_info": "Awards range from $50-$500 monthly, with a total pool of $1250 awarded monthly. If there are less than $1250 worth of qualified requests during a given month, funds roll over to the next month.",
+    "fee_details": "",
+    "eligibility_details": "Applicants must currently live within a 10-mile radius of Providence and in the state of Rhode Island. applicants must be 18+. Applicants cannot be enrolled in a degree-granting program.",
+    "eligibility_tier": "Local"
+  },
+  {
+    "name": "Anandvan Residency, Banaras Cultural Foundation",
+    "deadline": "Rolling",
+    "link": "https://banarasculturalfoundation.org/anandvan-residency",
+    "type": "Residency",
+    "fees": "",
+    "country": "International",
+    "award_info": "",
+    "fee_details": "",
+    "eligibility_details": "Open to artists internationally",
+    "eligibility_tier": "International"
+  },
+  {
+    "name": "FVU:LAB Residency",
+    "deadline": "Rolling",
+    "link": "https://fvu.co.uk/projects/fvulab",
+    "type": "Residency",
+    "fees": "",
+    "country": "",
+    "award_info": "GBP 500 bursary + expenses + mentoring + up to 5 days access to technology facilities",
+    "fee_details": "",
+    "eligibility_details": "Open to UK-based emerging moving image artists. Broad definition of 'emerging' - may include artists practicing for over a decade. Individual or collaborative applications accepted.",
+    "eligibility_tier": "National"
+  },
+  {
+    "name": "IHRAM Literary Magazine",
+    "deadline": "Rolling",
+    "link": "https://humanrightsartmovement.org/ihraf-publishes",
+    "type": "Competition",
+    "fees": "",
+    "country": "International",
+    "award_info": "Featured in the IHRAM's quarterly magazine. $25 stipend per published piece.",
+    "fee_details": "",
+    "eligibility_details": "Open to all artists and writers.",
+    "eligibility_tier": "International"
+  },
+  {
+    "name": "Pittsburgh Glass Corner Exhibitions Proposal",
+    "deadline": "Rolling",
+    "link": "http://pittsburghglasscenter.org/",
+    "type": "Exhibition",
+    "fees": "",
+    "country": "",
+    "award_info": "",
+    "fee_details": "",
+    "eligibility_details": "",
     "eligibility_tier": ""
   }
 ]
