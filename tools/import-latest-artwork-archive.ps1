@@ -21,8 +21,12 @@ Write-Host "Syncing the latest Artwork Archive export: $ExportPath"
 
 if (-not $env:GOOGLE_SERVICE_ACCOUNT_JSON) {
     if (-not $KeyPath) {
-        throw 'Set GOOGLE_SERVICE_ACCOUNT_JSON or pass an explicit -KeyPath.'
+        Write-Host "Looking for the latest service-account key in $downloads..."
+        $KeyPath = Get-ChildItem -LiteralPath $downloads -Filter 'nova-opportunities-*.json' -File |
+            Sort-Object LastWriteTime -Descending |
+            Select-Object -First 1 -ExpandProperty FullName
     }
+    if (-not $KeyPath) { throw "No nova-opportunities-*.json service-account key was found in $downloads" }
     if (-not (Test-Path -LiteralPath $KeyPath)) { throw "Service-account key not found: $KeyPath" }
     $credentials = Get-Content -Raw -LiteralPath $KeyPath
     $credentialObject = $credentials | ConvertFrom-Json

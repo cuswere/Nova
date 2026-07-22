@@ -26,4 +26,4 @@ To choose a file explicitly:
 npm run sync-opportunities -- --source artwork_archive --artwork-archive-export "C:\path\to\export.json"
 ```
 
-For the Windows launcher, set `GOOGLE_SERVICE_ACCOUNT_JSON` as a user environment variable, then run `tools/Import Latest Artwork Archive.cmd`. The PowerShell script also accepts `-ExportPath`, `-KeyPath`, and `-DryRun`; `-KeyPath` is used only when the environment variable is absent.
+Run `tools/Import Latest Artwork Archive.cmd` for the two-click Windows flow. It uses `GOOGLE_SERVICE_ACCOUNT_JSON` when set; otherwise it selects the newest `nova-opportunities-*.json` service-account key in Downloads and validates it before use. The PowerShell script also accepts `-ExportPath`, `-KeyPath`, and `-DryRun` for explicit control.
