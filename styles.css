@@ -99,7 +99,7 @@ button { cursor: pointer; }
 .page-title::before { content: "PRAXIS NOVA /"; align-self: stretch; display: flex; align-items: center; padding: 0 3px; margin-right: 6px; font-size: 14px; font-weight: 600; letter-spacing: .05em; }
 .title { color: inherit; font-size: 14px; font-weight: 600; letter-spacing: .05em; }
 .title-options { display: flex; gap: 6px; margin-left: auto; }
-.title-option { display: inline-flex; align-items: center; min-height: 23px; padding: 4px 10px; color: var(--ink); background: var(--face); box-shadow: var(--raise); font-size: 12px; }
+.title-option { display: inline-flex; align-items: center; min-height: 23px; padding: 4px 10px; color: var(--ink); background: var(--face); box-shadow: var(--raise); font-size: 12px; outline: 1px solid var(--blue-bright); outline-offset: -1px; }
 .title-option:hover { color: var(--ink); background: var(--face-light); text-decoration: none; }
 /* Pressed labels move without changing the box dimensions. */
 .title-option:active, .title-option.is-navigating { box-shadow: var(--sink); padding: 5px 9px 3px 11px; }
