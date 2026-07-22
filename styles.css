@@ -138,7 +138,7 @@ button { cursor: pointer; }
 }
 
 .home-wordmark { display: flex; align-items: center; width: fit-content; margin: 0 auto 15px; color: var(--ink); font-size: clamp(30px, 5vw, 50px); font-weight: 600; letter-spacing: -.12em; line-height: 1; }
-.home-wordmark span { padding: 2px 4px; border: 2px solid var(--ink); }
+.home-wordmark span { padding: 4px 4px; }
 /* Canon Praxis mark; sans-serif because the letterforms are the logo. */
 .home-wordmark span:first-child { padding: 2px; color: var(--praxis-blue); background: var(--white); border: 2px solid var(--praxis-blue); border-radius: 5px; border-top-right-radius: 0; border-bottom-right-radius: 0; font-family: system-ui, -apple-system, "Segoe UI", Arial, sans-serif; font-weight: normal; letter-spacing: .01em; text-transform: uppercase; }
 /* Letter-spacing trails the last letter too, eating into the right padding. */
