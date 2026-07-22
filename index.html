@@ -8,7 +8,7 @@
     <title>Praxis Nova</title>
     <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body class="page-home">
     <div class="content-wrapper">
         <div class="screen-refresh" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
 
@@ -16,7 +16,18 @@
             <h1 class="page-title"><span class="title">Home</span></h1>
         </header>
 
-        <div class="home-wordmark" aria-hidden="true"><span>Praxis</span><span>nova</span></div>
+        <div class="home-wordmark"><a class="praxis-mark" href="https://praxiscenterforaestheticstudies.com" target="_blank" rel="noopener noreferrer" data-confirm-exit>Praxis</a><span class="nova-mark" aria-hidden="true">nova</span></div>
+
+        <dialog class="exit-dialog" tabindex="-1" aria-labelledby="exit-dialog-title">
+            <div class="exit-dialog-bar"><span id="exit-dialog-title">PRAXIS NOVA</span></div>
+            <form method="dialog" class="exit-dialog-body">
+                <p class="exit-dialog-message">Open <span class="exit-dialog-host"></span>?</p>
+                <div class="exit-dialog-actions">
+                    <button type="submit" value="yes" class="form-submit">Yes</button>
+                    <button type="submit" value="no" class="form-submit">No</button>
+                </div>
+            </form>
+        </dialog>
 
         <div class="field options-container">
             <div class="opportunity-group">

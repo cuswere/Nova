@@ -112,21 +112,25 @@ button { cursor: pointer; }
     align-items: center;
     gap: 0;
     color: #fff;
-    background: linear-gradient(90deg, var(--blue-bright), var(--praxis-blue));
+    background: var(--blue-bright);
     font-size: 13px;
     font-weight: 600;
 }
+/* The gradient is the landing page's flourish; inner pages keep it flat. */
+.page-home .page-header { background: linear-gradient(90deg, var(--blue-bright), var(--praxis-blue)); }
 .page-title { display: flex; align-items: center; min-width: 0; margin: 0; font: inherit; }
 .page-title::before { content: "PRAXIS NOVA /"; align-self: stretch; display: flex; align-items: center; padding: 0 3px; margin-right: 6px; font-size: 14px; font-weight: 600; letter-spacing: .05em; }
 .title { color: inherit; font-size: 14px; font-weight: 600; letter-spacing: .05em; }
 .title-options { display: flex; gap: 6px; margin-left: auto; }
-.title-option { display: inline-flex; align-items: center; min-height: 23px; padding: 4px 10px; color: var(--ink); background: var(--face); box-shadow: var(--raise); font-size: 12px; outline: 1px solid var(--ink); outline-offset: -1px; }
+.title-option { display: inline-flex; align-items: center; padding: 2px 8px; color: var(--ink); background: var(--face); box-shadow: var(--raise); 
+   font-size: 12px; outline: 0px solid var(--ink); outline-offset: -1px; }
 @media (hover: hover) {
     .title-option:hover { text-decoration: underline; }
 }
-/* Pressed labels move without changing the box dimensions. .is-pressing is the
-   touch stand-in for :active; see setupNavigationState. */
-.title-option.is-pressing, .title-option.is-navigating { box-shadow: var(--sink); padding: 5px 9px 3px 11px; }
+/* Pressed labels move without changing the box dimensions: the default 2px 8px
+   shifted 1px down and right, so both values must follow if that padding does.
+   .is-pressing is the touch stand-in for :active; see setupNavigationState. */
+.title-option.is-pressing, .title-option.is-navigating { box-shadow: var(--sink); padding: 3px 7px 1px 9px; }
 /* :active is gated wherever .is-pressing also applies. Touch fires :active the
    instant a finger lands, while .is-pressing deliberately waits out the scroll
    test — leaving both live would split the press into two beats, the pressed
@@ -134,15 +138,32 @@ button { cursor: pointer; }
    .is-pressing alone drives the whole appearance on touch and it arrives as one.
    Controls with no .is-pressing rule keep their instant :active. */
 @media (hover: hover) {
-    .title-option:active { box-shadow: var(--sink); padding: 5px 9px 3px 11px; }
+    .title-option:active { box-shadow: var(--sink); padding: 3px 7px 1px 9px; }
 }
 
-.home-wordmark { display: flex; align-items: center; width: fit-content; margin: 0 auto 15px; color: var(--ink); font-size: clamp(30px, 5vw, 50px); font-weight: 600; letter-spacing: -.12em; line-height: 1; }
-.home-wordmark span { padding: 4px 4px; }
+.home-wordmark { display: flex; align-items: center; width: fit-content; margin: 0 auto 15px; color: var(--ink); font-size: clamp(30px, 5vw, 40px); font-weight: 600; letter-spacing: -.12em; line-height: 1; }
+.home-wordmark > * { padding: 6px 4px; }
 /* Canon Praxis mark; sans-serif because the letterforms are the logo. */
-.home-wordmark span:first-child { padding: 2px; color: var(--praxis-blue); background: var(--white); border: 2px solid var(--praxis-blue); border-radius: 5px; border-top-right-radius: 0; border-bottom-right-radius: 0; font-family: system-ui, -apple-system, "Segoe UI", Arial, sans-serif; font-weight: normal; letter-spacing: .01em; text-transform: uppercase; }
+.home-wordmark .praxis-mark { padding: 4px; color: var(--praxis-blue); background: var(--white); border: 2px solid var(--praxis-blue); border-radius: 5px; border-top-right-radius: 0; border-bottom-right-radius: 0; font-family: system-ui, -apple-system, "Segoe UI", Arial, sans-serif; font-weight: normal; letter-spacing: .01em; text-transform: uppercase; }
+@media (hover: hover) {
+    .home-wordmark .praxis-mark:hover { text-decoration: underline; text-decoration-thickness: 3px; }
+}
 /* Letter-spacing trails the last letter too, eating into the right padding. */
-.home-wordmark span + span { padding-right: calc(4px + .12em); color: #fff; background: var(--ink); text-shadow: 0 0 4px #fff; }
+.home-wordmark .nova-mark { padding-right: calc(4px + .12em); color: #fff; background: var(--ink); text-shadow: 0 0 4px #fff; }
+
+/* Leave-site confirmation, styled as a system dialog. */
+/* margin: 0 defeats the UA's centring so top/left can place it; both are set
+   before it is shown, so it never paints centred first. */
+.exit-dialog { outline: 1px solid var(--ink); position: fixed; margin: 0; max-width: min(380px, calc(100vw - 32px)); padding: 3px; color: var(--ink); background: var(--face); border: 0; box-shadow: 3px 3px 0 var(--ink); font: inherit; }
+.exit-dialog:focus {  }
+.exit-dialog::backdrop { background: rgba(0, 0, 0, .25); }
+.exit-dialog-bar { padding: 4px 6px; color: #fff; background: linear-gradient(90deg, var(--blue-bright), var(--praxis-blue)); font-size: 13px; font-weight: 600; letter-spacing: .05em; cursor: move; user-select: none; -webkit-user-select: none; touch-action: none; }
+.exit-dialog-body { padding: 16px 14px 12px; background: var(--face); }
+.exit-dialog-message { margin: 0 0 16px; font-size: 16px; line-height: 1.4; overflow-wrap: anywhere; }
+.exit-dialog-host { font-weight: 600; }
+.exit-dialog-actions { display: flex; justify-content: flex-end; gap: 8px; }
+.exit-dialog-actions .form-submit { align-self: auto; min-width: 76px; padding: 5px 12px; text-align: center; }
+.exit-dialog-actions .form-submit:active { padding: 6px 11px 4px 13px; }
 
 /* Home */
 .options-container { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding: 12px; min-height: 285px; }
@@ -534,7 +555,7 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
 .form-row.name { max-width: 360px !important; }
 .form-submit { align-self: flex-start; padding: 7px 12px; color: var(--ink); background: var(--field); outline: 1px solid var(--ink); outline-offset: -1px; border: 0; box-shadow: var(--raise); font-weight: 600; }
 .form-submit:active { box-shadow: var(--sink); padding: 8px 11px 6px 13px; }
-.form-submit:focus-visible { outline: 1px dotted #fff; outline-offset: -4px; }
+.form-submit:focus-visible { outline: 1px dotted var(--ink); outline-offset: -4px; }
 .form-submit[disabled] { background: var(--face); box-shadow: var(--sink); opacity: 0.6; cursor: default; }
 .form-submit[disabled]:hover { background: var(--face); }
 /* Status and button share a row, then wrap on narrow screens. */
