@@ -22,32 +22,33 @@ function setupExitConfirm() {
     if (!dialog || typeof dialog.showModal !== 'function') return;
 
     const host = dialog.querySelector('.exit-dialog-host');
-    const bar = dialog.querySelector('.exit-dialog-bar');
     let destination = null;
     let grab = null;
 
     const EDGE = 8;
-    // Clamped on both axes so neither the opening position nor a drag can put the
-    // title bar — the only way to move it back — out of reach.
+    // Clamped on both axes so neither the opening position nor a drag can leave
+    // the dialog partly off-screen.
     const moveTo = (left, top) => {
         const box = dialog.getBoundingClientRect();
         dialog.style.left = `${Math.max(EDGE, Math.min(left, window.innerWidth - box.width - EDGE))}px`;
         dialog.style.top = `${Math.max(EDGE, Math.min(top, window.innerHeight - box.height - EDGE))}px`;
     };
 
-    bar.addEventListener('pointerdown', (event) => {
+    const grip = dialog.querySelector('.exit-dialog-grip');
+    grip.addEventListener('pointerdown', (event) => {
         if (event.button !== 0) return;
         const box = dialog.getBoundingClientRect();
         grab = { x: event.clientX - box.left, y: event.clientY - box.top };
-        bar.setPointerCapture(event.pointerId);
+        grip.setPointerCapture(event.pointerId);
+        // Stops the press selecting the message text underneath.
         event.preventDefault();
     });
-    bar.addEventListener('pointermove', (event) => {
+    grip.addEventListener('pointermove', (event) => {
         if (grab) moveTo(event.clientX - grab.x, event.clientY - grab.y);
     });
-    // Pointer capture routes both here even when released off the bar.
-    bar.addEventListener('pointerup', () => { grab = null; });
-    bar.addEventListener('pointercancel', () => { grab = null; });
+    // Pointer capture routes both here even when released outside the grip.
+    grip.addEventListener('pointerup', () => { grab = null; });
+    grip.addEventListener('pointercancel', () => { grab = null; });
 
     document.addEventListener('click', (event) => {
         const link = event.target.closest?.('a[data-confirm-exit]');

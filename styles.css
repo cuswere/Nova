@@ -155,13 +155,18 @@ button { cursor: pointer; }
 /* margin: 0 defeats the UA's centring so top/left can place it; both are set
    before it is shown, so it never paints centred first. */
 .exit-dialog { outline: 1px solid var(--ink); position: fixed; margin: 0; max-width: min(380px, calc(100vw - 32px)); padding: 3px; color: var(--ink); background: var(--face); border: 0; box-shadow: 3px 3px 0 var(--ink); font: inherit; }
+/* Invisible handle over the top third, standing in for the removed title bar.
+   An element rather than a coordinate check, so the drag region is defined once
+   here and the script just listens to it. */
+.exit-dialog-grip { position: absolute; top: 0; left: 0; right: 0; height: 33%; cursor: move; user-select: none; -webkit-user-select: none; touch-action: none; }
 .exit-dialog:focus {  }
 .exit-dialog::backdrop { background: rgba(0, 0, 0, .25); }
-.exit-dialog-bar { padding: 4px 6px; color: #fff; background: linear-gradient(90deg, var(--blue-bright), var(--praxis-blue)); font-size: 13px; font-weight: 600; letter-spacing: .05em; cursor: move; user-select: none; -webkit-user-select: none; touch-action: none; }
 .exit-dialog-body { padding: 16px 14px 12px; background: var(--face); }
 .exit-dialog-message { margin: 0 0 16px; font-size: 16px; line-height: 1.4; overflow-wrap: anywhere; }
 .exit-dialog-host { font-weight: 600; }
-.exit-dialog-actions { display: flex; justify-content: flex-end; gap: 8px; }
+/* Above the grip, so the buttons stay clickable even if a short dialog puts them
+   inside its top third. */
+.exit-dialog-actions { position: relative; z-index: 1; display: flex; justify-content: flex-end; gap: 8px; }
 .exit-dialog-actions .form-submit { align-self: auto; min-width: 76px; padding: 5px 12px; text-align: center; }
 .exit-dialog-actions .form-submit:active { padding: 6px 11px 4px 13px; }
 
