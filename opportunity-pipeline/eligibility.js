@@ -22,39 +22,45 @@ function canonicalCountry(label) {
 }
 
 export function htmlToText(html = '', maxLength = 10_000) {
+    const source = String(html || '');
+    if (!/<\/?[a-z][^>]*>/i.test(source)) {
+        const text = source
+            .replace(/\r\n?/g, '\n')
+            .split('\n')
+            .map((line) => line.replace(/[^\S\n]+/g, ' ').trim())
+            .join('\n')
+            .replace(/\n{3,}/g, '\n\n')
+            .trim();
+        return { text: text.slice(0, maxLength), truncated: text.length > maxLength };
+    }
+
     const $ = cheerio.load(`<body>${String(html || '')}</body>`, { decodeEntities: true });
     $('script,style,noscript').remove();
     const root = $('body').get(0);
-    const parts = [];
-    const blockTags = new Set(['p', 'div', 'section', 'article', 'header', 'footer', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'tr']);
+    const blockTags = new Set(['p', 'div', 'section', 'article', 'header', 'footer', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'table', 'tr']);
 
-    function newline() {
-        if (parts.length && parts.at(-1) !== '\n') parts.push('\n');
-    }
-    function walk(node) {
-        if (node.type === 'text') {
-            parts.push(node.data);
-            return;
-        }
-        if (node.type !== 'tag' && node.type !== 'root') return;
+    function render(node) {
+        if (node.type === 'text') return node.data;
+        if (node.type !== 'tag' && node.type !== 'root') return '';
         const name = String(node.name || '').toLowerCase();
-        if (name === 'br') {
-            newline();
-            return;
-        }
-        if (blockTags.has(name)) newline();
-        for (const child of node.children || []) walk(child);
-        if (name === 'td' || name === 'th') parts.push(' | ');
-        if (blockTags.has(name)) newline();
+        if (name === 'br') return '\n';
+        let content = (node.children || []).map(render).join('');
+        if ((name === 'strong' || name === 'b') && content.trim()) content = `**${content.trim()}**`;
+        if ((name === 'em' || name === 'i') && content.trim()) content = `*${content.trim()}*`;
+        if (/^h[1-6]$/.test(name) && content.trim()) content = `**${content.trim()}**`;
+        if (name === 'li') return `- ${content.trim()}\n`;
+        if (name === 'td' || name === 'th') return `${content.trim()} | `;
+        if (name === 'ul' || name === 'ol') return `\n${content.trim()}\n`;
+        if (blockTags.has(name)) return `\n\n${content.trim()}\n\n`;
+        return content;
     }
-    walk(root);
-    const text = parts.join('')
+    const text = render(root)
         .replace(/\u00a0/g, ' ')
         .split('\n')
         .map((line) => line.replace(/\s+/g, ' ').trim())
-        .filter(Boolean)
         .join('\n');
-    return { text: text.slice(0, maxLength), truncated: text.length > maxLength };
+    const normalized = text.replace(/\n{3,}/g, '\n\n').trim();
+    return { text: normalized.slice(0, maxLength), truncated: normalized.length > maxLength };
 }
 
 function normalizeRegion(value = '') {

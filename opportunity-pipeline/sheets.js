@@ -205,16 +205,27 @@ async function sortByDeadline({ sheets, spreadsheetId, sheetName, rowCount }) {
 }
 
 export function mergeCandidate(current, candidate) {
-    const manualStatus = current.status || 'review';
-    // publish/reject are editorial decisions on the whole row, not just the
-    // public fields. A re-fetch matching one of these rows must not clobber
-    // manual corrections to description, source metadata, etc. — only
-    // bookkeeping timestamps advance so the row still shows as recently seen.
-    if (['publish', 'reject'].includes(manualStatus)) {
+    const currentStatus = current.status || 'review';
+    // Reject, manual publish, and the legacy manual alias explicitly lock the
+    // whole row against source refreshes.
+    // Bookkeeping still advances so a protected row shows when it was last
+    // matched without losing editorial changes.
+    if (['reject', 'manual publish', 'manual'].includes(currentStatus)) {
         return {
             ...current,
             last_seen: candidate.last_seen || current.last_seen,
             checked_at: candidate.checked_at || current.checked_at
+        };
+    }
+    // Publish means public, not protected. Refresh every collected field while
+    // retaining the publish decision unless the source now says it is expired.
+    if (currentStatus === 'publish') {
+        return {
+            ...current,
+            ...candidate,
+            last_seen: candidate.last_seen || current.last_seen,
+            checked_at: candidate.checked_at || current.checked_at,
+            status: candidate.status === 'expired' ? 'expired' : 'publish'
         };
     }
     const preferred = preferCandidate(current, candidate);
@@ -224,7 +235,7 @@ export function mergeCandidate(current, candidate) {
         ...preferred,
         last_seen: candidate.last_seen || current.last_seen,
         checked_at: candidate.checked_at || current.checked_at,
-        status: manualStatus
+        status: currentStatus
     };
     if (candidate.status === 'expired') merged.status = 'expired';
     return merged;

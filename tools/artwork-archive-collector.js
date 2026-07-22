@@ -8,18 +8,46 @@
     const visited = new Set();
     let url = new URL('/call-for-entry', location.origin);
 
+    const DETAIL_CONCURRENCY = 3;
+    const DETAIL_START_STAGGER_MS = 100;
+    const LISTING_PAGE_DELAY_MS = 750;
     const pause = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds));
     const text = (value) => String(value || '').replace(/\s+/g, ' ').trim();
     const isArtworkArchive = (hostname) => /(^|\.)artworkarchive\.com$/i.test(hostname);
 
+    function prose(element) {
+        if (!element) return '';
+        const blocks = new Set(['P', 'DIV', 'SECTION', 'ARTICLE', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'TABLE', 'TR']);
+        function render(node) {
+            if (node.nodeType === Node.TEXT_NODE) return node.data;
+            if (node.nodeType !== Node.ELEMENT_NODE) return '';
+            if (node.tagName === 'BR') return '\n';
+            let content = [...node.childNodes].map(render).join('');
+            if (['STRONG', 'B'].includes(node.tagName) && content.trim()) content = `**${content.trim()}**`;
+            if (['EM', 'I'].includes(node.tagName) && content.trim()) content = `*${content.trim()}*`;
+            if (/^H[1-6]$/.test(node.tagName) && content.trim()) content = `**${content.trim()}**`;
+            if (node.tagName === 'LI') return `- ${content.trim()}\n`;
+            if (['UL', 'OL'].includes(node.tagName)) return `\n${content.trim()}\n`;
+            if (blocks.has(node.tagName)) return `\n\n${content.trim()}\n\n`;
+            return content;
+        }
+        return render(element)
+            .replace(/\u00a0/g, ' ')
+            .split('\n')
+            .map((line) => line.replace(/\s+/g, ' ').trim())
+            .join('\n')
+            .replace(/\n{3,}/g, '\n\n')
+            .trim();
+    }
+
     function detailValue(detailPage, label) {
         const term = [...detailPage.querySelectorAll('dt')]
             .find((element) => text(element.textContent).replace(/:$/, '') === label);
-        if (term) return text(term.nextElementSibling?.textContent);
+        if (term) return prose(term.nextElementSibling);
 
         const labelElement = [...detailPage.querySelectorAll('h1,h2,h3,h4,h5,h6,strong,b,p,span,div')]
             .find((element) => !element.children.length && text(element.textContent).replace(/:$/, '') === label);
-        return text(labelElement?.nextElementSibling?.textContent);
+        return prose(labelElement?.nextElementSibling);
     }
 
     function sectionText(detailPage, heading) {
@@ -30,9 +58,9 @@
         const parts = [];
         for (let element = headingElement.nextElementSibling; element; element = element.nextElementSibling) {
             if (/^H[1-6]$/.test(element.tagName)) break;
-            parts.push(text(element.textContent));
+            parts.push(prose(element));
         }
-        return text(parts.join(' '));
+        return parts.filter(Boolean).join('\n\n');
     }
 
     function detailFields(detailPage) {
@@ -59,7 +87,7 @@
         return {
             ...fields,
             eligibilityDetails: eligibilityInfo,
-            description: text([...supportingDetails, about].join(' '))
+            description: [...supportingDetails, about].filter(Boolean).join('\n\n')
         };
     }
 
@@ -88,6 +116,23 @@
         };
     }
 
+    async function mapWithConcurrency(items, limit, mapper) {
+        const results = new Array(items.length);
+        let nextIndex = 0;
+        async function worker(workerIndex) {
+            while (nextIndex < items.length) {
+                const index = nextIndex;
+                nextIndex += 1;
+                /* Stagger starts within the small worker pool so the source
+                   does not receive a burst of identical detail-page requests. */
+                if (workerIndex) await pause(workerIndex * DETAIL_START_STAGGER_MS);
+                results[index] = await mapper(items[index], index);
+            }
+        }
+        await Promise.all(Array.from({ length: Math.min(limit, items.length) }, (_, index) => worker(index)));
+        return results;
+    }
+
     while (url && !visited.has(url.href)) {
         visited.add(url.href);
         console.log(`Nova: collecting ${url.href}`);
@@ -99,11 +144,15 @@
             .filter((card) => card.querySelector('a[href^="/call-for-entry/"] h3'));
         if (!cards.length) throw new Error(`No opportunities found on ${url.href}`);
 
-        const exportedCards = [];
-        for (const card of cards) {
+        const resolvedCards = await mapWithConcurrency(cards, DETAIL_CONCURRENCY, async (card) => {
             const name = text(card.querySelector('h3')?.textContent);
             console.log(`Nova: resolving ${name}`);
             const resolved = await learnMoreUrl(card, url.href);
+            return { card, name, resolved };
+        });
+
+        const exportedCards = [];
+        for (const { card, name, resolved } of resolvedCards) {
             if (!resolved?.externalUrl) {
                 unresolved.push({ name, listingUrl: resolved?.listingUrl || '' });
                 continue;
@@ -115,7 +164,6 @@
                 if (value) exported.setAttribute(`data-nova-${key.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)}`, value);
             }
             exportedCards.push(exported);
-            await pause(250);
         }
         if (!exportedCards.length) throw new Error(`No Learn More links found on ${url.href}`);
         pages.push({ url: url.href, html: exportedCards.map((card) => card.outerHTML).join('\n') });
@@ -125,7 +173,7 @@
             .map((link) => new URL(link.getAttribute('href'), url))
             .find((candidate) => Number(candidate.searchParams.get('page')) === currentPage + 1);
         url = next || null;
-        if (url) await new Promise((resolve) => setTimeout(resolve, 750));
+        if (url) await pause(LISTING_PAGE_DELAY_MS);
     }
 
     const payload = {

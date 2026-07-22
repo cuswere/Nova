@@ -125,6 +125,23 @@ test('normalization preserves full descriptions and does not apply automatic rel
     assert.doesNotMatch(row.issue, /outside visual-arts scope/);
 });
 
+test('normalization preserves safe prose structure for every source', () => {
+    const row = normalizeCandidate({
+        name: 'Structured prose',
+        deadline: 'August 1, 2026',
+        link: 'https://example.org/structured',
+        type: 'Grant',
+        fees: 'n',
+        description: '<p><strong>Overview</strong></p><p>Second paragraph.</p>',
+        awardInfo: '<p><b>Award:</b> $1,000.</p>',
+        eligibilityDetails: '<p><em>Open internationally.</em></p>',
+        source: 'Any source'
+    }, today);
+    assert.equal(row.description, '**Overview**\n\nSecond paragraph.');
+    assert.equal(row.award_info, '**Award:** $1,000.');
+    assert.equal(row.eligibility_details, '*Open internationally.*');
+});
+
 test('trusted tier-1 sources auto-publish clean candidates but not issue-flagged or expired ones', () => {
     assert.equal(isAutoPublishSource('Creative Capital'), true);
     assert.equal(isAutoPublishSource('Hyperallergic'), true);
@@ -545,17 +562,18 @@ test('excludes untyped and already-covered source links only for Creative Capita
     assert.equal(candidateImportExclusion({ source: 'Creative Capital', type: 'Grant', link: 'https://artworkarchive.com/call-for-entry/example' }), 'duplicate_source_creative_capital');
 });
 
-test('upsert merge preserves manual public fields and decisions', () => {
+test('upsert refreshes publish rows while retaining their publish decision', () => {
     const current = { name: 'Editor Title', link: 'https://example.org/a', deadline: '8/1/2026', type: 'Grant', fees: 'n', country: 'United States', status: 'publish' };
     const incoming = { name: 'Crawler Title', link: 'https://example.org/b', deadline: '2026-08-02', type: 'Award', fees: 'y', country: 'International', status: 'review', last_seen: '2026-07-16' };
     const merged = mergeCandidate(current, incoming);
     assert.equal(merged.status, 'publish');
-    assert.equal(merged.name, 'Editor Title');
+    assert.equal(merged.name, 'Crawler Title');
+    assert.equal(merged.link, 'https://example.org/b');
     assert.equal(merged.last_seen, '2026-07-16');
     assert.equal(mergeCandidate({ ...current, status: 'review' }, { ...incoming, status: 'expired' }).status, 'expired');
 });
 
-test('upsert merge fully preserves publish/reject rows, not just public fields', () => {
+test('upsert refreshes publish rows and fully protects reject/manual-publish rows', () => {
     const current = {
         name: 'Editor Title',
         link: 'https://example.org/a',
@@ -591,25 +609,38 @@ test('upsert merge fully preserves publish/reject rows, not just public fields',
         checked_at: '2026-07-16T00:00:00.000Z'
     };
     const merged = mergeCandidate(current, incoming);
-    assert.equal(merged.description, current.description);
-    assert.equal(merged.eligibility_details, current.eligibility_details);
-    assert.equal(merged.source, current.source);
-    assert.equal(merged.source_url, current.source_url);
-    assert.equal(merged.host_location, current.host_location);
-    assert.equal(merged.fee_details, current.fee_details);
-    assert.equal(merged.confidence, current.confidence);
-    // Bookkeeping timestamps still advance so the row shows as recently re-matched.
+    assert.equal(merged.status, 'publish');
+    assert.equal(merged.description, incoming.description);
+    assert.equal(merged.eligibility_details, incoming.eligibility_details);
+    assert.equal(merged.source, incoming.source);
+    assert.equal(merged.source_url, incoming.source_url);
+    assert.equal(merged.host_location, incoming.host_location);
+    assert.equal(merged.fee_details, incoming.fee_details);
+    assert.equal(merged.confidence, incoming.confidence);
     assert.equal(merged.last_seen, incoming.last_seen);
     assert.equal(merged.checked_at, incoming.checked_at);
 
     const rejected = mergeCandidate({ ...current, status: 'reject' }, incoming);
     assert.equal(rejected.status, 'reject');
     assert.equal(rejected.description, current.description);
+    assert.equal(rejected.last_seen, incoming.last_seen);
 
-    // A matching candidate that now looks expired must not flip an existing
-    // publish/reject row's status — that stays a manual/deadline-sweep decision.
-    assert.equal(mergeCandidate(current, { ...incoming, status: 'expired' }).status, 'publish');
+    const manualPublish = mergeCandidate({ ...current, status: 'manual publish' }, incoming);
+    assert.equal(manualPublish.status, 'manual publish');
+    assert.equal(manualPublish.description, current.description);
+    assert.equal(manualPublish.eligibility_details, current.eligibility_details);
+    assert.equal(manualPublish.source_url, current.source_url);
+    assert.equal(manualPublish.last_seen, incoming.last_seen);
+
+    // Keep the old status as a protected, non-public compatibility alias.
+    const legacyManual = mergeCandidate({ ...current, status: 'manual' }, incoming);
+    assert.equal(legacyManual.status, 'manual');
+    assert.equal(legacyManual.description, current.description);
+
+    // Publish participates in automated expiry; protected decisions do not.
+    assert.equal(mergeCandidate(current, { ...incoming, status: 'expired' }).status, 'expired');
     assert.equal(mergeCandidate({ ...current, status: 'reject' }, { ...incoming, status: 'expired' }).status, 'reject');
+    assert.equal(mergeCandidate({ ...current, status: 'manual publish' }, { ...incoming, status: 'expired' }).status, 'manual publish');
 });
 
 test('source-aware deduplication prefers detailed non-Creative-Capital records', () => {
@@ -794,6 +825,8 @@ test('AI enrichment uses structured evidence without inventing unsupported costs
 test('publisher exports only valid approved rows and keeps browser-safe dates', () => {
     const result = buildPublishedRows([
         { name: 'Good Grant', deadline: '2026-08-01', link: 'https://example.org/good', type: 'Grant', fees: 'y', country: 'International', award_info: 'Up to $10,000', fee_details: '$35 entry fee', eligibility_details: 'Open to US residents', eligibility_tier: 'National', status: 'publish' },
+        { name: 'Curated Grant', deadline: '2026-08-02', link: 'https://example.org/curated', type: 'Grant', fees: 'n', country: 'International', award_info: 'Manually edited', status: 'manual publish' },
+        { name: 'Legacy Manual', deadline: '2026-08-02', link: 'https://example.org/legacy-manual', type: 'Grant', fees: 'n', country: 'International', status: 'manual' },
         { name: 'Future Job Listing', deadline: '2026-08-02', link: 'https://example.org/job', type: 'Job', fees: 'n', country: 'International', status: 'publish' },
         { name: 'Needs Review', deadline: '2026-08-02', link: 'https://example.org/review', type: 'Grant', fees: 'n', country: 'International', status: 'review' },
         { name: 'Unknown Fee', deadline: '2026-08-03', link: 'https://example.org/bad', type: 'Grant', fees: '', country: 'International', status: 'publish' },
@@ -804,6 +837,7 @@ test('publisher exports only valid approved rows and keeps browser-safe dates', 
     // rows without them simply carry undefined (dropped on JSON serialization).
     assert.deepEqual(result.published, [
         { name: 'Good Grant', deadline: '8/1/2026', link: 'https://example.org/good', type: 'Grant', fees: 'y', country: 'International', award_info: 'Up to $10,000', fee_details: '$35 entry fee', eligibility_details: 'Open to US residents', eligibility_tier: 'National' },
+        { name: 'Curated Grant', deadline: '8/2/2026', link: 'https://example.org/curated', type: 'Grant', fees: 'n', country: 'International', award_info: 'Manually edited', fee_details: undefined, eligibility_details: undefined, eligibility_tier: undefined },
         { name: 'Unknown Fee', deadline: '8/3/2026', link: 'https://example.org/bad', type: 'Grant', fees: '', country: 'International', award_info: undefined, fee_details: undefined, eligibility_details: undefined, eligibility_tier: undefined }
     ]);
     assert.equal(result.rejected.length, 3);
@@ -940,9 +974,10 @@ test('Creative West extracts an independent organizer link from Contact Informat
 
 test('converts eligibility HTML without duplicate nested text and resolves Creative West eligibility conservatively', () => {
     const converted = htmlToText('<div><p>Artists &amp; makers</p><ul><li>Colorado residents</li><li>Age 18+</li></ul><script>ignore()</script><table><tr><td>A</td><td>B</td></tr></table></div>');
-    assert.equal(converted.text, 'Artists & makers\nColorado residents\nAge 18+\nA | B |');
+    assert.equal(converted.text, 'Artists & makers\n\n- Colorado residents\n- Age 18+\n\nA | B |');
     assert.equal(converted.truncated, false);
-    assert.equal(htmlToText('Lead<p>Body</p>Tail').text, 'Lead\nBody\nTail');
+    assert.equal(htmlToText('Lead<p><strong>Body</strong></p>Tail').text, 'Lead\n\n**Body**\n\nTail');
+    assert.equal(htmlToText('<h3>Selection Process</h3><p>First paragraph.</p><p><b>Bold lead:</b> More text.</p>').text, '**Selection Process**\n\nFirst paragraph.\n\n**Bold lead:** More text.');
     assert.equal(htmlToText(`<p>${'x'.repeat(20)}</p>`, 10).truncated, true);
     assert.deepEqual(resolveEligibility({ sourceId: 'creative_west', eligibilityLocation: 'International', details: 'Artists worldwide may apply.' }), { country: 'International', issue: '' });
     assert.deepEqual(resolveEligibility({ sourceId: 'creative_west', eligibilityLocation: 'National', details: 'Artists legally authorized to work in the United States may apply.' }), { country: 'United States', issue: '' });
@@ -998,7 +1033,7 @@ test('normalization retains specific eligibility issues and Sheet values follow 
     assert.equal(values[0], "'=danger");
 });
 
-test('Sheet writes use the schema-derived T column and keep manual public values', async () => {
+test('Sheet writes use the schema-derived T column and honor refresh locks', async () => {
     const calls = { updates: [], appends: [] };
     const sheet = {
         spreadsheets: {
@@ -1019,7 +1054,8 @@ test('Sheet writes use the schema-derived T column and keep manual public values
     assert.equal(calls.appends[0].requestBody.values[0][0], "'=formula");
     assert.equal(calls.appends[0].valueInputOption, 'RAW');
     const current = { name: 'Editor title', deadline: '2026-08-01', link: 'https://example.org/editor', type: 'Grant', fees: 'n', country: 'United States', status: 'publish' };
-    assert.equal(mergeCandidate(current, { ...current, name: 'Crawler title', status: 'review' }).name, 'Editor title');
+    assert.equal(mergeCandidate(current, { ...current, name: 'Crawler title', status: 'review' }).name, 'Crawler title');
+    assert.equal(mergeCandidate({ ...current, status: 'manual publish' }, { ...current, name: 'Crawler title', status: 'review' }).name, 'Editor title');
 });
 
 test('upsert skips brand-new already-expired candidates but still flags existing rows that expire', async () => {

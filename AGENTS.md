@@ -10,9 +10,9 @@ Praxis Nova is a static artist-opportunity catalogue built with plain HTML, CSS,
 source boards -> deterministic extraction -> Google Sheet review -> static JSON -> site
 ```
 
-The scheduled workflow runs `sync-opportunities`, then `publish-data`. New clean candidates from sources marked `autoPublish` enter as `publish`; incomplete or expired candidates still require review. Existing `publish` and `reject` rows preserve all editorial content during later source refreshes, advancing only bookkeeping timestamps.
+The scheduled workflow runs `sync-opportunities`, then `publish-data`. New clean candidates from sources marked `autoPublish` enter as `publish`; incomplete or expired candidates still require review. Existing `publish` rows refresh from later source imports while retaining their publish decision. Rows marked `reject` or `manual publish` preserve all editorial content, advancing only bookkeeping timestamps. The legacy `manual` status remains protected but is not public.
 
-`publish-data` keeps valid `publish` rows, removes non-public types, writes the configured public and extra fields, sorts by deadline, and replaces `data/opportunities.json`. The manual publish-only workflow skips source collection.
+`publish-data` keeps valid `publish` and `manual publish` rows, removes non-public types, writes the configured public and extra fields, sorts by deadline, and replaces `data/opportunities.json`. The manual publish-only workflow skips source collection.
 
 ## Commands
 

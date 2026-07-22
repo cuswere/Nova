@@ -101,14 +101,14 @@ export function parseArtworkArchive(html, definition = source('artwork_archive')
         const card = $(element);
         const anchor = card.find('a[href*="/call-for-entry/"]').first();
         const name = cleanText(card.find('h3').first().text());
-        const detail = (key) => cleanText(card.attr(`data-nova-${key}`));
+        const detail = (key) => String(card.attr(`data-nova-${key}`) || '').replace(/\r\n?/g, '\n').trim();
         const field = (label) => cleanText(card.find('dt').filter((__, term) => cleanText($(term).text()) === label).first().next('dd').text());
         const deadline = detail('deadline') || field('Deadline:');
         const listingUrl = absoluteUrl(anchor.attr('href'), definition.url);
         const canonicalUrl = absoluteUrl(card.attr('data-nova-link') || listingUrl, definition.url);
         if (!name || !listingUrl || !canonicalUrl || !deadline) return;
         const fee = detail('fee-details') || field('Entry Fee:');
-        const description = detail('description') || cleanText(card.find('p').first().text());
+        const description = detail('description') || htmlToText(card.find('p').first().html()).text;
         const eligibilityDetails = detail('eligibility-details') ||
             labeledDescriptionField(description, 'Eligibility details') ||
             cleanText(description.match(/(?:^|\s)Eligibility Info\s+(.+)$/i)?.[1]);
@@ -152,7 +152,7 @@ export function parseCreativeCapital(html, definition = source('creative_capital
     $('a.item').each((_, element) => {
         const anchor = $(element);
         const name = cleanText(anchor.find('h3').text());
-        const description = cleanText(anchor.find('.item-desc').text());
+        const description = htmlToText(anchor.find('.item-desc').html()).text;
         const label = cleanText(anchor.find('.item-info').text());
         if (!name) return;
         rows.push({
@@ -363,10 +363,16 @@ export function parseHyperallergicArticle(html, definition = source('hyperallerg
 
             const deadline = text.match(/Deadline\s*:\s*([^|]{2,60})/i)?.[1]?.trim() ||
                 (/\b(?:rolling|ongoing|no deadline)\b/i.test(text) ? 'Rolling' : '');
-            const withoutTitle = text.startsWith(name) ? text.slice(name.length) : text.replace(name, '');
-            const description = cleanText(withoutTitle
+            const richText = htmlToText(segmentHtml).text;
+            const firstBreak = richText.indexOf('\n\n');
+            const firstBlock = firstBreak === -1 ? richText : richText.slice(0, firstBreak);
+            const withoutTitle = cleanText(firstBlock.replace(/\*+/g, '')) === name
+                ? richText.slice(firstBreak === -1 ? richText.length : firstBreak + 2)
+                : richText.replace(name, '');
+            const description = withoutTitle
                 .replace(/Deadline\s*:.*/i, '')
-                .replace(/\s*Read more on Hyperallergic(?:\s*\.\s*[A-Z]?\d+)?\.?/gi, ' '));
+                .replace(/\s*Read more on Hyperallergic(?:\s*\.\s*[A-Z]?\d+)?\.?/gi, ' ')
+                .trim();
             const eligibility = resolveProseEligibility(text);
             const award = hyperallergicAwardInfo(lines);
             rows.push({
@@ -457,7 +463,7 @@ export function parseTransArtists(html, definition = source('transartists')) {
     $('h2 a[href*="/en/news/"]').each((_, element) => {
         const anchor = $(element);
         const card = anchor.closest('article');
-        const text = cleanText(card.text());
+        const text = htmlToText(card.html()).text;
         const name = cleanText(anchor.text());
         rows.push({
             name,

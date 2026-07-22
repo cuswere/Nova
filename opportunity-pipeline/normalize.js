@@ -1,5 +1,6 @@
 import crypto from 'node:crypto';
 import { ALLOWED_TYPES, SOURCE_DEFINITIONS } from './config.js';
+import { htmlToText } from './eligibility.js';
 
 const MONTHS = new Map([
     ['jan', 0], ['january', 0], ['feb', 1], ['february', 1], ['mar', 2], ['march', 2],
@@ -199,12 +200,7 @@ export function inferFeeDetails(text = '') {
 }
 
 function normalizeMultilineText(value = '') {
-    return String(value || '')
-        .replace(/\r\n?/g, '\n')
-        .replace(/[^\S\n]+/g, ' ')
-        .replace(/ *\n */g, '\n')
-        .replace(/\n{3,}/g, '\n\n')
-        .trim();
+    return htmlToText(value).text;
 }
 
 export function inferAwardInfo(text = '') {
@@ -244,7 +240,7 @@ export function normalizeCandidate(raw, now = new Date()) {
     const link = canonicalizeUrl(raw.link || raw.sourceUrl);
     const deadline = normalizeDeadline(raw.deadline);
     const rawDescription = String(raw.description || '');
-    const description = rawDescription.replace(/\s+/g, ' ').trim();
+    const description = normalizeMultilineText(rawDescription);
     const candidate = {
         name,
         deadline,
@@ -264,7 +260,7 @@ export function normalizeCandidate(raw, now = new Date()) {
         checked_at: now.toISOString(),
         issue: '',
         description,
-        eligibility_details: String(raw.eligibilityDetails || raw.eligibility_details || '').trim(),
+        eligibility_details: normalizeMultilineText(raw.eligibilityDetails || raw.eligibility_details),
         eligibility_tier: String(raw.eligibilityTier || raw.eligibility_tier || '').trim()
     };
     const issues = String(raw.issue || '').split(';').map((issue) => issue.trim()).filter(Boolean);

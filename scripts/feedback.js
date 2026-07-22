@@ -81,6 +81,7 @@ function setupFeedbackForm() {
     const sendFeedback = async (body) => {
         const response = await fetch(FORM_ACTION, {
             method: 'POST',
+            keepalive: true,
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body
         });

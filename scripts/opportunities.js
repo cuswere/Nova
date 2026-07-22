@@ -283,12 +283,42 @@ function eligibilityDetails(item) {
     return tier ? { text: tier, label: 'Eligibility tier' } : null;
 }
 
+function plainProse(text) {
+    return String(text || '').replace(/\*\*([^*]+)\*\*/g, '$1').replace(/\*([^*]+)\*/g, '$1');
+}
+
+function appendInlineProse(parent, text) {
+    const pattern = /(\*\*([^*]+)\*\*|\*([^*]+)\*)/g;
+    let cursor = 0;
+    for (const match of text.matchAll(pattern)) {
+        parent.append(text.slice(cursor, match.index));
+        parent.appendChild(element(match[2] ? 'strong' : 'em', '', match[2] || match[3]));
+        cursor = match.index + match[0].length;
+    }
+    parent.append(text.slice(cursor));
+}
+
+function proseContent(text) {
+    const wrapper = element('span', 'details-popup-text');
+    const paragraphs = String(text || '').replace(/\r\n?/g, '\n').split(/\n{2,}/).filter((part) => part.trim());
+    for (const paragraphText of paragraphs) {
+        const paragraph = element('span', 'details-popup-paragraph');
+        const lines = paragraphText.split('\n');
+        lines.forEach((line, index) => {
+            if (index) paragraph.appendChild(document.createElement('br'));
+            appendInlineProse(paragraph, line);
+        });
+        wrapper.appendChild(paragraph);
+    }
+    return wrapper;
+}
+
 function detailToken(className, labelText, details, ariaPrefix) {
     const cell = element('div', `grid-cell field ${className} detail-token has-details`);
     cell.tabIndex = 0;
     cell.setAttribute('role', 'button');
     cell.setAttribute('aria-pressed', 'false');
-    cell.setAttribute('aria-label', `${ariaPrefix}: ${details}`);
+    cell.setAttribute('aria-label', `${ariaPrefix}: ${plainProse(details)}`);
 
     const label = element('span', 'detail-token-label', labelText);
     const fold = element('span', 'detail-token-fold', '+');
@@ -298,7 +328,7 @@ function detailToken(className, labelText, details, ariaPrefix) {
     const tail = element('span', 'details-popup-tail');
     tail.setAttribute('aria-hidden', 'true');
     const content = element('span', 'details-popup-content');
-    content.appendChild(element('span', 'details-popup-text', details));
+    content.appendChild(proseContent(details));
     popup.append(tail, content);
     cell.append(label, fold, popup);
     return cell;

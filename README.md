@@ -9,7 +9,7 @@ source boards -> deterministic extraction -> Sheet review -> static JSON
 ```
 
 - `npm run dry-run-opportunities` fetches enabled sources and prints a summary without writing to Google Sheets.
-- `npm run sync-opportunities` upserts candidates while preserving editorial decisions and manual changes.
+- `npm run sync-opportunities` refreshes `publish` rows and protects rows explicitly marked `reject` or `manual publish`; `manual publish` rows remain public.
 - `npm run publish-data` validates approved rows and regenerates `data/opportunities.json`.
 - `npm test` runs the parser, normalization, deduplication, Sheet, and publishing tests.
 

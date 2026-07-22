@@ -15,7 +15,8 @@ export function buildPublishedRows(rows, now = new Date()) {
     const published = [];
     const rejected = [];
     for (const row of rows) {
-        if (String(row.status).toLowerCase() !== 'publish') continue;
+        const status = String(row.status).trim().toLowerCase();
+        if (!['publish', 'manual publish'].includes(status)) continue;
         const normalized = { ...row, deadline: normalizeDeadline(row.deadline), fees: String(row.fees).toLowerCase() };
         if (NON_PUBLIC_TYPES.some((type) => type.toLowerCase() === String(normalized.type || '').toLowerCase())) {
             rejected.push({ name: row.name || '(unnamed)', errors: ['type is not yet public'] });

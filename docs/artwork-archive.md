@@ -9,7 +9,7 @@ Open the Artwork Archive call-for-entry page in Vivaldi, then use either method:
 1. In DevTools (`F12`), create a reusable **Sources > Snippets** snippet containing `tools/artwork-archive-collector.js`, then run it with `Ctrl+Enter`.
 2. Run `tools/Copy Artwork Archive Collector Bookmarklet.cmd`, create a bookmark, and paste the copied value into its URL field. Click the bookmark from the call-for-entry page.
 
-The collector follows each detail page, keeps its URL as `source_url`, uses the external **Learn More** destination as the public link, and downloads `nova-artwork-archive-YYYY-MM-DD.json`. Entries without an external destination are reported and skipped.
+The collector follows each detail page (up to three concurrent requests, with staggered starts), keeps its URL as `source_url`, uses the external **Learn More** destination as the public link, and downloads `nova-artwork-archive-YYYY-MM-DD.json`. Entries without an external destination are reported and skipped.
 
 ## Review and sync
 
