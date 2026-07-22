@@ -592,12 +592,41 @@ function setupDetailsPopups() {
             const tailLeft = Math.max(1, Math.min(rawLeft, finalRect.width - tail.offsetWidth - 1));
             popup.style.setProperty('--tail-left', `${tailLeft}px`);
         }
+
+        markScrollable(popup);
+    };
+
+    // Flags a popup that still has text below the fold, which the marker in the
+    // stylesheet renders. Keyed on what is left rather than on whether the box
+    // scrolls at all, so it retires once the reader reaches the end.
+    const markScrollable = (popup) => {
+        const content = popup.querySelector('.details-popup-content');
+        if (!content) return;
+        const remaining = content.scrollHeight - content.clientHeight - content.scrollTop;
+        popup.classList.toggle('has-more', remaining > 1);
+    };
+
+    /* A closed popup can leave its border painted across the cards it covered.
+       The popup is placed with a transform inside a composited scroller, and the
+       region WebKit invalidates on hide doesn't reliably cover where it actually
+       drew — so those pixels are simply never asked to repaint. Nothing in the
+       page will ask on its own either, since the cards underneath haven't
+       changed. Touching opacity on the scroller invalidates the whole thing for
+       one frame, which repaints the stale region along with everything else.
+       This is a workaround for an engine bug, not a fix for our own logic: it is
+       scoped to dismissal on touch, where the artifact appears, so the common
+       paths stay clean. Assigning opacity does not disturb scrollTop. */
+    const repaintBox = () => {
+        if (!window.matchMedia('(pointer: coarse)').matches) return;
+        box.style.opacity = '0.999';
+        window.requestAnimationFrame(() => { box.style.opacity = ''; });
     };
 
     const setPinned = (cell, pinned) => {
         cell.classList.toggle('popup-pinned', pinned);
         cell.setAttribute('aria-pressed', String(pinned));
         cell.querySelector('.detail-token-fold').textContent = pinned ? '×' : '+';
+        if (!pinned) repaintBox();
     };
 
     const togglePinned = (cell) => {
@@ -614,6 +643,11 @@ function setupDetailsPopups() {
     };
 
     const tokenFrom = (event) => event.target.closest?.('.detail-token.has-details');
+    // Capture, because scroll does not bubble — one listener covers every popup.
+    box.addEventListener('scroll', (event) => {
+        const content = event.target.closest?.('.details-popup-content');
+        if (content) markScrollable(content.closest('.details-popup'));
+    }, true);
     box.addEventListener('mouseover', (event) => { const cell = tokenFrom(event); if (cell) place(cell); });
     box.addEventListener('focusin', (event) => { const cell = tokenFrom(event); if (cell) place(cell); });
     box.addEventListener('click', (event) => {

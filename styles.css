@@ -35,7 +35,16 @@ body {
 }
 
 a { color: var(--blue-bright); text-decoration: none; }
-a:hover { text-decoration: underline; }
+/* Every :hover rule in this file is gated on a hovering pointer. A touch browser
+   parks a synthetic cursor wherever you last tapped, so whatever ends up under
+   that point inherits hover and keeps it until the next tap somewhere else —
+   which is how dismissing a menu leaves the element revealed beneath it looking
+   moused-over. Each gate wraps its rule in place rather than being hoisted into
+   one block at the end, so cascade order against the :active and [aria-selected]
+   rules interleaved here is exactly what it was. */
+@media (hover: hover) {
+    a:hover { text-decoration: underline; }
+}
 button, input, textarea, select { font: inherit; }
 button { cursor: pointer; }
 .option-btn,
@@ -100,9 +109,21 @@ button { cursor: pointer; }
 .title { color: inherit; font-size: 14px; font-weight: 600; letter-spacing: .05em; }
 .title-options { display: flex; gap: 6px; margin-left: auto; }
 .title-option { display: inline-flex; align-items: center; min-height: 23px; padding: 4px 10px; color: var(--ink); background: var(--face); box-shadow: var(--raise); font-size: 12px; outline: 1px solid var(--blue-bright); outline-offset: -1px; }
-.title-option:hover { color: var(--ink); background: var(--face-light); text-decoration: none; }
-/* Pressed labels move without changing the box dimensions. */
-.title-option:active, .title-option.is-navigating { box-shadow: var(--sink); padding: 5px 9px 3px 11px; }
+@media (hover: hover) {
+    .title-option:hover { color: var(--ink); background: var(--face-light); text-decoration: none; }
+}
+/* Pressed labels move without changing the box dimensions. .is-pressing is the
+   touch stand-in for :active; see setupNavigationState. */
+.title-option.is-pressing, .title-option.is-navigating { box-shadow: var(--sink); padding: 5px 9px 3px 11px; }
+/* :active is gated wherever .is-pressing also applies. Touch fires :active the
+   instant a finger lands, while .is-pressing deliberately waits out the scroll
+   test — leaving both live would split the press into two beats, the pressed
+   look arriving on contact and the hover look catching up 110ms later. Gated,
+   .is-pressing alone drives the whole appearance on touch and it arrives as one.
+   Controls with no .is-pressing rule keep their instant :active. */
+@media (hover: hover) {
+    .title-option:active { box-shadow: var(--sink); padding: 5px 9px 3px 11px; }
+}
 
 .home-wordmark { display: flex; width: fit-content; margin: 0 auto 15px; color: var(--ink); font-size: clamp(30px, 5vw, 50px); font-weight: 600; letter-spacing: -.12em; line-height: 1; }
 .home-wordmark span { padding: 5px 12px; }
@@ -115,22 +136,47 @@ button { cursor: pointer; }
 .option-btn-container { min-width: 0; }
 span.option-btn { display: flex; background: var(--face); box-shadow: var(--raise); font-family: var(--mono); font-size: clamp(23px, 3.3vw, 37px); line-height: .98; }
 .option-btn a { flex: 1; padding: 12px; }
-.option-btn a:hover { text-decoration: underline; outline: 3px solid var(--blue-bright); outline-offset: -8px;}
+@media (hover: hover) {
+    .option-btn a:hover { text-decoration: underline; text-decoration-thickness: 3px; outline: 3px solid var(--blue-bright); outline-offset: -8px;}
+}
+/* The press and navigating rules further down only recolour this outline, so it
+   has to be drawn here too — on touch there is no hover to have drawn it. */
+.option-btn a.is-touched, .option-btn a.is-navigating { text-decoration: underline; outline: 3px solid var(--blue-bright); outline-offset: -8px; }
+/* The underline's natural thickness follows the font, which shrinks with the
+   clamped size on a phone until it no longer reads as the same weight as the 3px
+   outline beside it. Keyed to the pointer rather than to .is-touched so the
+   thickness holds through the navigating state too, instead of thinning at the
+   moment of the tap. Desktop keeps deriving it from the font as it does today. */
+@media (pointer: coarse) {
+    .option-btn a.is-touched, .option-btn a.is-navigating { text-decoration-thickness: 2px; outline-width: 2px; }
+    .option-btn .info.is-touched { outline-width: 2px; }
+}
 .option-btn .info { flex: 0 0 46px; display: grid; place-items: center; padding: 0; color: var(--blue-bright); background: none; border: 0; border-left: 1px solid var(--ink); font: inherit; line-height: 1; user-select: none; -webkit-user-select: none; }
-.option-btn .info:hover { text-decoration: none; outline: 3px solid var(--blue-bright); outline-offset: -8px; }
+@media (hover: hover) {
+    .option-btn .info:hover { text-decoration: none; outline: 3px solid var(--blue-bright); outline-offset: -8px; }
+}
+.option-btn .info.is-touched { text-decoration: none; outline: 3px solid var(--blue-bright); outline-offset: -8px; }
 .option-btn .info:focus-visible { outline: 3px solid var(--blue-bright); outline-offset: -6px; }
 
 .option-details { display: none; padding: 8px; background: var(--field); }
 .option-details.open { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
 .option-details-row { display: contents; color: var(--ink); font-size: 16px; }
 .option-details a { text-decoration: underline; text-decoration-thickness: 2px; }
-.option-details a:hover { outline: 2px solid var(--blue-bright); outline-offset: 2px;}
+@media (hover: hover) {
+    .option-details a:hover { outline: 2px solid var(--blue-bright); outline-offset: 2px;}
+}
+.option-details a.is-touched, .option-details a.is-navigating { outline: 2px solid var(--blue-bright); outline-offset: 2px; }
 
-.option-btn a:active,
-.option-details a:active,
+.option-btn a.is-pressing,
+.option-details a.is-pressing,
 .option-btn a.is-navigating,
 .option-details a.is-navigating,
-.option-btn .info:active { color: var(--red); outline-color: var(--red); }
+.option-btn .info.is-pressing { color: var(--red); outline-color: var(--red); }
+@media (hover: hover) {
+    .option-btn a:active,
+    .option-details a:active,
+    .option-btn .info:active { color: var(--red); outline-color: var(--red); }
+}
 
 /* Opportunity workspace */
 .columns { display: grid; grid-template-columns: minmax(0, 1fr) 240px; align-items: stretch; box-shadow: none; }
@@ -142,8 +188,14 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
 .pagination-tab { display: inline-flex; align-items: flex-end; min-height: 24px; padding: 0 4px; color: var(--ink); margin-left: 0px; background: var(--field); box-shadow: var(--sink-shallow); font-size: 14px; font-weight: bold; letter-spacing: .05em;}
 .pagination-arrows { display: flex; gap: 4px; }
 .page-arrow { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; min-height: 24px; padding: 4px; color: var(--ink); background: var(--face); border: 0; box-shadow: var(--raise); font-size: 14px; line-height: 1; }
-.page-arrow:hover:not(:disabled) { background: var(--field); }
-.page-arrow:active:not(:disabled) { box-shadow: var(--sink); padding: 3px 5px 1px 7px; }
+.page-arrow.is-touched:not(:disabled) { background: var(--field); }
+@media (hover: hover) {
+    .page-arrow:hover:not(:disabled) { background: var(--field); }
+}
+.page-arrow.is-pressing:not(:disabled) { box-shadow: var(--sink); padding: 3px 5px 1px 7px; }
+@media (hover: hover) {
+    .page-arrow:active:not(:disabled) { box-shadow: var(--sink); padding: 3px 5px 1px 7px; }
+}
 .page-arrow:focus-visible { outline: 1px dotted var(--ink); outline-offset: 2px; }
 .page-arrow:disabled { color: var(--muted); background: var(--face); box-shadow: var(--sink); cursor: default;}
 .repo { position: relative; min-width: 0; min-height: 520px; padding: 3px; background: var(--face); box-shadow: var(--sink); }
@@ -189,11 +241,19 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
 .opportunity-card a.line-background-ready .link-text { pointer-events: auto; }
 .opportunity-card a .link-text svg { fill: none; stroke: currentColor; }
 .opportunity-card a:not(.line-background-ready) .link-text, .opportunity-card .link-text { outline: 0px solid var(--ink); outline-offset: 7px; }
-.opportunity-card a:not(.line-background-ready):hover .link-text,
-.opportunity-card a.line-background-ready:has(.link-text:hover, .link-line-background:hover) .link-text { text-decoration-thickness: 2px; outline: 2px solid var(--blue-bright); outline-offset: 6px; }
-.opportunity-card a:not(.line-background-ready):hover { color: var(--blue-bright); background: var(--field); }
-.opportunity-card a.line-background-ready:has(.link-text:hover, .link-line-background:hover) { color: var(--blue-bright); text-decoration-color: var(--blue-bright); }
-.opportunity-card a.line-background-ready:has(.link-text:hover, .link-line-background:hover) .link-line-background { background: var(--field); }
+/* .is-touched is the deliberate-tap half of hover: same look, but driven by a
+   real press on this element rather than by a synthetic cursor left behind. */
+.opportunity-card a.is-touched .link-text { text-decoration-thickness: 2px; outline: 2px solid var(--blue-bright); outline-offset: 6px; }
+.opportunity-card a.is-touched:not(.line-background-ready) { color: var(--blue-bright); background: var(--field); }
+.opportunity-card a.is-touched.line-background-ready { color: var(--blue-bright); text-decoration-color: var(--blue-bright); }
+.opportunity-card a.is-touched.line-background-ready .link-line-background { background: var(--field); }
+@media (hover: hover) {
+    .opportunity-card a:not(.line-background-ready):hover .link-text,
+    .opportunity-card a.line-background-ready:has(.link-text:hover, .link-line-background:hover) .link-text { text-decoration-thickness: 2px; outline: 2px solid var(--blue-bright); outline-offset: 6px; }
+    .opportunity-card a:not(.line-background-ready):hover { color: var(--blue-bright); background: var(--field); }
+    .opportunity-card a.line-background-ready:has(.link-text:hover, .link-line-background:hover) { color: var(--blue-bright); text-decoration-color: var(--blue-bright); }
+    .opportunity-card a.line-background-ready:has(.link-text:hover, .link-line-background:hover) .link-line-background { background: var(--field); }
+}
 
 .top-right-grid { border: 1px solid var(--ink); padding: 8px; min-width: 0; max-width: 100%; }
 .details-summary-row { display: flex; justify-content: flex-start; align-items: flex-start; align-self: stretch; flex-wrap: wrap; gap: 4px; }
@@ -222,7 +282,11 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
    the popup itself is the thing under the pointer: the popup is a DOM
    descendant of the token, so :active on it bubbles to the token too, and
    without the :has() guard a press inside the popup would dim the token. */
-.detail-token.has-details:active:not(:has(.details-popup:hover))::before { content: ""; position: absolute; inset: 0; z-index: 1; background: rgba(0, 0, 0, .15); pointer-events: none; }
+/* Touch has no cursor to preview a token with, so the dim would only ever flash
+   as the popup itself opens — feedback for something already answered. */
+@media (hover: hover) {
+    .detail-token.has-details:active:not(:has(.details-popup:hover))::before { content: ""; position: absolute; inset: 0; z-index: 1; background: rgba(0, 0, 0, .15); pointer-events: none; }
+}
 .detail-token-label { position: relative; display: inline-block; }
 /* The underline is a hover-only cue: the corner fold already advertises that
    details exist at rest. currentColor so it survives the pinned inversion. */
@@ -286,6 +350,15 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
 .detail-token.popup-down .details-popup { top: calc(100% + 1px); bottom: auto; padding-top: var(--detail-tail-length); padding-bottom: 0; }
 .detail-token.popup-down .details-popup-tail { top: 0; bottom: auto; clip-path: polygon(50% 0, 100% 100%, 0 100%); }
 .detail-token.popup-down .details-popup-tail::after { top: 1px; clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+/* Mobile draws no persistent scrollbar, so a popup with more text below reads as
+   finished. This marks it. It hangs off .details-popup rather than the scrolling
+   box, which would carry it out of view on the first drag, and sits inside the
+   tail's padding so it lands in the content's own bottom-right corner either way
+   up. It clears itself at the end of the scroll — see markScrollable. */
+@media (pointer: coarse) {
+    .details-popup.has-more::after { content: "▼"; position: absolute; right: 3px; bottom: calc(var(--detail-tail-length) + 3px); z-index: 2; padding: 0 3px; color: var(--ink); background: var(--dialogue-background, #fff); font-size: 10px; line-height: 1; pointer-events: none; }
+    .detail-token.popup-down .details-popup.has-more::after { bottom: 3px; }
+}
 .detail-token.has-details:focus-visible .details-popup,
 .detail-token.popup-pinned .details-popup { display: block; }
 .detail-token.popup-dismissed .details-popup { display: none !important; }
@@ -321,7 +394,10 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
 .rolling-filter { background: var(--green); }
 .remove-filter-btn { position: relative; flex: 0 0 15px; width: 15px; height: 15px; padding: 0; border: 0; color: inherit; background: transparent; font-size: 0; }
 .remove-filter-btn::before { content: ""; position: absolute; top: 4px; left: 4px; width: 1px; height: 1px; background: currentColor; box-shadow: 6px 0 currentColor, 1px 1px currentColor, 5px 1px currentColor, 2px 2px currentColor, 4px 2px currentColor, 3px 3px currentColor, 2px 4px currentColor, 4px 4px currentColor, 1px 5px currentColor, 5px 5px currentColor, 0 6px currentColor, 6px 6px currentColor; }
-.remove-filter-btn:hover { color: var(--ink); background: #fff; }
+.remove-filter-btn.is-touched { color: var(--ink); background: #fff; }
+@media (hover: hover) {
+    .remove-filter-btn:hover { color: var(--ink); background: #fff; }
+}
 .remove-filter-btn:focus-visible { outline: 1px dotted currentColor; outline-offset: 1px; }
 .filter-selectors { display: flex; flex-direction: column; gap: 9px; padding: 8px 4px; }
 .checkbox-filters { display: flex; flex-wrap: wrap; gap: 9px 14px; }
@@ -338,10 +414,24 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
 .custom-options { position: absolute; z-index: 20; top: 100%; right: 0; left: 0; display: none; margin: 1px 0 0; padding: 2px; list-style: none; background: #fff; border: 1px solid var(--ink); box-shadow: 2px 2px 0 rgba(0,0,0,.5); }
 .custom-options[aria-hidden="false"] { display: block; }
 .custom-options li { position: relative; padding: 4px 6px; cursor: pointer; font-size: 14px; }
-.custom-options li:hover, .custom-options li[aria-selected="true"] { color: var(--field); background: var(--blue-bright); outline: 0px solid var(--ink); }
-.custom-options li:active .opt-label { display: inline-block; transform: translate(1px, 1px); }
+/* aria-selected is the menu's own keyboard/tap highlight and stays ungated;
+   only the pointer half is conditional. */
+.custom-options li[aria-selected="true"], .custom-options li.is-touched { color: var(--field); background: var(--blue-bright); outline: 0px solid var(--ink); }
+@media (hover: hover) {
+    .custom-options li:hover { color: var(--field); background: var(--blue-bright); outline: 0px solid var(--ink); }
+}
+.custom-options li.is-pressing .opt-label { display: inline-block; transform: translate(1px, 1px); }
+@media (hover: hover) {
+    .custom-options li:active .opt-label { display: inline-block; transform: translate(1px, 1px); }
+}
 .custom-options li.clear-filter-option { color: var(--red); }
-.custom-options li.clear-filter-option:hover, .custom-options li.clear-filter-option[aria-selected="true"], .custom-options li.clear-filter-option:active { color: var(--field); background: var(--red); }
+.custom-options li.clear-filter-option[aria-selected="true"], .custom-options li.clear-filter-option.is-touched { color: var(--field); background: var(--red); }
+@media (hover: hover) {
+    .custom-options li.clear-filter-option:active { color: var(--field); background: var(--red); }
+}
+@media (hover: hover) {
+    .custom-options li.clear-filter-option:hover { color: var(--field); background: var(--red); }
+}
 .visually-hidden { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(1px, 1px, 1px, 1px); white-space: nowrap; }
 .checkbox-label { display: flex; align-items: center; gap: 7px; cursor: pointer; font-size: 14px; user-select: none; -webkit-user-select: none; }
 .checkbox-input {
@@ -405,12 +495,21 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
 .thanks-item.is-in { visibility: visible; }
 .thanks-item.is-gone { visibility: hidden; }
 .thanks-label { padding: 8px; border: 0; font: inherit; font-size: 24px; font-weight: bold; line-height: 1.35; }
-.thanks-label:hover, .thanks-label:focus-visible { outline: 2px dashed #fff; outline-offset: -5px; }
+.thanks-label:focus-visible { outline: 2px dashed #fff; outline-offset: -5px; }
+@media (hover: hover) {
+    .thanks-label:hover { outline: 2px dashed #fff; outline-offset: -5px; }
+}
 .thanks-menu { position: absolute; top: calc(100% + 3px); left: 0; z-index: 40; display: none; }
 .thanks-item.is-open .thanks-menu { display: block; }
 .thanks-menu-option { display: block; width: 100%; padding: 4px 10px; color: var(--ink); background: #fff; border: 1px solid var(--ink); box-shadow: 2px 2px 0 var(--ink); font-size: 14px; font-weight: 400; text-align: left; white-space: nowrap; }
-.thanks-menu-option:hover { text-decoration: underline; }
-.thanks-menu-option:active { box-shadow: none; transform: translate(2px, 2px); }
+.thanks-menu-option.is-touched { text-decoration: underline; }
+@media (hover: hover) {
+    .thanks-menu-option:hover { text-decoration: underline; }
+}
+.thanks-menu-option.is-pressing { box-shadow: none; transform: translate(2px, 2px); }
+@media (hover: hover) {
+    .thanks-menu-option:active { box-shadow: none; transform: translate(2px, 2px); }
+}
 .thanks-item.is-leaving { pointer-events: none; animation: thanks-fade 200ms steps(2, end) forwards; }
 @keyframes thanks-fade { from { opacity: 1; } to { opacity: 0; } }
 .form-status-loading { font-size: 14px; font-weight: 600; background: none;}
@@ -450,6 +549,13 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
    narrow desktop window keeps the 14px body type in its form. */
 @media (pointer: coarse) {
     .form-input, .form-textarea { font-size: 16px; }
+    /* Mobile draws its own overlay scrollbars and ignores the ::-webkit-scrollbar
+       rules above entirely, leaving a pale bar that vanishes against these light
+       fills. scrollbar-color is the one lever those overlay bars do respect. It
+       is confined to coarse pointers because on desktop Chrome it takes over
+       from the ::-webkit-scrollbar styling rather than sitting alongside it,
+       which would flatten the beveled bars into plain ones. */
+    .repobox, .details-popup-content, .custom-options { scrollbar-color: var(--ink) transparent; }
 }
 
 @media (max-width: 430px) {
