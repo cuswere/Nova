@@ -530,8 +530,90 @@ function observeTitleBackgrounds(container) {
     titleBackgroundObserver.observe(container);
 }
 
+/* The stylesheet sets line-height as a unitless 1.4, and what getComputedStyle
+   hands back for that is not agreed on between engines: a pixel value, the bare
+   multiplier, or "normal". Read as pixels, a multiplier makes an allowance of
+   "two lines" mean 2.8px, which no real overflow ever fits inside — the box then
+   scrolls for a single spare line and the fit looks broken on that engine only.
+   Any figure smaller than the font itself cannot be a line height in pixels, so
+   it is treated as the multiplier it is. */
+/* How much overflow a popup may absorb rather than scroll, in lines. Two was too
+   tight in practice: a phone-width popup wraps the same text into more lines, so
+   a tail that reads as one spare line on screen measures nearer three. */
+const FIT_ALLOWANCE_LINES = 3;
+
+function lineHeightOf(element) {
+    const styles = getComputedStyle(element);
+    const fontSize = parseFloat(styles.fontSize) || 14;
+    const parsed = parseFloat(styles.lineHeight);
+    if (parsed >= fontSize) return parsed;
+    return fontSize * (parsed > 0 ? parsed : 1.4);
+}
+
 function setupDetailsPopups() {
     const box = document.querySelector('.repobox');
+
+    /* A line or two poking past the cap isn't worth a scrollbar — the bar costs
+       about as much room as it saves, and reads as far more content waiting below
+       than there is. Let the box absorb an overflow that small and only scroll
+       once it is genuinely substantial. Returns whether it ended up fitting.
+
+       One measurement is enough because the marker's gutter is reserved on every
+       popup rather than appearing with the scrollbar — see the stylesheet. Were
+       it conditional, growing the box would re-wrap the text and change the very
+       height this reads. */
+    const fitContent = (popup) => {
+        const content = popup.querySelector('.details-popup-content');
+        if (!content) return false;
+
+        // A popup's text never changes after render, so the verdict only depends
+        // on its width. Once fitted at this width, reuse the answer — repeat
+        // opens and desktop hover-tracking then never touch the classes below,
+        // and never pay the rebuilds.
+        if (popup.dataset.fitWidth === String(popup.offsetWidth)) return popup.dataset.fitVerdict !== 'scroll';
+
+        // iOS WebKit lays this popup out reliably on first display and
+        // unreliably on any in-place change — the same engine fault behind the
+        // dismissal ghost-borders: computed style reads back grown while the box
+        // keeps its capped height and the text spills past it. So the grown
+        // state is never changed on a live box; every toggle yanks the popup
+        // through display:none and back, discarding its boxes and rebuilding
+        // them the one way that engine gets right. Synchronous within one frame,
+        // so nothing flickers. That applies to removal too — an in-place
+        // declassing wouldn't shrink the box either, and the measurement below
+        // would read the grown geometry as "fits".
+        const rebuild = () => {
+            popup.style.display = 'none';
+            void popup.offsetHeight;
+            popup.style.display = '';
+        };
+
+        // The growth is a class swap (max-height: none + overflow-y: visible in
+        // the stylesheet), not an inline max-height raise WebKit can quietly drop.
+        if (content.classList.contains('is-grown')) {
+            content.classList.remove('is-grown');
+            rebuild();
+        }
+
+        const line = lineHeightOf(content);
+        const overflow = content.scrollHeight - content.clientHeight;
+        const allowance = line * FIT_ALLOWANCE_LINES;
+        let verdict = 'fits';
+
+        if (overflow > 0) {
+            if (overflow > allowance) {
+                verdict = 'scroll';
+            } else {
+                content.classList.add('is-grown');
+                rebuild();
+                verdict = 'grew';
+            }
+        }
+
+        popup.dataset.fitWidth = String(popup.offsetWidth);
+        popup.dataset.fitVerdict = verdict;
+        return verdict !== 'scroll';
+    };
 
     const place = (cell) => {
         const popup = cell.querySelector('.details-popup');
@@ -543,22 +625,7 @@ function setupDetailsPopups() {
         // corrected placement only arrives with the click that pins it.
         if (!popup || !popup.offsetWidth) return;
 
-        // A line or two poking past the cap isn't worth a scrollbar — the bar
-        // costs about as much room as it saves, and reads as far more content
-        // waiting below than there is. Let the box absorb an overflow that
-        // small and only start scrolling once it's genuinely substantial.
-        // Clearing the override first is what makes this reversible: measured
-        // against a grown box the overflow always reads as zero.
-        const content = popup.querySelector('.details-popup-content');
-        if (content) {
-            content.style.maxHeight = '';
-            const line = parseFloat(getComputedStyle(content).lineHeight) || 20;
-            const overflow = content.scrollHeight - content.clientHeight;
-            // scrollHeight stops at the padding edge, so under border-box the
-            // borders have to be added back or the box lands short and scrolls anyway.
-            const border = content.offsetHeight - content.clientHeight;
-            if (overflow > 0 && overflow <= line * 2) content.style.maxHeight = `${content.scrollHeight + border}px`;
-        }
+        fitContent(popup);
 
         const boxRect = box.getBoundingClientRect();
         const cellRect = cell.getBoundingClientRect();
@@ -598,12 +665,15 @@ function setupDetailsPopups() {
 
     // Flags a popup that still has text below the fold, which the marker in the
     // stylesheet renders. Keyed on what is left rather than on whether the box
-    // scrolls at all, so it retires once the reader reaches the end.
+    // scrolls at all, so it retires once the reader reaches the end. The 2px
+    // tolerance is for sub-pixel rounding: an expanded box can report a stray
+    // pixel of overflow it cannot actually scroll, and the marker would sit there
+    // pointing at nothing.
     const markScrollable = (popup) => {
         const content = popup.querySelector('.details-popup-content');
         if (!content) return;
         const remaining = content.scrollHeight - content.clientHeight - content.scrollTop;
-        popup.classList.toggle('has-more', remaining > 1);
+        popup.classList.toggle('has-more', remaining > 2);
     };
 
     /* A closed popup can leave its border painted across the cards it covered.
@@ -640,6 +710,11 @@ function setupDetailsPopups() {
         cell.classList.remove('popup-dismissed');
         setPinned(cell, true);
         place(cell);
+        // The popup is measured in the same tick it is revealed. Re-place once the
+        // frame has actually been laid out, so anything that settled late is
+        // measured against what is really on screen. place() is idempotent, so on
+        // the common path this just confirms the first answer.
+        window.requestAnimationFrame(() => { if (cell.classList.contains('popup-pinned')) place(cell); });
     };
 
     const tokenFrom = (event) => event.target.closest?.('.detail-token.has-details');

@@ -32,6 +32,12 @@ body {
     font: 14px/1.35 var(--mono);
     font-variant-ligatures: none;
     -webkit-font-smoothing: none;
+    /* Mobile WebKit may inflate text in wide blocks without reporting it in the
+       computed font-size. Anything that measures rendered height against a line
+       height read from CSS — the popup fit in place() — would be reading a
+       different scale than the one on screen. */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
 }
 
 a { color: var(--blue-bright); text-decoration: none; }
@@ -188,13 +194,27 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
 .pagination-tab { display: inline-flex; align-items: flex-end; min-height: 24px; padding: 0 4px; color: var(--ink); margin-left: 0px; background: var(--field); box-shadow: var(--sink-shallow); font-size: 14px; font-weight: bold; letter-spacing: .05em;}
 .pagination-arrows { display: flex; gap: 4px; }
 .page-arrow { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; min-height: 24px; padding: 4px; color: var(--ink); background: var(--face); border: 0; box-shadow: var(--raise); font-size: 14px; line-height: 1; }
-.page-arrow.is-touched:not(:disabled) { background: var(--field); }
+/* No .is-touched counterpart on purpose: like the detail tokens, the hover wash
+   is a cursor preview, and on touch it would only linger after the press that
+   already answered it. The .is-pressing bevel below is the whole affordance. */
 @media (hover: hover) {
     .page-arrow:hover:not(:disabled) { background: var(--field); }
 }
 .page-arrow.is-pressing:not(:disabled) { box-shadow: var(--sink); padding: 3px 5px 1px 7px; }
 @media (hover: hover) {
     .page-arrow:active:not(:disabled) { box-shadow: var(--sink); padding: 3px 5px 1px 7px; }
+}
+/* At 24px these sit under the ~44px a fingertip actually covers, so WebKit's
+   touch adjustment quietly redirects near-misses to them. That fires the click
+   but not the press styling: the click is retargeted, while the pointerdown
+   .is-pressing rides on reports the real element under the finger, the toolbar.
+   Widening the hit area to cover the near-miss makes both agree. Transparent, so
+   the bevel keeps its 24px look. The insets are bounded by the neighbours — 2px
+   is half the 4px gap between the two arrows, and 4px is the toolbar's bottom
+   margin, past which this would start intercepting taps meant for the cards. */
+@media (pointer: coarse) {
+    .page-arrow { position: relative; }
+    .page-arrow:not(:disabled)::after { content: ""; position: absolute; inset: -8px -2px -4px; }
 }
 .page-arrow:focus-visible { outline: 1px dotted var(--ink); outline-offset: 2px; }
 .page-arrow:disabled { color: var(--muted); background: var(--face); box-shadow: var(--sink); cursor: default;}
@@ -261,7 +281,7 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
 .grid-cell { background: none; border: 1px solid var(--ink); flex: 0 1 auto; display: flex; align-items: center; justify-content: center; max-width: 100%; overflow: hidden; overflow-wrap: anywhere; line-height: 1.15; box-shadow: none; }
 .fee-cell { min-height: 26px; padding: 3px 5px; color: var(--ink); background: var(--amber); box-shadow: none; }
 .type-cell { border-color: var(--blue-bright) !important; color: var(--white); background: var(--blue-bright)}
-.type-cell::selection { background: #fff; color: var(--ink); }
+.type-cell::selection, .title::selection { background: #fff; color: var(--ink); }
 /* Shared details affordance: a dotted underline on the token label (hard-edged
    square dots via a sharp-stop gradient, not soft radial circles, so they stay
    pixel-crisp; round-tiled so the row always ends on a whole dot rather than
@@ -326,6 +346,13 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
 .fee-cell .details-popup { --dialogue-background: var(--amber); --popup-inline-offset: 50%; right: var(--detail-fold-center-offset); }
 .fee-cell .details-popup-content { text-align: center; font-size: 18px; }
 .details-popup-content { position: relative; z-index: 1; display: block; max-height: 220px; overflow-y: auto; padding: 6px 10px; overflow-wrap: anywhere; background: var(--dialogue-background, #fff); border: 1px solid var(--ink); box-shadow: 2px 2px 0px var(--ink); cursor: default; }
+/* Applied by fitContent when the text fits within the growth allowance: the cap
+   comes off and the scroller is dismantled outright. A class swapping overflow,
+   not an inline max-height — iOS WebKit was observed accepting an inline cap
+   raise on this composited scroller and then never relaying it out (heights read
+   back still clamped to 220px). Removing the scroller is a change it can't skip,
+   and with no cap and overflow visible there is nothing left to mis-measure. */
+.details-popup-content.is-grown { max-height: none; overflow-y: visible; }
 /* No separate track gutter — just the thumb, floating on the popup's own
    background. Its edges can sit flush against the popup's real border on any
    side depending on scroll position (the scrollbar occupies the padding box,
@@ -354,9 +381,26 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
    finished. This marks it. It hangs off .details-popup rather than the scrolling
    box, which would carry it out of view on the first drag, and sits inside the
    tail's padding so it lands in the content's own bottom-right corner either way
-   up. It clears itself at the end of the scroll — see markScrollable. */
+   up. It clears itself at the end of the scroll — see markScrollable.
+
+   --details-marker-inset holds the marker clear of the column the overlay
+   scrollbar runs down, so the bar travels the full height of the box instead of
+   stopping short against it. The text gutter is measured from the marker's far
+   edge, not the border, so the two stay spaced however the inset is tuned.
+
+   The gutter is reserved on every popup, not only the ones that scroll. Making
+   it conditional looks tidier and is a trap: the gutter changes where the text
+   wraps, so a box that gains one on becoming scrollable is taller for it, which
+   is the same measurement that decided whether it scrolls. That loop is what
+   produced boxes that were given extra height and left scrollable anyway.
+   Constant, the fit is always measured against the final wrap, and the marker
+   is left as pure paint with no say in layout. The centred fee popup gets the
+   same reserve mirrored on its left so its text stays centred. */
 @media (pointer: coarse) {
-    .details-popup.has-more::after { content: "▼"; position: absolute; right: 3px; bottom: calc(var(--detail-tail-length) + 3px); z-index: 2; padding: 0 3px; color: var(--ink); background: var(--dialogue-background, #fff); font-size: 10px; line-height: 1; pointer-events: none; }
+    .details-popup { --details-marker-inset: 9px; --details-marker-width: 16px; --details-marker-gap: 0px; --details-gutter: calc(var(--details-marker-inset) + var(--details-marker-width) + var(--details-marker-gap)); }
+    .details-popup-content { padding-right: var(--details-gutter); }
+    .fee-cell .details-popup-content { padding-left: var(--details-gutter); }
+    .details-popup.has-more::after { content: "▼"; position: absolute; right: var(--details-marker-inset); bottom: calc(var(--detail-tail-length) + 3px); z-index: 2; width: var(--details-marker-width); color: var(--ink); background: var(--dialogue-background, #fff); font-size: 10px; line-height: 1; text-align: center; pointer-events: none; }
     .detail-token.popup-down .details-popup.has-more::after { bottom: 3px; }
 }
 .detail-token.has-details:focus-visible .details-popup,

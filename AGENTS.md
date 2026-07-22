@@ -46,3 +46,5 @@ AI enrichment is intentionally disabled during beta. Missing or ambiguous fields
 - Preserve the no-build, no-framework architecture and minimal dependencies.
 - Prefer relative links so the site works from any hosting path.
 - simple edits do not require a browser preview; be economical with usage until an issue is reported.
+- Mobile is WebKit, iOS Chrome included; `line-height` numbers, text autosizing, and hover/active resolve differently there. If desktop is fine and rewrites don't help, suspect a misread value rather than the structure.
+- Phones are tested over the LAN with no console. For a stubborn mobile-only bug, render the numbers into the page for a screenshot early, and make sure the readout can't alter what it measures.
