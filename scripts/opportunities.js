@@ -284,7 +284,15 @@ function eligibilityDetails(item) {
 }
 
 function plainProse(text) {
-    return String(text || '').replace(/\*\*([^*]+)\*\*/g, '$1').replace(/\*([^*]+)\*/g, '$1');
+    return normalizeDisplayProse(text)
+        .replace(/\*\*([^*]+)\*\*/g, '$1')
+        .replace(/\*([^*]+)\*/g, '$1');
+}
+
+function normalizeDisplayProse(text) {
+    return String(text || '')
+        .replace(/(\*{4,})([^*\n]+)\1/g, '**$2**')
+        .replace(/^[ \t]*\*+[ \t]*(?:\r?\n|$)/gm, '');
 }
 
 function appendInlineProse(parent, text) {
@@ -300,7 +308,7 @@ function appendInlineProse(parent, text) {
 
 function proseContent(text) {
     const wrapper = element('span', 'details-popup-text');
-    const paragraphs = String(text || '').replace(/\r\n?/g, '\n').split(/\n{2,}/).filter((part) => part.trim());
+    const paragraphs = normalizeDisplayProse(text).replace(/\r\n?/g, '\n').split(/\n{2,}/).filter((part) => part.trim());
     for (const paragraphText of paragraphs) {
         const paragraph = element('span', 'details-popup-paragraph');
         const lines = paragraphText.split('\n');
