@@ -11,14 +11,20 @@
     --amber: #ffc962;
     --green: #2f9229;
     --desktop: #5b7070;
+    /* Brand blue of the Praxis mark — lighter and cooler than the UI --blue-bright,
+       which belongs to the Windows chrome and shouldn't be conflated with it. */
+    --praxis-blue: #1f9cf0;
     --line: #111;
-    --raise: inset -1px -1px #161616, inset 1px 1px #fff, inset -2px -2px #888, inset 2px 2px #ddd;
-    --sink: inset -1px -1px #fff, inset 1px 1px #7b7b7b, inset -2px -2px #ddd, inset 2px 2px #202020;
-    --sink-shallow: inset -1px -1px #fff, inset 1px 1px #7b7b7b;
+    /* Positive offsets (top/left) come first in each pair: the first shadow paints
+       on top, so those edges run full length and the bottom/right ones mitre into
+       them, as Windows drew it. Inner 1px pair stays ahead of the outer 2px pair. */
+    --raise: inset 1px 1px #fff, inset -1px -1px #161616, inset 2px 2px #ddd, inset -2px -2px #888;
+    --sink: inset 1px 1px #7b7b7b, inset -1px -1px #fff, inset 2px 2px #202020, inset -2px -2px #ddd;
+    --sink-shallow: inset 1px 1px #7b7b7b, inset -1px -1px #fff;
     /* Blue controls need their own bevel ramp; the neutral highlight washes out. */
-    --raise-blue: inset -1px -1px #00002e, inset 1px 1px #a8a8ff, inset -2px -2px #000090, inset 2px 2px #5a5aff;
-    --sink-blue: inset -1px -1px #a8a8ff, inset 1px 1px #000090, inset -2px -2px #5a5aff, inset 2px 2px #00002e;
-    --label-bevel: inset -1px -1px #888, inset 1px 1px #eee;
+    --raise-blue: inset 1px 1px #a8a8ff, inset -1px -1px #00002e, inset 2px 2px #5a5aff, inset -2px -2px #000090;
+    --sink-blue: inset 1px 1px #000090, inset -1px -1px #a8a8ff, inset 2px 2px #00002e, inset -2px -2px #5a5aff;
+    --label-bevel: inset 1px 1px #eee, inset -1px -1px #888;
     --mono: monospace;
 }
 
@@ -106,7 +112,7 @@ button { cursor: pointer; }
     align-items: center;
     gap: 0;
     color: #fff;
-    background: linear-gradient(90deg, var(--blue), var(--blue-bright));
+    background: linear-gradient(90deg, var(--blue-bright), var(--praxis-blue));
     font-size: 13px;
     font-weight: 600;
 }
@@ -114,9 +120,9 @@ button { cursor: pointer; }
 .page-title::before { content: "PRAXIS NOVA /"; align-self: stretch; display: flex; align-items: center; padding: 0 3px; margin-right: 6px; font-size: 14px; font-weight: 600; letter-spacing: .05em; }
 .title { color: inherit; font-size: 14px; font-weight: 600; letter-spacing: .05em; }
 .title-options { display: flex; gap: 6px; margin-left: auto; }
-.title-option { display: inline-flex; align-items: center; min-height: 23px; padding: 4px 10px; color: var(--ink); background: var(--face); box-shadow: var(--raise); font-size: 12px; outline: 1px solid var(--blue-bright); outline-offset: -1px; }
+.title-option { display: inline-flex; align-items: center; min-height: 23px; padding: 4px 10px; color: var(--white); background: var(--praxis-blue); box-shadow: var(--raise); font-size: 12px; outline: 1px solid var(--ink); outline-offset: -1px; }
 @media (hover: hover) {
-    .title-option:hover { color: var(--ink); background: var(--face-light); text-decoration: none; }
+    .title-option:hover { text-decoration: underline; }
 }
 /* Pressed labels move without changing the box dimensions. .is-pressing is the
    touch stand-in for :active; see setupNavigationState. */
@@ -131,9 +137,12 @@ button { cursor: pointer; }
     .title-option:active { box-shadow: var(--sink); padding: 5px 9px 3px 11px; }
 }
 
-.home-wordmark { display: flex; width: fit-content; margin: 0 auto 15px; color: var(--ink); font-size: clamp(30px, 5vw, 50px); font-weight: 600; letter-spacing: -.12em; line-height: 1; }
-.home-wordmark span { padding: 5px 12px; }
-.home-wordmark span + span { margin-left: -1px; color: #fff; background: var(--ink); text-shadow: 0 0 4px #fff; }
+.home-wordmark { display: flex; align-items: center; width: fit-content; margin: 0 auto 15px; color: var(--ink); font-size: clamp(30px, 5vw, 50px); font-weight: 600; letter-spacing: -.12em; line-height: 1; }
+.home-wordmark span { padding: 2px 4px; border: 2px solid var(--ink); }
+/* Canon Praxis mark; sans-serif because the letterforms are the logo. */
+.home-wordmark span:first-child { padding: 2px; color: var(--praxis-blue); background: var(--white); border: 2px solid var(--praxis-blue); border-radius: 5px; border-top-right-radius: 0; border-bottom-right-radius: 0; font-family: system-ui, -apple-system, "Segoe UI", Arial, sans-serif; font-weight: normal; letter-spacing: .01em; text-transform: uppercase; }
+/* Letter-spacing trails the last letter too, eating into the right padding. */
+.home-wordmark span + span { padding-right: calc(4px + .12em); color: #fff; background: var(--ink); text-shadow: 0 0 4px #fff; }
 
 /* Home */
 .options-container { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding: 12px; min-height: 285px; }
