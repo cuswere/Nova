@@ -39,15 +39,22 @@ export function htmlToText(html = '', maxLength = 10_000) {
     const root = $('body').get(0);
     const blockTags = new Set(['p', 'div', 'section', 'article', 'header', 'footer', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'table', 'tr']);
 
+    function inline(content, marker) {
+        const leading = content.match(/^\s*/)?.[0] || '';
+        const trailing = content.match(/\s*$/)?.[0] || '';
+        const value = content.trim();
+        return value ? `${leading}${marker}${value}${marker}${trailing}` : content;
+    }
+
     function render(node) {
         if (node.type === 'text') return node.data;
         if (node.type !== 'tag' && node.type !== 'root') return '';
         const name = String(node.name || '').toLowerCase();
         if (name === 'br') return '\n';
         let content = (node.children || []).map(render).join('');
-        if ((name === 'strong' || name === 'b') && content.trim()) content = `**${content.trim()}**`;
-        if ((name === 'em' || name === 'i') && content.trim()) content = `*${content.trim()}*`;
-        if (/^h[1-6]$/.test(name) && content.trim()) content = `**${content.trim()}**`;
+        if (name === 'strong' || name === 'b') content = inline(content, '**');
+        if (name === 'em' || name === 'i') content = inline(content, '*');
+        if (/^h[1-6]$/.test(name)) content = inline(content, '**');
         if (name === 'li') return `- ${content.trim()}\n`;
         if (name === 'td' || name === 'th') return `${content.trim()} | `;
         if (name === 'ul' || name === 'ol') return `\n${content.trim()}\n`;

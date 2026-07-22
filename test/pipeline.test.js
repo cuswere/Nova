@@ -978,6 +978,7 @@ test('converts eligibility HTML without duplicate nested text and resolves Creat
     assert.equal(converted.truncated, false);
     assert.equal(htmlToText('Lead<p><strong>Body</strong></p>Tail').text, 'Lead\n\n**Body**\n\nTail');
     assert.equal(htmlToText('<h3>Selection Process</h3><p>First paragraph.</p><p><b>Bold lead:</b> More text.</p>').text, '**Selection Process**\n\nFirst paragraph.\n\n**Bold lead:** More text.');
+    assert.equal(htmlToText('<p><strong>All&nbsp;</strong>applications must be submitted.</p>').text, '**All** applications must be submitted.');
     assert.equal(htmlToText(`<p>${'x'.repeat(20)}</p>`, 10).truncated, true);
     assert.deepEqual(resolveEligibility({ sourceId: 'creative_west', eligibilityLocation: 'International', details: 'Artists worldwide may apply.' }), { country: 'International', issue: '' });
     assert.deepEqual(resolveEligibility({ sourceId: 'creative_west', eligibilityLocation: 'National', details: 'Artists legally authorized to work in the United States may apply.' }), { country: 'United States', issue: '' });

@@ -18,14 +18,20 @@
     function prose(element) {
         if (!element) return '';
         const blocks = new Set(['P', 'DIV', 'SECTION', 'ARTICLE', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'TABLE', 'TR']);
+        function inline(content, marker) {
+            const leading = content.match(/^\s*/)?.[0] || '';
+            const trailing = content.match(/\s*$/)?.[0] || '';
+            const value = content.trim();
+            return value ? `${leading}${marker}${value}${marker}${trailing}` : content;
+        }
         function render(node) {
             if (node.nodeType === Node.TEXT_NODE) return node.data;
             if (node.nodeType !== Node.ELEMENT_NODE) return '';
             if (node.tagName === 'BR') return '\n';
             let content = [...node.childNodes].map(render).join('');
-            if (['STRONG', 'B'].includes(node.tagName) && content.trim()) content = `**${content.trim()}**`;
-            if (['EM', 'I'].includes(node.tagName) && content.trim()) content = `*${content.trim()}*`;
-            if (/^H[1-6]$/.test(node.tagName) && content.trim()) content = `**${content.trim()}**`;
+            if (['STRONG', 'B'].includes(node.tagName)) content = inline(content, '**');
+            if (['EM', 'I'].includes(node.tagName)) content = inline(content, '*');
+            if (/^H[1-6]$/.test(node.tagName)) content = inline(content, '**');
             if (node.tagName === 'LI') return `- ${content.trim()}\n`;
             if (['UL', 'OL'].includes(node.tagName)) return `\n${content.trim()}\n`;
             if (blocks.has(node.tagName)) return `\n\n${content.trim()}\n\n`;
