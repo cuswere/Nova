@@ -543,6 +543,23 @@ function setupDetailsPopups() {
         // corrected placement only arrives with the click that pins it.
         if (!popup || !popup.offsetWidth) return;
 
+        // A line or two poking past the cap isn't worth a scrollbar — the bar
+        // costs about as much room as it saves, and reads as far more content
+        // waiting below than there is. Let the box absorb an overflow that
+        // small and only start scrolling once it's genuinely substantial.
+        // Clearing the override first is what makes this reversible: measured
+        // against a grown box the overflow always reads as zero.
+        const content = popup.querySelector('.details-popup-content');
+        if (content) {
+            content.style.maxHeight = '';
+            const line = parseFloat(getComputedStyle(content).lineHeight) || 20;
+            const overflow = content.scrollHeight - content.clientHeight;
+            // scrollHeight stops at the padding edge, so under border-box the
+            // borders have to be added back or the box lands short and scrolls anyway.
+            const border = content.offsetHeight - content.clientHeight;
+            if (overflow > 0 && overflow <= line * 2) content.style.maxHeight = `${content.scrollHeight + border}px`;
+        }
+
         const boxRect = box.getBoundingClientRect();
         const cellRect = cell.getBoundingClientRect();
         const spaceAbove = cellRect.top - boxRect.top;

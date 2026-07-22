@@ -114,7 +114,7 @@ button { cursor: pointer; }
 .action-group { gap: 12px; }
 .option-btn-container { min-width: 0; }
 span.option-btn { display: flex; background: var(--face); box-shadow: var(--raise); font-family: var(--mono); font-size: clamp(23px, 3.3vw, 37px); line-height: .98; }
-.option-btn a { flex: 1; padding: 12px; color: }
+.option-btn a { flex: 1; padding: 12px; }
 .option-btn a:hover { text-decoration: underline; outline: 3px solid var(--blue-bright); outline-offset: -8px;}
 .option-btn .info { flex: 0 0 46px; display: grid; place-items: center; padding: 0; color: var(--blue-bright); background: none; border: 0; border-left: 1px solid var(--ink); font: inherit; line-height: 1; user-select: none; -webkit-user-select: none; }
 .option-btn .info:hover { text-decoration: none; outline: 3px solid var(--blue-bright); outline-offset: -8px; }
@@ -175,7 +175,7 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
    --connector-x is nudged by drawTitleBackground when the default column would
    graze the end of a wrapped line; see connectorOffset there. */
 .opportunity-title { position: relative; }
-.opportunity-title::after { content: ""; position: absolute; left: var(--connector-x, 75px); top: 4px; bottom: -16px; width: 1px; background: var(--ink); }
+.opportunity-title::after { content: ""; position: absolute; left: var(--connector-x, 75px); top: 4px; bottom: -16px; width: 1px; background: var(--desktop); }
 /* z-index raises the title above the deadline connector line (see
    .opportunity-title::after), which would otherwise paint over it by DOM order. The
    isolation here already makes the link an atomic stacking context — it exists
