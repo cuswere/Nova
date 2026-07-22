@@ -8,8 +8,8 @@
  *   Who has access: Anyone
  * and put the resulting /exec URL into FORM_ACTION in scripts/feedback.js.
  *
- * The frontend posts url-encoded `name` / `message` fields with mode:'no-cors',
- * so nothing here needs CORS headers and the response body is never read.
+ * The frontend posts url-encoded `name` / `message` fields and reads the JSON
+ * result before showing success.
  *
  */
 

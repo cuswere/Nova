@@ -9,3 +9,6 @@
 5. Put the resulting `/exec` URL in `FORM_ACTION` in `scripts/feedback.js`.
 
 After changing the Apps Script, create a new deployment version under **Deploy > Manage deployments**; otherwise the previous version remains active.
+
+The page shows success only after the endpoint returns `{ "ok": true }`. A
+network error or rejected write leaves the form intact and shows an error.

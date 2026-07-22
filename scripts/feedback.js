@@ -79,14 +79,16 @@ function setupFeedbackForm() {
     };
 
     const sendFeedback = async (body) => {
-        if (navigator.sendBeacon?.(FORM_ACTION, body)) return;
-        await fetch(FORM_ACTION, {
+        const response = await fetch(FORM_ACTION, {
             method: 'POST',
-            mode: 'no-cors',
-            keepalive: true,
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body
         });
+
+        if (!response.ok) throw new Error(`Feedback endpoint returned HTTP ${response.status}`);
+
+        const result = await response.json();
+        if (!result.ok) throw new Error(result.error || 'Feedback was not accepted');
     };
 
     document.addEventListener('click', (event) => {
