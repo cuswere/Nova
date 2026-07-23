@@ -100,7 +100,6 @@ button { cursor: pointer; }
     background: var(--face);
     border-left: 1px solid var(--line);
     border-right: 1px solid var(--line);
-    box-shadow: 6px 0 0 rgba(0,0,0,.13), -6px 0 0 rgba(0,0,0,.13);
 }
 
 .field { background: var(--face); box-shadow: var(--raise); }
@@ -145,28 +144,28 @@ button { cursor: pointer; }
 }
 
 .home-wordmark { display: flex; align-items: center; width: fit-content; margin: 0 auto 15px; color: var(--ink); font-size: clamp(30px, 5vw, 40px); font-weight: 600; letter-spacing: -.12em; line-height: 1; }
-.home-wordmark > * { padding: 6px 4px; }
+.home-wordmark > * {  }
 /* Canon Praxis mark; sans-serif because the letterforms are the logo. */
-.home-wordmark .praxis-mark { padding: 4px; color: var(--praxis-blue); background: var(--white); border: 2px solid var(--praxis-blue); border-radius: 5px; border-top-right-radius: 0; border-bottom-right-radius: 0; font-family: system-ui, -apple-system, "Segoe UI", Arial, sans-serif; font-weight: normal; letter-spacing: .01em; text-transform: uppercase; }
+.home-wordmark .praxis-mark { padding: 4px; color: var(--praxis-blue); background: var(--white); border: 2px solid var(--praxis-blue); border-right: 0; border-radius: 5px; border-top-right-radius: 0; border-bottom-right-radius: 0; font-family: system-ui, -apple-system, "Segoe UI", Arial, sans-serif; font-weight: normal; letter-spacing: .01em; text-transform: uppercase; }
 @media (hover: hover) {
     .home-wordmark .praxis-mark:hover { text-decoration: underline; text-decoration-thickness: 3px; }
 }
 /* Letter-spacing trails the last letter too, eating into the right padding. */
-.home-wordmark .nova-mark { padding-right: calc(4px + .12em); color: #fff; background: var(--ink); text-shadow: 0 0 4px #fff; }
+.home-wordmark .nova-mark { padding: 2px; padding-right: calc(4px + .12em); color: #fff; background: var(--face); border: 2px solid var(--white); text-shadow: 0 0 4px #fff; }
 
 /* Leave-site confirmation, styled as a system dialog. */
 /* margin: 0 defeats the UA's centring so top/left can place it; both are set
    before it is shown, so it never paints centred first. */
-.exit-dialog { outline: 1px solid var(--ink); position: fixed; margin: 0; max-width: min(380px, calc(100vw - 32px)); padding: 3px; color: var(--ink); background: var(--face); border: 0; box-shadow: 3px 3px 0 var(--ink); font: inherit; }
+.exit-dialog { outline: 1px solid var(--ink); position: fixed; margin: 0; max-width: min(380px, calc(100vw - 32px)); padding: 3px; color: var(--ink); border: 0; box-shadow: 3px 3px 0 var(--ink); font: inherit; }
 /* Invisible handle over the top third, standing in for the removed title bar.
    An element rather than a coordinate check, so the drag region is defined once
    here and the script just listens to it. */
-.exit-dialog-grip { position: absolute; top: 0; left: 0; right: 0; height: 33%; cursor: move; user-select: none; -webkit-user-select: none; touch-action: none; }
+.exit-dialog-grip { position: absolute; top: 0; left: 0; right: 0; height: 20%; user-select: none; -webkit-user-select: none; touch-action: none; }
 .exit-dialog:focus {  }
 .exit-dialog::backdrop { background: rgba(0, 0, 0, .25); }
-.exit-dialog-body { padding: 16px 14px 12px; background: var(--face); }
-.exit-dialog-message { margin: 0 0 16px; font-size: 16px; line-height: 1.4; overflow-wrap: anywhere; }
-.exit-dialog-host { font-weight: 600; }
+.exit-dialog-body { padding: 18px 8px 8px; background: var(--white); }
+.exit-dialog-message { margin: 0 0 16px; font-size: 14px; line-height: 1.4; overflow-wrap: anywhere; }
+.exit-dialog-host { font-weight: 600; color: var(--praxis-blue); }
 /* Above the grip, so the buttons stay clickable even if a short dialog puts them
    inside its top third. */
 .exit-dialog-actions { position: relative; z-index: 1; display: flex; justify-content: flex-end; gap: 8px; }
@@ -179,7 +178,7 @@ button { cursor: pointer; }
 .action-group { gap: 12px; }
 .option-btn-container { min-width: 0; }
 span.option-btn { display: flex; background: var(--face); box-shadow: var(--raise); font-family: var(--mono); font-size: clamp(23px, 3.3vw, 37px); line-height: .98; }
-.option-btn a { flex: 1; padding: 12px; }
+.option-btn a { flex: 1; padding: 12px; text-decoration: underline; }
 @media (hover: hover) {
     .option-btn a:hover { text-decoration: underline; text-decoration-thickness: 3px; outline: 3px solid var(--blue-bright); outline-offset: -8px;}
 }
@@ -194,7 +193,7 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
 @media (pointer: coarse) {
     .option-btn a.is-touched, .option-btn a.is-navigating { text-decoration-thickness: 2px; outline-width: 2px; }
 }
-.option-btn .info { flex: 0 0 46px; display: grid; place-items: center; padding: 0; color: var(--blue-bright); background: none; border: 0; border-left: 1px solid var(--ink); font: inherit; line-height: 1; user-select: none; -webkit-user-select: none; }
+.option-btn .info { flex: 0 0 46px; display: grid; place-items: center; padding: 0; background: none; color: var(--blue-bright); border: 0; border-left: 1px solid var(--blue-bright); font: inherit; line-height: 1; user-select: none; -webkit-user-select: none; }
 @media (hover: hover) {
     .option-btn .info:hover { text-decoration: none; outline: 3px solid var(--blue-bright); outline-offset: -8px; }
 }
@@ -299,7 +298,7 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
 .opportunity-card a { font-size: 18px; font-weight: 600;  position: relative; isolation: isolate; z-index: 1; display: inline-block; min-width: 0; max-width: 100%; padding: 8px; background: var(--desktop); color: #fff; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 2px; vertical-align: top; }
 .link-text { display: inline; }
 .link-line-backgrounds { position: absolute; z-index: -1; inset: 0; pointer-events: none; }
-.link-line-background { position: absolute; display: block; background: var(--desktop); pointer-events: auto; }
+.link-line-background { position: absolute; display: block; background: var(--green); pointer-events: auto; }
 .opportunity-card a.line-background-ready { background: transparent; pointer-events: none; }
 .opportunity-card a.line-background-ready .link-text { pointer-events: auto; }
 .opportunity-card a .link-text svg { fill: none; stroke: currentColor; }
