@@ -15,6 +15,10 @@
        which belongs to the Windows chrome and shouldn't be conflated with it. */
     --praxis-blue: #1f9cf0;
     --line: #111;
+    /* Accent-line weight on the home controls — the outlines, the button drop
+       shadow, the open-details offset. One knob so they stay in step; thinned by
+       1px on touch (below) so it doesn't overpower the smaller text. */
+    --stroke: 3px;
     /* Positive offsets (top/left) come first in each pair: the first shadow paints
        on top, so those edges run full length and the bottom/right ones mitre into
        them, as Windows drew it. Inner 1px pair stays ahead of the outer 2px pair. */
@@ -26,6 +30,13 @@
     --sink-blue: inset 1px 1px #000090, inset -1px -1px #a8a8ff, inset 2px 2px #00002e, inset -2px -2px #5a5aff;
     --label-bevel: inset 1px 1px #eee, inset -1px -1px #888;
     --mono: monospace;
+}
+
+/* Keyed to width, not pointer: the home-button font is vw-clamped, so it's a
+   narrow viewport — not a touchscreen — that shrinks it enough for 3px to
+   overpower it. Same 700px breakpoint the pagination uses. */
+@media (max-width: 700px) {
+    :root { --stroke: 2px; }
 }
 
 * { box-sizing: border-box; }
@@ -146,7 +157,7 @@ button { cursor: pointer; }
 .home-wordmark { display: flex; align-items: center; width: fit-content; margin: 0 auto 15px; color: var(--ink); font-size: clamp(30px, 5vw, 40px); font-weight: 600; letter-spacing: -.12em; line-height: 1; }
 .home-wordmark > * {  }
 /* Canon Praxis mark; sans-serif because the letterforms are the logo. */
-.home-wordmark .praxis-mark { padding: 4px; color: var(--praxis-blue); background: var(--white); border: 2px solid var(--praxis-blue); border-right: 0; border-radius: 5px; border-top-right-radius: 0; border-bottom-right-radius: 0; font-family: system-ui, -apple-system, "Segoe UI", Arial, sans-serif; font-weight: normal; letter-spacing: .01em; text-transform: uppercase; }
+.home-wordmark .praxis-mark { padding: 4px; color: var(--praxis-blue); background: var(--white); border-radius: 5px; border-top-right-radius: 0; border-bottom-right-radius: 0; font-family: system-ui, -apple-system, "Segoe UI", Arial, sans-serif; font-weight: normal; letter-spacing: .01em; text-transform: uppercase; }
 @media (hover: hover) {
     .home-wordmark .praxis-mark:hover { text-decoration: underline; text-decoration-thickness: 3px; }
 }
@@ -169,7 +180,7 @@ button { cursor: pointer; }
 /* Above the grip, so the buttons stay clickable even if a short dialog puts them
    inside its top third. */
 .exit-dialog-actions { position: relative; z-index: 1; display: flex; justify-content: flex-end; gap: 8px; }
-.exit-dialog-actions .form-submit { align-self: auto; min-width: 76px; padding: 5px 12px; text-align: center; }
+.exit-dialog-actions .form-submit { align-self: auto; min-width: 76px; padding: 5px 12px; text-align: center; background: var(--white); }
 .exit-dialog-actions .form-submit:active { padding: 6px 11px 4px 13px; }
 
 /* Home */
@@ -177,38 +188,32 @@ button { cursor: pointer; }
 .opportunity-group, .action-group, .option-btn-container { display: flex; flex-direction: column; align-items: stretch; }
 .action-group { gap: 12px; }
 .option-btn-container { min-width: 0; }
-span.option-btn { outline: 1px solid var(--ink); outline-offset: -1px; display: flex; background: var(--field); box-shadow: var(--raise); font-family: var(--mono); font-size: clamp(23px, 3.3vw, 37px); line-height: .98; }
+span.option-btn { display: flex; background: var(--field); box-shadow: var(--stroke) var(--stroke) 0 var(--blue-bright); font-family: var(--mono); font-size: clamp(23px, 3.3vw, 37px); line-height: .98; }
 .option-btn a { flex: 1; padding: 12px; text-decoration: underline; }
 @media (hover: hover) {
-    .option-btn a:hover { text-decoration: underline; text-decoration-thickness: 3px; outline: 3px solid var(--blue-bright); outline-offset: -8px;}
+    .option-btn a:hover { text-decoration: underline; text-decoration-thickness: var(--stroke); outline: var(--stroke) solid var(--blue-bright); outline-offset: -8px;}
 }
 /* The press and navigating rules further down only recolour this outline, so it
    has to be drawn here too — on touch there is no hover to have drawn it. */
-.option-btn a.is-touched, .option-btn a.is-navigating { text-decoration: underline; outline: 3px solid var(--blue-bright); outline-offset: -8px; }
+.option-btn a.is-touched, .option-btn a.is-navigating { text-decoration: underline; outline: var(--stroke) solid var(--blue-bright); outline-offset: -8px; }
 /* The underline's natural thickness follows the font, which shrinks with the
-   clamped size on a phone until it no longer reads as the same weight as the 3px
-   outline beside it. Keyed to the pointer rather than to .is-touched so the
-   thickness holds through the navigating state too, instead of thinning at the
-   moment of the tap. Desktop keeps deriving it from the font as it does today. */
+   clamped size on a phone until it no longer reads as the same weight as the
+   outline beside it. Pinned to --stroke to match, and keyed to the pointer rather
+   than to .is-touched so it holds through the navigating state too instead of
+   thinning at the tap. Desktop keeps deriving it from the font. */
 @media (pointer: coarse) {
-    .option-btn a.is-touched, .option-btn a.is-navigating { text-decoration-thickness: 2px; outline-width: 2px; }
+    .option-btn a.is-touched, .option-btn a.is-navigating { text-decoration-thickness: var(--stroke); }
 }
 .option-btn .info { flex: 0 0 46px; display: grid; place-items: center; padding: 0; background: none; color: var(--blue-bright); border: 0; border-left: 0px solid var(--ink); font: inherit; line-height: 1; user-select: none; -webkit-user-select: none; }
 @media (hover: hover) {
-    .option-btn .info:hover { text-decoration: none; outline: 3px solid var(--blue-bright); outline-offset: -8px; }
+    .option-btn .info:hover { text-decoration: none; outline: var(--stroke) solid var(--blue-bright); outline-offset: -8px; }
 }
-.option-btn .info.is-touched { text-decoration: none; outline: 3px solid var(--blue-bright); outline-offset: -8px; }
-/* Has to follow the shorthand above, not sit with the other coarse overrides
-   further up: same specificity, so whichever comes last wins, and the shorthand
-   would put the width back to 3px. */
-@media (pointer: coarse) {
-    .option-btn .info.is-touched { outline-width: 2px; }
-}
-.option-btn .info:focus-visible { outline: 3px solid var(--blue-bright); outline-offset: -6px; }
+.option-btn .info.is-touched { text-decoration: none; outline: var(--stroke) solid var(--blue-bright); outline-offset: -8px; }
+.option-btn .info:focus-visible { outline: var(--stroke) solid var(--blue-bright); outline-offset: -6px; }
 
 .option-details { display: none; padding: 8px; background: var(--white);
-    border: 1px solid var(--ink); border-top: 0;}
-.option-details.open { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+    border: 0px solid var(--ink); border-top: 0;}
+.option-details.open { margin-top: var(--stroke); margin-left: var(--stroke); box-shadow: 0 0px 4px; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
 .option-details-row { display: contents; color: var(--ink); font-size: 16px; }
 .option-details a { text-decoration: underline; text-decoration-thickness: 2px; }
 @media (hover: hover) {
