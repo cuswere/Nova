@@ -44,6 +44,9 @@ body {
        different scale than the one on screen. */
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
+    /* Suppress the grey tap-flash iOS paints over any tapped link/button; the
+       site draws its own press feedback (.is-pressing) and the two collide. */
+    -webkit-tap-highlight-color: transparent;
 }
 
 a { color: var(--blue-bright); text-decoration: none; }
