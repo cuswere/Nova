@@ -464,7 +464,7 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
     .detail-token.has-details:hover .detail-token-label::after { display: block; }
     .detail-token.has-details:hover .detail-token-fold { color: #fff; background: var(--ink); }
     .award-cell.detail-token.has-details:hover,
-    .eligibility-cell.detail-token.has-details:hover { background: #fff; }
+    .eligibility-cell.detail-token.has-details:hover { }
     .detail-token.has-details:hover .details-popup { z-index: 41; display: block; }
 }
 /* Award info sits to the left of eligibility in a shared right-aligned row;
