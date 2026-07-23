@@ -151,7 +151,7 @@ button { cursor: pointer; }
     .home-wordmark .praxis-mark:hover { text-decoration: underline; text-decoration-thickness: 3px; }
 }
 /* Letter-spacing trails the last letter too, eating into the right padding. */
-.home-wordmark .nova-mark { padding: 2px; padding-right: calc(4px + .12em); color: #fff; background: var(--face); border: 2px solid var(--white); text-shadow: 0 0 4px #fff; }
+.home-wordmark .nova-mark { padding: 2px 4px; padding-right: calc(4px + .12em); color: #fff; background: var(--face); border: 2px solid var(--white); text-shadow: 0 0 4px #fff; }
 
 /* Leave-site confirmation, styled as a system dialog. */
 /* margin: 0 defeats the UA's centring so top/left can place it; both are set
@@ -173,11 +173,11 @@ button { cursor: pointer; }
 .exit-dialog-actions .form-submit:active { padding: 6px 11px 4px 13px; }
 
 /* Home */
-.options-container { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding: 12px; min-height: 285px; }
+.options-container { background: var(--field); outline: 1px solid var(--ink); outline-offset: -1px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding: 12px; min-height: 285px; }
 .opportunity-group, .action-group, .option-btn-container { display: flex; flex-direction: column; align-items: stretch; }
 .action-group { gap: 12px; }
 .option-btn-container { min-width: 0; }
-span.option-btn { display: flex; background: var(--face); box-shadow: var(--raise); font-family: var(--mono); font-size: clamp(23px, 3.3vw, 37px); line-height: .98; }
+span.option-btn { outline: 1px solid var(--ink); outline-offset: -1px; display: flex; background: var(--field); box-shadow: var(--raise); font-family: var(--mono); font-size: clamp(23px, 3.3vw, 37px); line-height: .98; }
 .option-btn a { flex: 1; padding: 12px; text-decoration: underline; }
 @media (hover: hover) {
     .option-btn a:hover { text-decoration: underline; text-decoration-thickness: 3px; outline: 3px solid var(--blue-bright); outline-offset: -8px;}
@@ -206,7 +206,8 @@ span.option-btn { display: flex; background: var(--face); box-shadow: var(--rais
 }
 .option-btn .info:focus-visible { outline: 3px solid var(--blue-bright); outline-offset: -6px; }
 
-.option-details { display: none; padding: 8px; background: var(--field); }
+.option-details { display: none; padding: 8px; background: var(--white);
+    border: 1px solid var(--ink); border-top: 0;}
 .option-details.open { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
 .option-details-row { display: contents; color: var(--ink); font-size: 16px; }
 .option-details a { text-decoration: underline; text-decoration-thickness: 2px; }
