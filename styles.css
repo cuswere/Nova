@@ -82,6 +82,8 @@ button { cursor: pointer; }
 .remove-filter-btn,
 .pagination-tab,
 .page-arrow,
+.search-tab,
+.search-clear,
 .form-submit { user-select: none; -webkit-user-select: none; }
 
 /* Short, stepped page-change signal. */
@@ -239,20 +241,26 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
 .repo-column { display: flex; flex-direction: column; min-width: 0; }
 
 /* Pagination toolbar: a raised "Page N" tab overlapping the top-left of the
-   recessed results box, with a horizontal Prev/Next arrow pair alongside it. */
-.repo-toolbar { position: relative; z-index: 2; display: flex; align-items: flex-end; gap: 6px; margin-bottom: 4px; }
+   recessed results box, with a horizontal Prev/Next arrow pair alongside it,
+   then the search tab. Wrapping is what makes the open search field work on a
+   narrow screen — it drops to its own full-width row instead of squeezing the
+   controls, so no width breakpoint has to name the crossover. */
+.repo-toolbar { position: relative; z-index: 2; display: flex; flex-wrap: wrap; align-items: flex-end; gap: 6px; margin-bottom: 4px; }
 .pagination-tab { display: inline-flex; align-items: flex-end; min-height: 24px; padding: 0 4px; color: var(--ink); margin-left: 0px; background: var(--field); box-shadow: var(--sink-shallow); font-size: 14px; font-weight: bold; letter-spacing: .05em;}
 .pagination-arrows { display: flex; gap: 4px; }
-.page-arrow { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; min-height: 24px; padding: 4px; color: var(--ink); background: var(--face); border: 0; box-shadow: var(--raise); font-size: 14px; line-height: 1; }
+/* The search tab and its clear button are the same raised control as an arrow,
+   so they share every rule below rather than restating the bevel. */
+.page-arrow, .search-tab, .search-clear { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; min-height: 24px; padding: 4px; color: var(--ink); background: var(--face); border: 0; box-shadow: var(--raise); font-size: 14px; line-height: 1; }
+.search-tab { padding: 4px 8px; font-weight: bold; letter-spacing: .05em; }
 /* No .is-touched counterpart on purpose: like the detail tokens, the hover wash
    is a cursor preview, and on touch it would only linger after the press that
    already answered it. The .is-pressing bevel below is the whole affordance. */
 @media (hover: hover) {
-    .page-arrow:hover:not(:disabled) { background: var(--field); }
+    .page-arrow:hover:not(:disabled), .search-tab:hover, .search-clear:hover { background: var(--field); }
 }
-.page-arrow.is-pressing:not(:disabled) { box-shadow: var(--sink); padding: 3px 5px 1px 7px; }
+.page-arrow.is-pressing:not(:disabled), .search-tab.is-pressing, .search-clear.is-pressing { box-shadow: var(--sink); padding: 3px 5px 1px 7px; }
 @media (hover: hover) {
-    .page-arrow:active:not(:disabled) { box-shadow: var(--sink); padding: 3px 5px 1px 7px; }
+    .page-arrow:active:not(:disabled), .search-tab:active, .search-clear:active { box-shadow: var(--sink); padding: 3px 5px 1px 7px; }
 }
 /* At 24px these sit under the ~44px a fingertip actually covers, so WebKit's
    touch adjustment quietly redirects near-misses to them. That fires the click
@@ -263,11 +271,30 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
    is half the 4px gap between the two arrows, and 4px is the toolbar's bottom
    margin, past which this would start intercepting taps meant for the cards. */
 @media (pointer: coarse) {
-    .page-arrow { position: relative; }
-    .page-arrow:not(:disabled)::after { content: ""; position: absolute; inset: -8px -2px -4px; }
+    .page-arrow, .search-tab, .search-clear { position: relative; }
+    .page-arrow:not(:disabled)::after, .search-tab::after, .search-clear::after { content: ""; position: absolute; inset: -8px -2px -4px; }
 }
-.page-arrow:focus-visible { outline: 1px dotted var(--ink); outline-offset: 2px; }
+.page-arrow:focus-visible, .search-tab:focus-visible, .search-clear:focus-visible { outline: 1px dotted var(--ink); outline-offset: 2px; }
 .page-arrow:disabled { color: var(--muted); background: var(--face); box-shadow: var(--sink); cursor: default;}
+
+/* Search tab and the field it opens. The tab stays pressed in while the field
+   is showing, the way a latched toolbar button does. Its own press padding
+   shifts the 4px 8px rest state by 1px rather than adopting the arrows' 24px
+   one, which would visibly narrow a text label. */
+.search-tab[aria-expanded="true"] { background: var(--field); box-shadow: var(--sink); }
+.search-tab.is-pressing { padding: 5px 7px 3px 9px; }
+@media (hover: hover) {
+    .search-tab:active { padding: 5px 7px 3px 9px; }
+}
+/* Grows into the room beside the arrows but stops well short of the toolbar's
+   full width, which a name-length query would leave mostly empty; the cap is
+   under a phone row, so a wrapped field still fills its own line. */
+.search-field { display: flex; align-items: stretch; gap: 4px; flex: 1 1 240px; max-width: 360px; min-width: 0; }
+.search-field[hidden] { display: none; }
+.search-input { flex: 1; min-width: 0; min-height: 24px; padding: 2px 6px; color: var(--ink); background: var(--white); border: 0; border-radius: 0; box-shadow: var(--sink); outline: 0; font-size: 14px; }
+.search-input:focus { outline: 1px dotted var(--ink); outline-offset: -4px; }
+/* WebKit's own cancel button would sit beside the one the toolbar already draws. */
+.search-input::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; }
 .repo { position: relative; min-width: 0; min-height: 520px; padding: 3px; background: var(--face); box-shadow: var(--sink); }
 /* Keep the inner bevel above the scrolling cards. An inset shadow painted on
    .repobox itself sits behind its children, so the cards conceal it as they
@@ -486,6 +513,9 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
 .active-filter { display: flex; gap: 5px; align-items: center; padding: 2px 4px; color: #fff; background: var(--blue-bright); }
 .exclude-filter { background: var(--red); }
 .rolling-filter { background: var(--green); }
+/* Typed text rather than a facet, so it doesn't take the blue every chip picked
+   from a menu wears. The × inherits this colour. */
+.search-filter { color: var(--ink); background: var(--amber); }
 .remove-filter-btn { position: relative; flex: 0 0 15px; width: 15px; height: 15px; padding: 0; border: 0; color: inherit; background: transparent; font-size: 0; }
 .remove-filter-btn::before { content: ""; position: absolute; top: 4px; left: 4px; width: 1px; height: 1px; background: currentColor; box-shadow: 6px 0 currentColor, 1px 1px currentColor, 5px 1px currentColor, 2px 2px currentColor, 4px 2px currentColor, 3px 3px currentColor, 2px 4px currentColor, 4px 4px currentColor, 1px 5px currentColor, 5px 5px currentColor, 0 6px currentColor, 6px 6px currentColor; }
 .remove-filter-btn.is-touched { color: var(--ink); background: #fff; }
@@ -642,7 +672,7 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
    and offers no way back out. Keyed to the pointer rather than the width so a
    narrow desktop window keeps the 14px body type in its form. */
 @media (pointer: coarse) {
-    .form-input, .form-textarea { font-size: 16px; }
+    .form-input, .form-textarea, .search-input { font-size: 16px; }
     /* Mobile draws its own overlay scrollbars and ignores the ::-webkit-scrollbar
        rules above entirely, leaving a pale bar that vanishes against these light
        fills. scrollbar-color is the one lever those overlay bars do respect. It

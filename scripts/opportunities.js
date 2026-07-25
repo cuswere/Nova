@@ -6,7 +6,7 @@ const MOBILE_BREAKPOINT = '(max-width: 700px)';
 const pageSize = () => (window.matchMedia(MOBILE_BREAKPOINT).matches ? 25 : 50);
 const state = {
     opportunities: [],
-    filters: { types: [], hideFees: false, onlyRolling: false },
+    filters: { types: [], hideFees: false, onlyRolling: false, query: '' },
     page: 1
 };
 
@@ -36,9 +36,21 @@ function isCurrent(opportunity) {
     return deadlineTime(opportunity.deadline) >= startOfToday().getTime();
 }
 
+/* Every word has to appear in the name, in any order, so "grant film" still
+   finds "Film Production Grant" — a plain substring match on the phrase would
+   not. Names are the only field searched; a description search would surface
+   cards whose match the reader can't see. */
+function matchesQuery(item) {
+    const terms = state.filters.query.toLowerCase().split(/\s+/).filter(Boolean);
+    if (!terms.length) return true;
+    const name = String(item.name || '').toLowerCase();
+    return terms.every((term) => name.includes(term));
+}
+
 function currentOpportunities() {
     return state.opportunities
         .filter(isCurrent)
+        .filter(matchesQuery)
         .filter((item) => !state.filters.types.length || state.filters.types.includes(String(item.type || '').toLowerCase()))
         .filter((item) => !state.filters.hideFees || String(item.fees || '').toLowerCase() !== 'y')
         .filter((item) => !state.filters.onlyRolling || /rolling/i.test(String(item.deadline || '')))
@@ -53,6 +65,7 @@ function parseUrlFilters() {
         .filter(Boolean);
     state.filters.hideFees = ['1', 'true'].includes(params.get('hideFees'));
     state.filters.onlyRolling = ['1', 'true'].includes(params.get('rolling'));
+    state.filters.query = (params.get('q') || '').trim();
 }
 
 function statusMessage(text) {
@@ -254,6 +267,13 @@ function renderFilters() {
         state.filters.onlyRolling = false;
         document.querySelector('#rolling-toggle').checked = false;
         updateView();
+    }));
+    // The search reads as a filter like any other, so it gets a chip too — which
+    // is also what tells a reader scrolled away from the toolbar why the list is
+    // short. Removing it puts the toolbar back the way the tab closes it.
+    if (state.filters.query) chips.push(filterChip(`“${state.filters.query}”`, 'search-filter', () => {
+        clearSearch();
+        setSearchOpen(false);
     }));
 
     container.replaceChildren(...(chips.length ? chips : [element('div', 'filter-item', 'none')]));
@@ -753,6 +773,85 @@ function setupDetailsPopups() {
     });
 }
 
+function setSearchOpen(open, { focus = true } = {}) {
+    const tab = document.querySelector('.search-tab');
+    const field = document.querySelector('.search-field');
+    tab.setAttribute('aria-expanded', String(open));
+    field.hidden = !open;
+    if (open && focus) field.querySelector('.search-input').focus();
+}
+
+function applySearch(value) {
+    state.filters.query = value.trim();
+    document.querySelector('.search-clear').hidden = !state.filters.query;
+    updateView();
+}
+
+// Empties the box without deciding whether it should still be showing.
+function clearSearch() {
+    document.querySelector('.search-input').value = '';
+    applySearch('');
+}
+
+// Re-filtering rebuilds every card on the page and re-measures each title, so
+// the list follows the typing at a pause rather than on every keystroke.
+const TYPING_SETTLE_MS = 140;
+
+function setupSearch() {
+    const tab = document.querySelector('.search-tab');
+    const input = document.querySelector('.search-input');
+    const clear = document.querySelector('.search-clear');
+    let typingTimer = null;
+
+    const settleNow = () => {
+        window.clearTimeout(typingTimer);
+        applySearch(input.value);
+    };
+
+    tab.addEventListener('click', () => {
+        const open = tab.getAttribute('aria-expanded') !== 'true';
+        setSearchOpen(open);
+        // A filter nobody can see is a filter nobody can undo, so the query
+        // leaves with the field it was typed into.
+        if (!open) clearSearch();
+    });
+    input.addEventListener('input', () => {
+        window.clearTimeout(typingTimer);
+        typingTimer = window.setTimeout(settleNow, TYPING_SETTLE_MS);
+    });
+    input.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+            // Nothing to submit — this just skips the wait on the last keystroke.
+            event.preventDefault();
+            settleNow();
+        } else if (event.key === 'Escape') {
+            event.preventDefault();
+            window.clearTimeout(typingTimer);
+            // Escape empties a full box and dismisses an empty one, so the key
+            // always does the more reversible of the two first.
+            if (input.value) {
+                clearSearch();
+            } else {
+                setSearchOpen(false);
+                tab.focus();
+            }
+        }
+    });
+    clear.addEventListener('click', () => {
+        window.clearTimeout(typingTimer);
+        clearSearch();
+        input.focus();
+    });
+
+    // A ?q= link arrives with the field already filtering; show what it is doing.
+    // Focus is left alone — landing on a page shouldn't raise a phone keyboard.
+    if (state.filters.query) {
+        input.value = state.filters.query;
+        clear.hidden = false;
+        setSearchOpen(true, { focus: false });
+    }
+}
+
 function setupFilterInputs() {
     const fees = document.querySelector('#hide-fees-toggle');
     const rolling = document.querySelector('#rolling-toggle');
@@ -784,9 +883,11 @@ function setupRepoFit() {
     window.addEventListener('resize', fitRepoHeight);
     window.addEventListener('orientationchange', fitRepoHeight);
     // On mobile the filters stack above the box, so their applied-chip list
-    // growing pushes it further down the page.
-    const filters = document.querySelector('.filters');
-    if (filters && window.ResizeObserver) new ResizeObserver(fitRepoHeight).observe(filters);
+    // growing pushes it further down the page. The toolbar does the same when the
+    // open search field wraps onto a row of its own.
+    if (!window.ResizeObserver) return;
+    const observer = new ResizeObserver(fitRepoHeight);
+    document.querySelectorAll('.filters, .repo-toolbar').forEach((node) => observer.observe(node));
 }
 
 function init() {
@@ -794,6 +895,7 @@ function init() {
     parseUrlFilters();
     setupCategoryMenu();
     setupFilterInputs();
+    setupSearch();
     setupPagination();
     setupDetailsPopups();
     setupRepoFit();
