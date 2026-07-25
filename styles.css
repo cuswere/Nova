@@ -163,6 +163,8 @@ button { cursor: pointer; }
 }
 /* Letter-spacing trails the last letter too, eating into the right padding. */
 .home-wordmark .nova-mark { padding: 2px 4px; padding-right: calc(4px + .12em); color: #fff; background: var(--face); border: 2px solid var(--white); text-shadow: 0 0 4px #fff; }
+/* Sized in em so the badge tracks the vw-clamped wordmark. */
+.home-wordmark .beta-mark { align-self: flex-end; margin-left: 4px; padding: 2px 5px; color: var(--ink); background: var(--amber); font-size: .45em; letter-spacing: normal; }
 
 /* Leave-site confirmation, styled as a system dialog. */
 /* margin: 0 defeats the UA's centring so top/left can place it; both are set
