@@ -32,6 +32,14 @@ That ordering produces both visible defects:
 
 The current API response shows the full PDF URL as the anchor text, while the stored row contains only `pdf`. Nova does not currently reduce a URL to that label, so the exact historical source fragment cannot be reconstructed without a retained raw snapshot. The clause-selection failure is nevertheless deterministic for either form.
 
+### Rosamond Park
+
+Creative West's `eligibilityDescription` contains two useful eligibility sections (`Who May Apply` and `Can a team apply?`), followed by an alternate-format contact paragraph and Denver's civil-rights/language-assistance notice translated into many languages. Nova currently treats the entire upstream field as eligibility prose, so the legal/accessibility footer is published along with the applicant requirements.
+
+This is not an HTML boundary or character-decoding error in Nova. The multilingual paragraphs are present in the Creative West API response. Some replacement-looking glyphs are Unicode private-use characters already embedded in the upstream Burmese and Nepali text, so browsers without the originating font cannot render them correctly.
+
+Filtering must be semantic and structural rather than based on language or non-Latin scripts. Genuine eligibility may itself be multilingual. A safe rule can identify the start of an operational/legal footer from complete blocks (for example, an alternate-format request followed by a nondiscrimination/language-assistance notice), reinforced by repeated organization/contact text across consecutive translated blocks. Those blocks should be excluded from `eligibility_details` while remaining available in retained raw source evidence.
+
 ## Backend work to schedule
 
 1. Replace the duplicated HTML-to-prose walkers in `opportunity-pipeline/eligibility.js` and `tools/artwork-archive-collector.js` with one tested serializer contract.
@@ -42,9 +50,10 @@ The current API response shows the full PDF URL as the anchor text, while the st
    - retain intended paragraphs, lists, bold, and italics.
 3. Extract semantic fields from the HTML tree before serializing display prose. Award inference should operate on block nodes and their plain text, then serialize only the selected complete nodes. It must never slice through formatting markers or join unrelated link blocks to a later budget sentence.
 4. Treat standalone link blocks as references, not prose candidates. Exclude anchors whose text is a bare file type, filename, or URL unless the surrounding block itself contains the qualifying award meaning.
-5. Keep the original source HTML or a bounded raw-source evidence field during collection so malformed outputs can be traced to a specific source fragment.
-6. Add fixtures for all four records above, including a bold sentence ending in punctuation followed by a PDF link and a later qualifying budget block.
-7. After the backend normalization is in place, refresh affected source rows so the Sheet and `data/opportunities.json` are repaired rather than merely masked at display time.
+5. Segment eligibility into applicant-requirement blocks and operational/legal footer blocks. Do not use script or language alone as an exclusion signal; use footer semantics, block order, repeated contact text, and translated repetition together.
+6. Keep the original source HTML or a bounded raw-source evidence field during collection so malformed outputs can be traced to a specific source fragment.
+7. Add fixtures for all five records above, including a bold sentence ending in punctuation followed by a PDF link and a later qualifying budget block, plus a legitimate multilingual legal footer following concise eligibility requirements.
+8. After the backend normalization is in place, refresh affected source rows so the Sheet and `data/opportunities.json` are repaired rather than merely masked at display time.
 
 ## Scope note
 
