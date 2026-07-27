@@ -248,7 +248,7 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
    is a cursor preview, and on touch it would only linger after the press that
    already answered it. The .is-pressing bevel below is the whole affordance. */
 @media (hover: hover) {
-    .page-arrow:hover:not(:disabled) { background: var(--field); }
+    .page-arrow:hover:not(:disabled) {  }
 }
 .page-arrow.is-pressing:not(:disabled) { box-shadow: var(--sink); padding: 3px 5px 1px 7px; }
 @media (hover: hover) {
