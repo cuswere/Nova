@@ -785,7 +785,10 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
    they cannot paint above the ::after bevel the way a bare positioned element
    would. scroll rather than auto keeps the track drawn whether or not the article
    is long enough to need it, matching .repobox. */
-.page-article .article { isolation: isolate; flex: 1; min-height: 0; overflow-y: scroll; scrollbar-gutter: stable; }
+/* auto rather than .repobox's scroll: an article short enough to fit should not
+   show a dead track. scrollbar-gutter still reserves the width either way, so
+   nothing reflows when a longer article brings the bar back. */
+.page-article .article { isolation: isolate; flex: 1; min-height: 0; overflow-y: auto; scrollbar-gutter: stable; }
 /* One leg of the elbow tying a wrapped link's two halves together. Drawn as
    plain rects rather than SVG to stay orthogonal, matching the connector lines
    the opportunities page already draws. */
@@ -793,7 +796,7 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
    own and matches the dashed rules elsewhere on the page. Each leg is its own
    element, so the weight rides in a custom property that drawLinkConnectors sets
    from BRIDGE_WEIGHT — one number, not two that can drift apart. */
-.link-bridge { position: absolute; pointer-events: none; border: 0 dashed var(--white); }
+.link-bridge { position: absolute; pointer-events: none; border: 0 dashed var(--blue-bright); }
 .link-bridge-h { border-top-width: var(--bridge-weight, 2px); }
 .link-bridge-v { border-left-width: var(--bridge-weight, 2px); }
 .article-title { margin: 0 0 4px; font-family: var(--mono); font-size: clamp(26px, 4.5vw, 38px); font-weight: 600; line-height: 1.05; }
@@ -802,12 +805,12 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
    31px tall, so a tighter line leaves consecutive lines' boxes overlapping and
    closes the channel the wrap connector routes through. Below about 2.4 the
    connector has nowhere to run and drawLinkConnectors quietly skips it. */
-.article p, .article li { margin: 0 0 15px; font-size: 16px; line-height: 1.5; }
+.article p, .article li { margin: 0 0 18px 0; font-size: 16px; line-height: 1.5; }
 /* An opportunity listing: a linked name plus a bolded deadline, flagged by the
    pipeline (readListing) rather than sniffed for here. Outlined rather than
    bordered so the box costs no layout and the prose stays on the same measure;
    the roomier margin keeps consecutive listings' outlines from touching. */
-.article p.article-listing { margin-bottom: 26px; padding: 2px 12px; outline: 2px solid var(--white); outline-offset: 12px; line-height: 2.2; }
+.article p.article-listing { margin-bottom: 26px; padding: 12px 24px; background: var(--field); color: var(--ink); outline: 2px solid var(--field); outline-offset: 12px; line-height: 2.2; }
 .article h2, .article h3 { margin: 26px 0 10px; font-family: var(--mono); font-weight: 600; line-height: 1.15; }
 .article h2 { font-size: 21px; }
 .article h3 { font-size: 17px; }
@@ -818,19 +821,25 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
    WebKit, which is what the phones run. */
 .article strong, .article a { -webkit-box-decoration-break: clone; box-decoration-break: clone; }
 .article strong { border: 2px solid var(--white); outline-offset: 0px; padding: 0 6px; display: inline-block; line-height: 20px; border-top: 0; border-left: 0; }
+.article-listing strong { border-color: var(--blue-bright); color: var(--blue-bright); }
 .article blockquote { margin: 0 0 15px; padding-left: 14px; border-left: var(--stroke) solid var(--blue-bright); font-size: 15px; line-height: 1.5; }
 .article-list { margin: 0 0 15px; padding-left: 22px; }
 .article-list li { margin-bottom: 6px; }
 .article hr { margin: 24px 0; border: 0; border-top: 1px solid var(--ink); }
 .article-image { display: block; max-width: 100%; height: auto; margin: 0 0 15px; }
 .article a { color: var(--blue-bright); font-weight: bold; text-decoration: underline; text-decoration-thickness: 2px; background: var(--white); padding: 6px }
+.article .article-listing a{ background: var(--blue-bright); color: var(--white); }
 @media (hover: hover) {
     .article a:hover { outline: 2px solid var(--blue-bright); outline-offset: -4px; }
-    
+    .article .article-listing a:hover { outline: 2px solid var(--white); outline-offset: -4px; }
 }
 .article a.is-touched { text-decoration-thickness: 2px; }
 .article a.is-pressing, .article a.is-navigating { color: var(--blue-bright); outline-color: var(--blue-bright); }
 .article-source { margin: 28px 0 0; padding-top: 14px; border-top: 1px solid var(--white); font-family: var(--mono); font-size: 13px; }
+/* Trailing margin at the end of a scroll container is dead space you can still
+   scroll to. The last element's bottom margin goes, leaving the article's own
+   padding as the only gutter under the text. */
+.article > :last-child { margin-bottom: 0; }
 .article-status { margin: 0 0 12px; color: var(--muted); font-size: 15px; }
 .article-return { color: var(--blue); font-size: 15px; text-decoration: underline; }
 
