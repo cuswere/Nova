@@ -8,7 +8,7 @@
     <title>Praxis Nova</title>
     <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body class="page-article">
     <div class="content-wrapper">
         <div class="screen-refresh" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
 
@@ -31,8 +31,13 @@
             </form>
         </dialog>
 
-        <main class="field article" data-article>
-            <p class="article-status">Loading…</p>
+        <!-- Frame and scroller are separate elements for the same reason .repo and
+             .repobox are: an inset bevel on the scroller itself paints behind its
+             own content, so the text would slide over the recess instead of under it. -->
+        <main class="article-frame">
+            <div class="article" data-article>
+                <p class="article-status">Loading…</p>
+            </div>
         </main>
 
     </div>
