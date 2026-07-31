@@ -70,8 +70,41 @@ function wrap(tag, child) {
     return node;
 }
 
+// Sentence punctuation, which must not be left standing alone on a line.
+const TRAILING_PUNCTUATION = /^[.,;:!?]+/;
+
 function spanNodes(spans) {
-    return (spans || []).map(spanNode);
+    const nodes = [];
+    // Copied because gluing punctuation onto one span consumes it from the next.
+    const queue = (spans || []).map((span) => ({ ...span }));
+
+    for (let index = 0; index < queue.length; index += 1) {
+        const span = queue[index];
+        if (!span.text) continue;
+
+        const node = spanNode(span);
+        const next = queue[index + 1];
+        /* A bolded deadline is an inline-block, and a line may break between it and
+           whatever follows — which strands the sentence's full stop by itself on the
+           next line. Gluing the punctuation to the box removes the opportunity.
+           Links are deliberately left out: they are meant to fragment across lines,
+           and nowrap would stop them wrapping at all. */
+        const glue = span.bold && !span.href && next && !next.href
+            ? (next.text.match(TRAILING_PUNCTUATION) || [''])[0]
+            : '';
+
+        if (!glue) {
+            nodes.push(node);
+            continue;
+        }
+
+        const pair = element('span', 'nowrap');
+        pair.append(node, document.createTextNode(glue));
+        nodes.push(pair);
+        next.text = next.text.slice(glue.length);
+    }
+
+    return nodes;
 }
 
 export function renderBlocks(blocks) {

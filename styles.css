@@ -760,6 +760,9 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
 /* position: relative so the wrap connectors, which are absolutely placed from
    measured rects, resolve against this padding box. */
 .article { position: relative; margin: 0 auto; padding: 24px clamp(16px, 4vw, 32px) 32px; background: var(--green); color: white; }
+/* Holds a boxed run and the punctuation after it on one line; applied by
+   spanNodes, which is where the reasoning lives. */
+.nowrap { white-space: nowrap; }
 /* Recessed frame around the reading column, built the way .repo is: the outer
    bevel here, a second one drawn by ::after that does not scroll, and the
    scroller itself inside — so the scrollbar sits within the recess rather than
