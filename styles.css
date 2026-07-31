@@ -802,12 +802,12 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
    31px tall, so a tighter line leaves consecutive lines' boxes overlapping and
    closes the channel the wrap connector routes through. Below about 2.4 the
    connector has nowhere to run and drawLinkConnectors quietly skips it. */
-.article p, .article li { margin: 0 0 15px; font-size: 16px; line-height: 2.2; }
+.article p, .article li { margin: 0 0 15px; font-size: 16px; line-height: 1.5; }
 /* An opportunity listing: a linked name plus a bolded deadline, flagged by the
    pipeline (readListing) rather than sniffed for here. Outlined rather than
    bordered so the box costs no layout and the prose stays on the same measure;
    the roomier margin keeps consecutive listings' outlines from touching. */
-.article p.article-listing { margin-bottom: 26px; padding: 2px 12px; outline: 2px solid var(--white); outline-offset: 6px; }
+.article p.article-listing { margin-bottom: 26px; padding: 2px 12px; outline: 2px solid var(--white); outline-offset: 6px; line-height: 2.2; }
 .article h2, .article h3 { margin: 26px 0 10px; font-family: var(--mono); font-weight: 600; line-height: 1.15; }
 .article h2 { font-size: 21px; }
 .article h3 { font-size: 17px; }
@@ -817,7 +817,7 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
    their own text. clone gives every fragment the full set instead. Prefixed for
    WebKit, which is what the phones run. */
 .article strong, .article a { -webkit-box-decoration-break: clone; box-decoration-break: clone; }
-.article strong { border: 2px solid var(--white); outline-offset: 0px; padding: 0 6px; display: inline-block; line-height: 16px; }
+.article strong { border: 2px solid var(--white); outline-offset: 0px; padding: 0 6px; display: inline-block; line-height: 20px; border-top: 0; border-left: 0; }
 .article blockquote { margin: 0 0 15px; padding-left: 14px; border-left: var(--stroke) solid var(--blue-bright); font-size: 15px; line-height: 1.5; }
 .article-list { margin: 0 0 15px; padding-left: 22px; }
 .article-list li { margin-bottom: 6px; }
