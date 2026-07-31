@@ -1,0 +1,136 @@
+[
+  {
+    "slug": "just-show-up",
+    "title": "Just Show Up",
+    "link": "https://blog.praxiscenterforaesthetics.com/just-show-up/",
+    "date": "2026-07-29T18:28:48.000Z",
+    "author": "Brainard Carey",
+    "opportunities": [
+      {
+        "title": "The Blu Sky Artist Award",
+        "deadline": "August 15"
+      },
+      {
+        "title": "Head On Photo Awards",
+        "deadline": "August 16"
+      },
+      {
+        "title": "Prospect Art",
+        "deadline": "August 16"
+      }
+    ],
+    "blocks": [
+      {
+        "type": "p",
+        "spans": [
+          {
+            "text": "At times it can feel like everyone else is getting the exhibition, the grant, the residency, or the attention you’ve been working toward. Building an art career is rarely a straight line, rather it’s a process of showing up, continuing to make work that matters to you, and staying connected to opportunities that can move your practice forward. Every application you submit, every new resource you discover, and every connection you make adds another piece to the foundation you’re building."
+          }
+        ]
+      },
+      {
+        "type": "p",
+        "spans": [
+          {
+            "href": "https://www.tenmoirgallery.com/blu-sky-emerging-artist-award/",
+            "text": "The Blu Sky Artist Award"
+          },
+          {
+            "text": " offers more than cash prizes, providing two winners and 20 finalists with editorial features, collector exposure, career-building recognition, and lasting visibility for their work. "
+          },
+          {
+            "href": "https://www.tenmoirgallery.com/blu-sky-emerging-artist-award/",
+            "text": "Learn more at the website"
+          },
+          {
+            "text": ". Deadline is "
+          },
+          {
+            "bold": true,
+            "text": "August 15"
+          },
+          {
+            "text": "."
+          }
+        ],
+        "listing": true
+      },
+      {
+        "type": "p",
+        "spans": [
+          {
+            "text": "Compete for an AUD$80,000 prize pool in the "
+          },
+          {
+            "href": "https://headon.org.au/awards",
+            "text": "Head On Photo Awards"
+          },
+          {
+            "text": ", open worldwide to photographers of all levels. Anonymous judging, prestigious exhibitions, and international exposure await standout images. "
+          },
+          {
+            "href": "https://headon.org.au/awards",
+            "text": "For more information and to submit your work, visit the website"
+          },
+          {
+            "text": ". Deadline is "
+          },
+          {
+            "bold": true,
+            "text": "August 16"
+          },
+          {
+            "text": "."
+          }
+        ],
+        "listing": true
+      },
+      {
+        "type": "p",
+        "spans": [
+          {
+            "href": "https://www.prospectart.org/new-work-grant",
+            "text": "Prospect Art"
+          },
+          {
+            "text": " seeks global visual artists for its 2027 NEW WORK commission, awarding $1,500 for conceptually driven projects exploring "
+          },
+          {
+            "italic": true,
+            "text": "We Come in Pieces"
+          },
+          {
+            "text": ". One application also qualifies artists for ONE WORK and BROADCAST opportunities. "
+          },
+          {
+            "href": "https://www.prospectart.org/new-work-grant",
+            "text": "Visit the website for more details"
+          },
+          {
+            "text": ". Deadline is "
+          },
+          {
+            "bold": true,
+            "text": "August 16"
+          },
+          {
+            "text": "."
+          }
+        ],
+        "listing": true
+      },
+      {
+        "type": "p",
+        "spans": [
+          {
+            "href": "https://praxiscenterforaestheticstudies.com/l/products?sortKey=name&sortDirection=asc&page=1",
+            "text": "Praxis Center"
+          },
+          {
+            "text": " gets it. We really do. The road can feel long and hard – impossible at times. Keep going. There are more paths into the art world than ever before, and with the right information and a little persistence, the next opportunity could be the one that changes everything."
+          }
+        ]
+      }
+    ]
+  }
+]

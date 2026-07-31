@@ -1,4 +1,9 @@
+import { element, formatShortDate, loadFeatured } from './featured.js';
 import { initSharedPage } from './shared.js';
+
+// How many of the archived articles the home page shows; the rest stay in the
+// JSON so their article pages keep resolving.
+const FEATURED_ON_HOME = 2;
 
 function setupOptionDetails() {
     document.querySelectorAll('.option-btn .info').forEach((toggle) => {
@@ -13,75 +18,63 @@ function setupOptionDetails() {
     });
 }
 
-/* Confirms before handing the reader off to another site. Driven by the
-   data-confirm-exit attribute rather than a URL, so the dialog is reusable and
-   the destination stays declared in the markup. Falls through to a plain link
-   wherever <dialog> is unsupported. */
-function setupExitConfirm() {
-    const dialog = document.querySelector('.exit-dialog');
-    if (!dialog || typeof dialog.showModal !== 'function') return;
+/* The whole card is the link, not just the title, so the opportunities listed
+   under it are part of the target rather than dead text beside it. */
+function preview(article) {
+    const item = element('a', 'featured-item');
+    // The slug rides in the fragment, not a query: `npx serve` redirects
+    // /article.html to /article and drops a query string on the way, which would
+    // break the link on the LAN preview. A fragment survives any redirect.
+    item.href = `article.html#${encodeURIComponent(article.slug)}`;
 
-    const host = dialog.querySelector('.exit-dialog-host');
-    let destination = null;
-    let grab = null;
+    const date = formatShortDate(article.date);
+    // Without this the link announces its whole contents, deadlines included.
+    item.setAttribute('aria-label', date ? `${article.title} - ${date}` : article.title);
 
-    const EDGE = 8;
-    // Clamped on both axes so neither the opening position nor a drag can leave
-    // the dialog partly off-screen.
-    const moveTo = (left, top) => {
-        const box = dialog.getBoundingClientRect();
-        dialog.style.left = `${Math.max(EDGE, Math.min(left, window.innerWidth - box.width - EDGE))}px`;
-        dialog.style.top = `${Math.max(EDGE, Math.min(top, window.innerHeight - box.height - EDGE))}px`;
-    };
+    const heading = element('p', 'featured-line');
+    heading.append(element('span', 'featured-title', article.title));
+    if (date) heading.append(element('span', 'featured-date', ` - ${date}`));
+    item.append(heading);
 
-    const grip = dialog.querySelector('.exit-dialog-grip');
-    grip.addEventListener('pointerdown', (event) => {
-        if (event.button !== 0) return;
-        const box = dialog.getBoundingClientRect();
-        grab = { x: event.clientX - box.left, y: event.clientY - box.top };
-        grip.setPointerCapture(event.pointerId);
-        // Stops the press selecting the message text underneath.
-        event.preventDefault();
-    });
-    grip.addEventListener('pointermove', (event) => {
-        if (grab) moveTo(event.clientX - grab.x, event.clientY - grab.y);
-    });
-    // Pointer capture routes both here even when released outside the grip.
-    grip.addEventListener('pointerup', () => { grab = null; });
-    grip.addEventListener('pointercancel', () => { grab = null; });
+    if (article.opportunities?.length) {
+        const list = element('ul', 'featured-opportunities');
+        for (const opportunity of article.opportunities) {
+            const row = element('li');
+            row.append(element('span', 'featured-opportunity-name', opportunity.title));
+            // Its own element rather than a pseudo-element: the leader has to be a
+            // flex item to take up the slack between the two, and a ::after inside
+            // the name would only ever stretch within the name.
+            const leader = element('span', 'featured-opportunity-leader');
+            leader.setAttribute('aria-hidden', 'true');
+            row.append(leader);
+            row.append(element('span', 'featured-opportunity-deadline', opportunity.deadline));
+            list.append(row);
+        }
+        item.append(list);
+    }
 
-    document.addEventListener('click', (event) => {
-        const link = event.target.closest?.('a[data-confirm-exit]');
-        if (!link || event.defaultPrevented || event.button !== 0) return;
-        // A modified click already says how the reader wants it opened, and
-        // can't take them anywhere by surprise. Only the plain one needs asking.
-        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    return item;
+}
 
-        event.preventDefault();
-        destination = link.href;
-        host.textContent = new URL(link.href).hostname;
+/* The rest of the page must not wait on this or break with it: the feed is a
+   third party, and the two buttons beside it are the reason people are here. */
+async function setupFeatured() {
+    const list = document.querySelector('[data-featured-list]');
+    if (!list) return;
 
-        // Shown first because it cannot be measured while closed; the placement
-        // lands in the same task, so no centred frame is ever painted.
-        dialog.showModal();
-        const anchor = link.getBoundingClientRect();
-        moveTo(anchor.left, anchor.bottom + EDGE);
-        // Park focus on the dialog itself rather than letting it land on a
-        // button, which would open wearing a focus ring nobody asked for. Set
-        // explicitly because engines differ on where showModal puts it. Tab still
-        // reaches both buttons, and Escape still cancels.
-        dialog.focus();
-    });
-
-    // Opened from the button's own click rather than the dialog's close event,
-    // so the popup blocker sees an unambiguous user gesture. The form's
-    // method="dialog" closes it either way; Escape and No open nothing.
-    dialog.querySelector('[value="yes"]').addEventListener('click', () => {
-        if (destination) window.open(destination, '_blank', 'noopener');
-    });
-    dialog.addEventListener('close', () => { destination = null; });
+    try {
+        const articles = await loadFeatured();
+        if (!articles.length) {
+            list.replaceChildren(element('p', 'featured-status', 'Nothing featured just yet.'));
+            return;
+        }
+        list.replaceChildren(...articles.slice(0, FEATURED_ON_HOME).map(preview));
+    } catch (error) {
+        console.error('Error loading featured articles:', error);
+        list.replaceChildren(element('p', 'featured-status', "Couldn't load featured grants."));
+    }
 }
 
 initSharedPage();
 setupOptionDetails();
-setupExitConfirm();
+setupFeatured();

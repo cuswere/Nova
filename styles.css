@@ -41,7 +41,11 @@
 }
 
 * { box-sizing: border-box; }
-html { min-height: 100%; background: var(--desktop); }
+/* both-edges reserves the scrollbar's width on the left as well, so a page long
+   enough to scroll — the article page, mostly — keeps the wrapper on the same
+   centre line as a page that isn't. Ignored where scrollbars are overlays, which
+   is every touch browser, and there they never shifted anything to begin with. */
+html { min-height: 100%; background: var(--desktop); scrollbar-gutter: stable both-edges; }
 body {
     min-height: 100vh;
     margin: 0;
@@ -181,7 +185,7 @@ button { cursor: pointer; }
 .exit-dialog::backdrop { background: rgba(0, 0, 0, .25); }
 .exit-dialog-body { padding: 18px 8px 8px; background: var(--white); }
 .exit-dialog-message { margin: 0 0 16px; font-size: 14px; line-height: 1.4; overflow-wrap: anywhere; }
-.exit-dialog-host { font-weight: 600; color: var(--praxis-blue); }
+.exit-dialog-host { font-weight: 600; color: var(--ink); border: 2px solid var(--ink); padding:2px 4px}
 /* Above the grip, so the buttons stay clickable even if a short dialog puts them
    inside its top third. */
 .exit-dialog-actions { position: relative; z-index: 1; display: flex; justify-content: flex-end; gap: 8px; }
@@ -189,7 +193,20 @@ button { cursor: pointer; }
 .exit-dialog-actions .form-submit:active { padding: 6px 11px 4px 13px; }
 
 /* Home */
-.options-container { background: var(--field); outline: 1px solid var(--ink); outline-offset: -1px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding: 12px; min-height: 285px; }
+/* --featured-offset is extra breathing room above the Featured panel on desktop,
+   on top of the space the details panel already reserves below the Opportunities
+   button. Only ever add with it: the reserved space is what stops the open
+   details panel reaching Featured, so a negative value would let them collide.
+   To close the gap instead, shrink the details panel itself — its padding or the
+   16px .option-details-row type — and the gap follows it down. */
+.options-container { --featured-offset: 24px; background: var(--field); outline: 1px solid var(--ink); outline-offset: -1px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: auto 1fr; gap: 12px; padding: 12px; min-height: 285px; }
+/* Placed explicitly rather than by source order: Featured comes last in the
+   markup so the narrow layout stacks it under all three buttons, but on a wide
+   screen it belongs in the space left under Opportunities. The 700px query
+   hands placement back to source order. */
+.opportunity-group { grid-column: 1; grid-row: 1; }
+.featured-group { grid-column: 1; grid-row: 2; }
+.action-group { grid-column: 2; grid-row: 1 / -1; }
 .opportunity-group, .action-group, .option-btn-container { display: flex; flex-direction: column; align-items: stretch; }
 .action-group { gap: 12px; }
 .option-btn-container { min-width: 0; }
@@ -216,9 +233,14 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
 .option-btn .info.is-touched { text-decoration: none; outline: var(--stroke) solid var(--blue-bright); outline-offset: -8px; }
 .option-btn .info:focus-visible { outline: var(--stroke) solid var(--blue-bright); outline-offset: -6px; }
 
-.option-details { display: none; padding: 8px; background: var(--white);
+/* Laid out whether or not it is open, and only revealed by the toggle, so the
+   room it needs is always reserved: opening it can neither displace the Featured
+   panel below nor overlay it, and the gap between the two is exactly the panel's
+   own height at any width. Narrow screens go back to toggling display — there the
+   panel sits above the other buttons, where a permanent gap is just dead space. */
+.option-details { visibility: hidden; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: var(--stroke); margin-left: var(--stroke); padding: 8px; background: var(--white);
     border: 0px solid var(--ink); border-top: 0;}
-.option-details.open { margin-top: var(--stroke); margin-left: var(--stroke); box-shadow: 0 0px 4px; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.option-details.open { visibility: visible; box-shadow: 0 0px 4px var(--ink); }
 .option-details-row { display: contents; color: var(--ink); font-size: 16px; }
 .option-details a { text-decoration: underline; text-decoration-thickness: 2px; }
 @media (hover: hover) {
@@ -236,6 +258,44 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
     .option-details a:active,
     .option-btn .info:active { color: var(--red); outline-color: var(--red); }
 }
+
+/* Featured articles. Same fill and blue drop shadow as the option buttons so it
+   reads as part of the same panel, at prose sizes so it stays secondary to them. */
+.featured-group { display: flex; flex-direction: column; min-width: 0; margin-top: var(--featured-offset); padding: 4px 12px 12px; background: var(--field); outline: 0 solid var(--blue-bright); box-shadow: var(--stroke) calc(var(--stroke) * -1) 0 var(--blue-bright); font-family: var(--mono); }
+.featured-heading { margin: 0 0 4px; padding-bottom: 2px; border-bottom: var(--stroke) solid var(--blue-bright); color: var(--blue-bright); font-size: 16px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+.featured-list { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; }
+/* The whole card is the anchor, so the colour and the press states live here and
+   everything inside inherits them — one source of truth, and a press reddens the
+   card in one go. The resting shadow is the transparent twin of the hover one:
+   box-shadow only steps cleanly between two shadows of the same shape. */
+.featured-item { display: flex; flex-direction: column; gap: 2px; padding: 8px; box-shadow: 0 0 4px 2px var(--blue-bright); background: var(--field);
+    outline-offset: 0px; color: var(--blue-bright); transition: box-shadow 0ms steps(4, end);  }
+.featured-line { margin: 0; font-size: 16px; line-height: 1.2; }
+.featured-title { color: inherit; text-decoration: underline; font-weight: bold; text-decoration-thickness: 2px !important;  }
+.featured-date { white-space: nowrap; font-size: 13px; }
+@media (hover: hover) {
+    /* text-decoration: none overrides the site-wide a:hover underline, which would
+       otherwise draw a line under every row of the card. */
+    .featured-item:hover { text-decoration: none; outline: var(--stroke) solid var(--blue-bright); outline-offset: -5px; outline-width: 0px;
+      box-shadow: 0 0 4px 2px var(--blue-bright); background-color: var(--white); }
+    /* The press has to read as instant, so it cancels the transition rather than
+       stepping the glow away. Releasing hands the element back to the rules above,
+       whose transition is still in force, so the glow steps back in on the way out. */
+    .featured-item:active { color: var(--white); background: var(--green); outline-color: var(--green); box-shadow: none; outline-offset: 2px; outline-width: var(--stroke); }
+}
+.featured-item.is-touched {  }
+.featured-item.is-pressing, .featured-item.is-navigating { color: var(--white); background: var(--green); outline-color: var(--green); box-shadow: none; outline-offset: 2px; outline-width: var(--stroke); }
+/* The opportunities the article carries: name to the left, deadline held to the
+   right edge so the dates line up down the column. */
+.featured-opportunities { display: flex; flex-direction: column; gap: 4px; margin: 0; padding: 0; list-style: none; font-size: 13px; line-height: 1.25; }
+.featured-opportunities li { display: flex; align-items: baseline; gap: 6px; }
+.featured-opportunity-name { min-width: 0; }
+/* Takes up whatever slack is left between the two and rules a line across it. An
+   empty flex item has no baseline of its own, so the row aligns its bottom edge —
+   the border — to the text baseline, and the nudge drops it clear of descenders. */
+.featured-opportunity-leader { flex: 1 1 12px; min-width: 12px; border-bottom: 1px dashed currentColor; transform: translateY(-2px); }
+.featured-opportunity-deadline { white-space: nowrap; }
+.featured-status { margin: 0; font-size: 13px; }
 
 /* Opportunity workspace */
 .columns { display: grid; grid-template-columns: minmax(0, 1fr) 240px; align-items: stretch; box-shadow: none; }
@@ -691,7 +751,39 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
 @media (prefers-reduced-motion: reduce) {
     .form-spinner { animation: none; }
     .thanks-item.is-leaving { opacity: 0; animation: none; }
+    .featured-item { transition: none; }
 }
+
+/* Article page. A reading copy of a Praxis blog post, so the column is measured
+   for prose rather than filling the wrapper. */
+.article { margin: 0 auto; padding: 24px clamp(16px, 4vw, 32px) 32px; background: var(--green); color: white; }
+.article-title { margin: 0 0 4px; font-family: var(--mono); font-size: clamp(26px, 4.5vw, 38px); font-weight: 600; line-height: 1.05; }
+.article-byline { margin: 0 0 20px; font-family: var(--mono); font-size: 13px; letter-spacing: .03em; }
+.article p, .article li { margin: 0 0 15px; font-size: 16px; line-height: 1.5; }
+/* An opportunity listing: a linked name plus a bolded deadline, flagged by the
+   pipeline (readListing) rather than sniffed for here. Outlined rather than
+   bordered so the box costs no layout and the prose stays on the same measure;
+   the roomier margin keeps consecutive listings' outlines from touching. */
+.article p.article-listing { margin-bottom: 26px; padding: 2px 0; outline: 2px solid var(--white); outline-offset: 6px; }
+.article h2, .article h3 { margin: 26px 0 10px; font-family: var(--mono); font-weight: 600; line-height: 1.15; }
+.article h2 { font-size: 21px; }
+.article h3 { font-size: 17px; }
+.article strong { border: 2px solid var(--white); outline-offset: 0px; padding: 0 6px; }
+.article blockquote { margin: 0 0 15px; padding-left: 14px; border-left: var(--stroke) solid var(--blue-bright); font-size: 15px; line-height: 1.5; }
+.article-list { margin: 0 0 15px; padding-left: 22px; }
+.article-list li { margin-bottom: 6px; }
+.article hr { margin: 24px 0; border: 0; border-top: 1px solid var(--ink); }
+.article-image { display: block; max-width: 100%; height: auto; margin: 0 0 15px; }
+.article a { color: var(--white); font-weight: bold; text-decoration: underline; text-decoration-thickness: 2px; }
+@media (hover: hover) {
+    .article a:hover { outline: 2px solid var(--white); outline-offset: 3px; }
+    
+}
+.article a.is-touched { text-decoration-thickness: 2px; }
+.article a.is-pressing, .article a.is-navigating { color: var(--white); outline-color: var(--white); }
+.article-source { margin: 28px 0 0; padding-top: 14px; border-top: 1px solid var(--white); font-family: var(--mono); font-size: 13px; }
+.article-status { margin: 0 0 12px; color: var(--muted); font-size: 15px; }
+.article-return { color: var(--blue); font-size: 15px; text-decoration: underline; }
 
 ::-webkit-scrollbar { width: 14px; height: 14px; }
 ::-webkit-scrollbar-track { background: var(--face); }
@@ -699,7 +791,13 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
 
 @media (max-width: 700px) {
     .content-wrapper { width: 100%; padding: 10px; }
-    .options-container { grid-template-columns: 1fr; min-height: 0; }
+    /* Zeroed here rather than on .featured-group, so whatever desktop value is set
+       above stays desktop-only without needing a second edit. */
+    .options-container { --featured-offset: 0px; grid-template-columns: 1fr; grid-template-rows: none; min-height: 0; }
+    /* Source order takes over, which puts Featured under all three buttons. */
+    .opportunity-group, .action-group, .featured-group { grid-column: 1; grid-row: auto; }
+    .option-details { display: none; }
+    .option-details.open { display: flex; }
     .columns { grid-template-columns: 1fr; }
     .filters { order: -1; }
     .filter-selectors { display: grid; grid-template-columns: 1fr 1fr; align-items: center; }

@@ -20,6 +20,7 @@ The scheduled workflow runs `sync-opportunities`, then `publish-data`. New clean
 - `npm run dry-run-opportunities` — fetch enabled sources without writing to the Sheet.
 - `npm run sync-opportunities` — fetch and upsert candidates.
 - `npm run publish-data` — regenerate the public JSON from approved rows.
+- `npm run sync-featured` — rebuild `data/featured.json` from the Praxis blog feed.
 - Serve locally with `npx serve .` or `python -m http.server`; browser fetches do not work over `file://`.
 
 ## Key files
@@ -31,6 +32,7 @@ The scheduled workflow runs `sync-opportunities`, then `publish-data`. New clean
 - `opportunity-pipeline/adapters.js` — source adapter entrypoint.
 - `sync-opportunities.js` — collection and upsert entrypoint.
 - `publish.js` — static JSON publisher.
+- `featured-pipeline/feed.js` and `sync-featured.js` — home-page featured articles from the Praxis blog feed; see `docs/featured.md`.
 
 The leading Sheet columns are the public contract. `fees` means application or submission fee only; blank means unknown. `country` means applicant eligibility, not host location. `PUBLISHED_EXTRA_FIELDS` carries fee, award, and eligibility details used by the frontend without changing the leading Sheet-column contract.
 
