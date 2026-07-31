@@ -814,7 +814,7 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
    their own text. clone gives every fragment the full set instead. Prefixed for
    WebKit, which is what the phones run. */
 .article strong, .article a { -webkit-box-decoration-break: clone; box-decoration-break: clone; }
-.article strong { border: 2px solid var(--white); outline-offset: 0px; padding: 0 6px; display: inline-block; line-height: 18px; }
+.article strong { border: 2px solid var(--white); outline-offset: 0px; padding: 0 6px; display: inline-block; line-height: 16px; }
 .article blockquote { margin: 0 0 15px; padding-left: 14px; border-left: var(--stroke) solid var(--blue-bright); font-size: 15px; line-height: 1.5; }
 .article-list { margin: 0 0 15px; padding-left: 22px; }
 .article-list li { margin-bottom: 6px; }
