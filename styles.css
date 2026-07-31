@@ -759,7 +759,7 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
    measured rects, resolve against this padding box. */
 /* position: relative so the wrap connectors, which are absolutely placed from
    measured rects, resolve against this padding box. */
-.article { position: relative; margin: 0 auto; padding: 24px clamp(16px, 4vw, 32px) 32px; background: var(--green); color: white; }
+.article { position: relative; margin: 0 auto; padding: 16px clamp(16px, 4vw, 32px) 32px; padding-bottom: 0; background: var(--green); color: white; }
 /* Holds a boxed run and the punctuation after it on one line; applied by
    spanNodes, which is where the reasoning lives. */
 .nowrap { white-space: nowrap; }
@@ -842,11 +842,11 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
 /* Direct child of .article, not of a paragraph — the target is the last block in
    the article, and .article p > :last-child only ever reaches inline runs inside
    one. Two class-level components, so it also outweighs .article p's margin. */
-.article > :last-child { margin-bottom: 0; }
+.article > :last-child { margin-bottom: 12px; }
 .article-status { margin: 0 0 12px; color: var(--muted); font-size: 15px; }
 .article-return { color: var(--blue); font-size: 15px; text-decoration: underline; }
 
-::-webkit-scrollbar { width: 14px; height: 14px; }
+::-webkit-scrollbar { width: 7px; height: 14px; }
 ::-webkit-scrollbar-track { background: var(--transparent); }
 ::-webkit-scrollbar-thumb { background: var(--white); border: 0px solid var(--ink); }
 
