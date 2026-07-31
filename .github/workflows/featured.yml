@@ -1,0 +1,46 @@
+name: Refresh featured articles
+
+# Posts land on Wednesdays. 01:00 UTC on Thursday and Friday is 9pm Wednesday and
+# 9pm Thursday Eastern in summer, 8pm in winter — cron cannot follow daylight
+# saving, so the hour is set late deliberately, never before the 8pm cutoff.
+# The Thursday run is the safety net for a late upload.
+on:
+  schedule:
+    - cron: '0 1 * * 4,5'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: featured-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npm test
+      - run: npm run sync-featured
+
+      - name: Commit updated featured articles
+        shell: bash
+        run: |
+          if git diff --quiet -- data/featured.json; then
+            echo "No featured article changes."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/featured.json
+          git commit -m "Refresh featured articles"
+          git push

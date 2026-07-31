@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A featured article from the Praxis Center for Aesthetic Studies blog.">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='black'/%3E%3Cpath d='M16 2 L19 13 L30 16 L19 19 L16 30 L13 19 L2 16 L13 13 Z' fill='white'/%3E%3C/svg%3E">
+    <title>Praxis Nova</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="content-wrapper">
+        <div class="screen-refresh" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+
+        <!-- The article supplies the page's only <h1>, so the chrome bar drops to a <p>. -->
+        <header class="field page-header">
+            <p class="page-title"><span class="title">Featured</span></p>
+            <nav class="title-options" aria-label="Page navigation">
+                <a href="index.html" class="title-option">Home</a>
+            </nav>
+        </header>
+
+        <dialog class="exit-dialog" tabindex="-1" aria-label="Leave Praxis Nova">
+            <div class="exit-dialog-grip" aria-hidden="true"></div>
+            <form method="dialog" class="exit-dialog-body">
+                <p class="exit-dialog-message">Open <span class="exit-dialog-host"></span>?</p>
+                <div class="exit-dialog-actions">
+                    <button type="submit" value="yes" class="form-submit">Yes</button>
+                    <button type="submit" value="no" class="form-submit">No</button>
+                </div>
+            </form>
+        </dialog>
+
+        <main class="field article" data-article>
+            <p class="article-status">Loading…</p>
+        </main>
+
+    </div>
+
+    <script type="module" src="scripts/article.js"></script>
+</body>
+</html>

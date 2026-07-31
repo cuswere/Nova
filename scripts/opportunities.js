@@ -6,7 +6,7 @@ const MOBILE_BREAKPOINT = '(max-width: 700px)';
 const pageSize = () => (window.matchMedia(MOBILE_BREAKPOINT).matches ? 25 : 50);
 const state = {
     opportunities: [],
-    filters: { types: [], hideFees: false, onlyRolling: false },
+    filters: { types: [], hideFees: false, onlyRolling: false, query: '' },
     page: 1
 };
 
@@ -36,9 +36,21 @@ function isCurrent(opportunity) {
     return deadlineTime(opportunity.deadline) >= startOfToday().getTime();
 }
 
+/* Every word has to appear in the name, in any order, so "grant film" still
+   finds "Film Production Grant" — a plain substring match on the phrase would
+   not. Names are the only field searched; a description search would surface
+   cards whose match the reader can't see. */
+function matchesQuery(item) {
+    const terms = state.filters.query.toLowerCase().split(/\s+/).filter(Boolean);
+    if (!terms.length) return true;
+    const name = String(item.name || '').toLowerCase();
+    return terms.every((term) => name.includes(term));
+}
+
 function currentOpportunities() {
     return state.opportunities
         .filter(isCurrent)
+        .filter(matchesQuery)
         .filter((item) => !state.filters.types.length || state.filters.types.includes(String(item.type || '').toLowerCase()))
         .filter((item) => !state.filters.hideFees || String(item.fees || '').toLowerCase() !== 'y')
         .filter((item) => !state.filters.onlyRolling || /rolling/i.test(String(item.deadline || '')))
@@ -53,6 +65,7 @@ function parseUrlFilters() {
         .filter(Boolean);
     state.filters.hideFees = ['1', 'true'].includes(params.get('hideFees'));
     state.filters.onlyRolling = ['1', 'true'].includes(params.get('rolling'));
+    state.filters.query = (params.get('q') || '').trim();
 }
 
 function statusMessage(text) {
@@ -212,8 +225,10 @@ function animateFilterArea(container, fromHeight, toHeight) {
     }, 50);
 }
 
-function updateView({ categories = false } = {}) {
-    state.page = 1;
+// Changing a filter invalidates the page you were on, so the count resets by
+// default; keepPage is for redraws that put a filter back the way it was.
+function updateView({ categories = false, keepPage = false } = {}) {
+    if (!keepPage) state.page = 1;
     if (categories) renderCategoryMenu();
     renderFilters();
     renderOpportunities();
@@ -254,6 +269,13 @@ function renderFilters() {
         state.filters.onlyRolling = false;
         document.querySelector('#rolling-toggle').checked = false;
         updateView();
+    }));
+    // The search reads as a filter like any other, so it gets a chip too — which
+    // is also what tells a reader scrolled away from the toolbar why the list is
+    // short. Removing it puts the toolbar back the way the tab closes it.
+    if (state.filters.query) chips.push(filterChip(`“${state.filters.query}”`, 'search-filter', () => {
+        clearSearch();
+        setSearchOpen(false);
     }));
 
     container.replaceChildren(...(chips.length ? chips : [element('div', 'filter-item', 'none')]));
@@ -753,6 +775,148 @@ function setupDetailsPopups() {
     });
 }
 
+function setSearchOpen(open, { focus = true } = {}) {
+    const tab = document.querySelector('.search-tab');
+    const field = document.querySelector('.search-field');
+    tab.setAttribute('aria-expanded', String(open));
+    field.hidden = !open;
+    if (open && focus) field.querySelector('.search-input').focus();
+}
+
+function applySearch(value, { keepPage = false } = {}) {
+    state.filters.query = value.trim();
+    document.querySelector('.search-clear').hidden = !state.filters.query;
+    updateView({ keepPage });
+}
+
+// Empties the box without deciding whether it should still be showing.
+function clearSearch({ keepPage = false } = {}) {
+    document.querySelector('.search-input').value = '';
+    applySearch('', { keepPage });
+}
+
+// Re-filtering rebuilds every card on the page and re-measures each title, so
+// the list follows the typing at a pause rather than on every keystroke.
+const TYPING_SETTLE_MS = 140;
+
+/* Touch holds .is-pressing for a moment past the click (see PRESS_HOLD_MS in
+   shared.js), so a state flip on click lands mid-press and the pressed styling
+   keyed to that state drops a beat before the finger visually lets go. Waiting
+   for the class keeps the two in step. Mouse never has it — :active is already
+   over by click — so that path runs straight through. */
+const PRESS_SETTLE_CAP_MS = 400;
+
+function afterPress(element, done) {
+    if (!element.classList.contains('is-pressing')) return done();
+    let capTimer = null;
+    const observer = new MutationObserver(() => {
+        if (element.classList.contains('is-pressing')) return;
+        observer.disconnect();
+        window.clearTimeout(capTimer);
+        done();
+    });
+    observer.observe(element, { attributes: true, attributeFilter: ['class'] });
+    // The class comes off a timer, not a promise, so don't wait on it forever.
+    capTimer = window.setTimeout(() => { observer.disconnect(); done(); }, PRESS_SETTLE_CAP_MS);
+}
+
+function setupSearch() {
+    const tab = document.querySelector('.search-tab');
+    const input = document.querySelector('.search-input');
+    const clear = document.querySelector('.search-clear');
+    let typingTimer = null;
+
+    const settleNow = () => {
+        window.clearTimeout(typingTimer);
+        applySearch(input.value);
+    };
+
+    // Where the list stood when the field went up, so dismissing it returns you
+    // there instead of to the top of page one.
+    let restore = null;
+
+    // Dismissal is one path whatever asks for it — the tab, the × in the field,
+    // or Escape — so all three drop the query and land back on the same row.
+    const closeSearch = () => {
+        setSearchOpen(false);
+        // An empty box filtered nothing, so there is nothing to redraw and the
+        // list keeps its place untouched.
+        if (!input.value) return;
+        // A filter nobody can see is a filter nobody can undo, so the query
+        // leaves with the field it was typed into — but the list underneath
+        // goes back to the page it was showing before, not to the start.
+        window.clearTimeout(typingTimer);
+        state.page = restore ? restore.page : 1;
+        clearSearch({ keepPage: true });
+        if (restore) document.querySelector('.repobox').scrollTop = restore.scroll;
+    };
+
+    // The field appears on pointerdown so the fade-in animation begins under
+    // the finger rather than after it lifts. Focus is deferred to click — on
+    // iOS, focus() from pointerdown won't raise the keyboard because the
+    // browser hasn't committed to the tap yet (it might become a scroll).
+    let openedOnDown = false;
+    tab.addEventListener('pointerdown', (event) => {
+        if (event.button !== 0) return;
+        if (tab.getAttribute('aria-expanded') !== 'false') return;
+        restore = { page: state.page, scroll: document.querySelector('.repobox').scrollTop };
+        tab.classList.add('search-opening');
+        setSearchOpen(true, { focus: false });
+        openedOnDown = true;
+    });
+    tab.addEventListener('click', () => {
+        if (openedOnDown) {
+            openedOnDown = false;
+            tab.classList.remove('search-opening');
+            input.focus();
+            return;
+        }
+        // Keyboard or other non-pointer activation still opens on click.
+        if (tab.getAttribute('aria-expanded') !== 'true') {
+            restore = { page: state.page, scroll: document.querySelector('.repobox').scrollTop };
+            setSearchOpen(true);
+            return;
+        }
+        afterPress(tab, closeSearch);
+    });
+    input.addEventListener('input', () => {
+        window.clearTimeout(typingTimer);
+        typingTimer = window.setTimeout(settleNow, TYPING_SETTLE_MS);
+    });
+    input.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+            // Nothing to submit — this just skips the wait on the last keystroke.
+            event.preventDefault();
+            settleNow();
+        } else if (event.key === 'Escape') {
+            event.preventDefault();
+            window.clearTimeout(typingTimer);
+            // Escape empties a full box and dismisses an empty one, so the key
+            // always does the more reversible of the two first.
+            if (input.value) {
+                clearSearch();
+            } else {
+                closeSearch();
+                tab.focus();
+            }
+        }
+    });
+    // The × dismisses the whole field rather than just emptying it: an empty box
+    // still showing is a state you have to leave a second time.
+    clear.addEventListener('click', () => afterPress(clear, () => {
+        closeSearch();
+        tab.focus();
+    }));
+
+    // A ?q= link arrives with the field already filtering; show what it is doing.
+    // Focus is left alone — landing on a page shouldn't raise a phone keyboard.
+    if (state.filters.query) {
+        input.value = state.filters.query;
+        clear.hidden = false;
+        setSearchOpen(true, { focus: false });
+    }
+}
+
 function setupFilterInputs() {
     const fees = document.querySelector('#hide-fees-toggle');
     const rolling = document.querySelector('#rolling-toggle');
@@ -784,9 +948,11 @@ function setupRepoFit() {
     window.addEventListener('resize', fitRepoHeight);
     window.addEventListener('orientationchange', fitRepoHeight);
     // On mobile the filters stack above the box, so their applied-chip list
-    // growing pushes it further down the page.
-    const filters = document.querySelector('.filters');
-    if (filters && window.ResizeObserver) new ResizeObserver(fitRepoHeight).observe(filters);
+    // growing pushes it further down the page. The toolbar does the same when the
+    // open search field wraps onto a row of its own.
+    if (!window.ResizeObserver) return;
+    const observer = new ResizeObserver(fitRepoHeight);
+    document.querySelectorAll('.filters, .repo-toolbar').forEach((node) => observer.observe(node));
 }
 
 function init() {
@@ -794,6 +960,7 @@ function init() {
     parseUrlFilters();
     setupCategoryMenu();
     setupFilterInputs();
+    setupSearch();
     setupPagination();
     setupDetailsPopups();
     setupRepoFit();

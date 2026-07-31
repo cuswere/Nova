@@ -24,6 +24,7 @@
        them, as Windows drew it. Inner 1px pair stays ahead of the outer 2px pair. */
     --raise: inset 1px 1px #fff, inset -1px -1px #161616, inset 2px 2px #ddd, inset -2px -2px #888;
     --sink: inset 1px 1px #7b7b7b, inset -1px -1px #fff, inset 2px 2px #202020, inset -2px -2px #ddd;
+    --raise-shallow: inset 1px 1px #fff, inset -1px -1px #7b7b7b;
     --sink-shallow: inset 1px 1px #7b7b7b, inset -1px -1px #fff;
     /* Blue controls need their own bevel ramp; the neutral highlight washes out. */
     --raise-blue: inset 1px 1px #a8a8ff, inset -1px -1px #00002e, inset 2px 2px #5a5aff, inset -2px -2px #000090;
@@ -40,7 +41,11 @@
 }
 
 * { box-sizing: border-box; }
-html { min-height: 100%; background: var(--desktop); }
+/* both-edges reserves the scrollbar's width on the left as well, so a page long
+   enough to scroll — the article page, mostly — keeps the wrapper on the same
+   centre line as a page that isn't. Ignored where scrollbars are overlays, which
+   is every touch browser, and there they never shifted anything to begin with. */
+html { min-height: 100%; background: var(--desktop); scrollbar-gutter: stable both-edges; }
 body {
     min-height: 100vh;
     margin: 0;
@@ -82,6 +87,8 @@ button { cursor: pointer; }
 .remove-filter-btn,
 .pagination-tab,
 .page-arrow,
+.search-tab,
+.search-clear,
 .form-submit { user-select: none; -webkit-user-select: none; }
 
 /* Short, stepped page-change signal. */
@@ -135,15 +142,15 @@ button { cursor: pointer; }
 .page-title::before { content: "PRAXIS NOVA /"; align-self: stretch; display: flex; align-items: center; padding: 0 3px; margin-right: 6px; font-size: 14px; font-weight: 600; letter-spacing: .05em; }
 .title { color: inherit; font-size: 14px; font-weight: 600; letter-spacing: .05em; }
 .title-options { display: flex; gap: 6px; margin-left: auto; }
-.title-option { display: inline-flex; align-items: center; padding: 2px 8px; color: var(--ink); background: var(--face); box-shadow: var(--raise); 
+.title-option { display: inline-flex; align-items: center; padding: 2px 8px; color: var(--ink); background: var(--face); box-shadow: var(--raise-shallow); 
    font-size: 12px; outline: 0px solid var(--ink); outline-offset: -1px; }
 @media (hover: hover) {
-    .title-option:hover { text-decoration: underline; }
+    .title-option:hover { text-decoration: none; }
 }
 /* Pressed labels move without changing the box dimensions: the default 2px 8px
    shifted 1px down and right, so both values must follow if that padding does.
    .is-pressing is the touch stand-in for :active; see setupNavigationState. */
-.title-option.is-pressing, .title-option.is-navigating { box-shadow: var(--sink); padding: 3px 7px 1px 9px; }
+.title-option.is-pressing, .title-option.is-navigating { box-shadow: var(--sink-shallow); padding: 3px 7px 1px 9px; }
 /* :active is gated wherever .is-pressing also applies. Touch fires :active the
    instant a finger lands, while .is-pressing deliberately waits out the scroll
    test — leaving both live would split the press into two beats, the pressed
@@ -151,7 +158,7 @@ button { cursor: pointer; }
    .is-pressing alone drives the whole appearance on touch and it arrives as one.
    Controls with no .is-pressing rule keep their instant :active. */
 @media (hover: hover) {
-    .title-option:active { box-shadow: var(--sink); padding: 3px 7px 1px 9px; }
+    .title-option:active { box-shadow: var(--sink-shallow); padding: 3px 7px 1px 9px; }
 }
 
 .home-wordmark { display: flex; align-items: center; width: fit-content; margin: 0 auto 15px; color: var(--ink); font-size: clamp(30px, 5vw, 40px); font-weight: 600; letter-spacing: -.12em; line-height: 1; }
@@ -178,7 +185,7 @@ button { cursor: pointer; }
 .exit-dialog::backdrop { background: rgba(0, 0, 0, .25); }
 .exit-dialog-body { padding: 18px 8px 8px; background: var(--white); }
 .exit-dialog-message { margin: 0 0 16px; font-size: 14px; line-height: 1.4; overflow-wrap: anywhere; }
-.exit-dialog-host { font-weight: 600; color: var(--praxis-blue); }
+.exit-dialog-host { font-weight: 600; color: var(--ink); border: 2px solid var(--ink); padding:2px 4px}
 /* Above the grip, so the buttons stay clickable even if a short dialog puts them
    inside its top third. */
 .exit-dialog-actions { position: relative; z-index: 1; display: flex; justify-content: flex-end; gap: 8px; }
@@ -186,7 +193,20 @@ button { cursor: pointer; }
 .exit-dialog-actions .form-submit:active { padding: 6px 11px 4px 13px; }
 
 /* Home */
-.options-container { background: var(--field); outline: 1px solid var(--ink); outline-offset: -1px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding: 12px; min-height: 285px; }
+/* --featured-offset is extra breathing room above the Featured panel on desktop,
+   on top of the space the details panel already reserves below the Opportunities
+   button. Only ever add with it: the reserved space is what stops the open
+   details panel reaching Featured, so a negative value would let them collide.
+   To close the gap instead, shrink the details panel itself — its padding or the
+   16px .option-details-row type — and the gap follows it down. */
+.options-container { --featured-offset: 24px; background: var(--field); outline: 1px solid var(--ink); outline-offset: -1px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: auto 1fr; gap: 12px; padding: 12px; min-height: 285px; }
+/* Placed explicitly rather than by source order: Featured comes last in the
+   markup so the narrow layout stacks it under all three buttons, but on a wide
+   screen it belongs in the space left under Opportunities. The 700px query
+   hands placement back to source order. */
+.opportunity-group { grid-column: 1; grid-row: 1; }
+.featured-group { grid-column: 1; grid-row: 2; }
+.action-group { grid-column: 2; grid-row: 1 / -1; }
 .opportunity-group, .action-group, .option-btn-container { display: flex; flex-direction: column; align-items: stretch; }
 .action-group { gap: 12px; }
 .option-btn-container { min-width: 0; }
@@ -213,9 +233,14 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
 .option-btn .info.is-touched { text-decoration: none; outline: var(--stroke) solid var(--blue-bright); outline-offset: -8px; }
 .option-btn .info:focus-visible { outline: var(--stroke) solid var(--blue-bright); outline-offset: -6px; }
 
-.option-details { display: none; padding: 8px; background: var(--white);
+/* Laid out whether or not it is open, and only revealed by the toggle, so the
+   room it needs is always reserved: opening it can neither displace the Featured
+   panel below nor overlay it, and the gap between the two is exactly the panel's
+   own height at any width. Narrow screens go back to toggling display — there the
+   panel sits above the other buttons, where a permanent gap is just dead space. */
+.option-details { visibility: hidden; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: var(--stroke); margin-left: var(--stroke); padding: 8px; background: var(--white);
     border: 0px solid var(--ink); border-top: 0;}
-.option-details.open { margin-top: var(--stroke); margin-left: var(--stroke); box-shadow: 0 0px 4px; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.option-details.open { visibility: visible; box-shadow: 0 0px 4px var(--ink); }
 .option-details-row { display: contents; color: var(--ink); font-size: 16px; }
 .option-details a { text-decoration: underline; text-decoration-thickness: 2px; }
 @media (hover: hover) {
@@ -227,32 +252,81 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
 .option-details a.is-pressing,
 .option-btn a.is-navigating,
 .option-details a.is-navigating,
-.option-btn .info.is-pressing { color: var(--red); outline-color: var(--red); }
+.option-btn .info.is-pressing { color: var(--white); outline-color: var(--white); }
 @media (hover: hover) {
     .option-btn a:active,
     .option-details a:active,
-    .option-btn .info:active { color: var(--red); outline-color: var(--red); }
+    .option-btn .info:active { color: var(--white); outline-color: var(--white); }
 }
+
+/* Featured articles. Same fill and blue drop shadow as the option buttons so it
+   reads as part of the same panel, at prose sizes so it stays secondary to them. */
+.featured-group { display: flex; flex-direction: column; min-width: 0; margin-top: var(--featured-offset); padding: 4px 12px 12px; background: var(--field); outline: 0 solid var(--blue-bright); box-shadow: var(--stroke) calc(var(--stroke) * -1) 0 var(--blue-bright); font-family: var(--mono); }
+.featured-heading { margin: 0 0 4px; padding-bottom: 2px; border-bottom: var(--stroke) solid var(--blue-bright); color: var(--blue-bright); font-size: 16px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+.featured-list { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; }
+/* The whole card is the anchor, so the colour and the press states live here and
+   everything inside inherits them — one source of truth, and a press reddens the
+   card in one go. The resting shadow is the transparent twin of the hover one:
+   box-shadow only steps cleanly between two shadows of the same shape. */
+.featured-item { display: flex; flex-direction: column; gap: 2px; padding: 8px; box-shadow: 0 0 4px 2px var(--blue-bright); background: var(--field);
+    outline-offset: 0px; color: var(--blue-bright); transition: box-shadow 0ms steps(4, end);  }
+.featured-line { margin: 0; font-size: 16px; line-height: 1.2; }
+.featured-title { color: inherit; text-decoration: underline; font-weight: bold; text-decoration-thickness: 2px !important;  }
+.featured-date { white-space: nowrap; font-size: 13px; }
+@media (hover: hover) {
+    /* text-decoration: none overrides the site-wide a:hover underline, which would
+       otherwise draw a line under every row of the card. */
+    .featured-item:hover { text-decoration: none; outline: var(--stroke) solid var(--blue-bright); outline-offset: -5px; outline-width: 0px;
+      box-shadow: 0 0 4px 2px var(--blue-bright); background-color: var(--white); }
+    /* The press has to read as instant, so it cancels the transition rather than
+       stepping the glow away. Releasing hands the element back to the rules above,
+       whose transition is still in force, so the glow steps back in on the way out. */
+    .featured-item:active { color: var(--white); background: var(--green); outline-color: var(--green); box-shadow: none; outline-offset: 2px; outline-width: var(--stroke); }
+}
+.featured-item.is-touched {  }
+.featured-item.is-pressing, .featured-item.is-navigating { color: var(--white); background: var(--green); outline-color: var(--green); box-shadow: none; outline-offset: 2px; outline-width: var(--stroke); }
+/* The opportunities the article carries: name to the left, deadline held to the
+   right edge so the dates line up down the column. */
+.featured-opportunities { display: flex; flex-direction: column; gap: 4px; margin: 0; padding: 0; list-style: none; font-size: 13px; line-height: 1.25; }
+.featured-opportunities li { display: flex; align-items: baseline; gap: 6px; }
+.featured-opportunity-name { min-width: 0; }
+/* Takes up whatever slack is left between the two and rules a line across it. An
+   empty flex item has no baseline of its own, so the row aligns its bottom edge —
+   the border — to the text baseline, and the nudge drops it clear of descenders. */
+.featured-opportunity-leader { flex: 1 1 12px; min-width: 12px; border-bottom: 1px dashed currentColor; transform: translateY(-2px); }
+.featured-opportunity-deadline { white-space: nowrap; }
+.featured-status { margin: 0; font-size: 13px; }
 
 /* Opportunity workspace */
 .columns { display: grid; grid-template-columns: minmax(0, 1fr) 240px; align-items: stretch; box-shadow: none; }
 .repo-column { display: flex; flex-direction: column; min-width: 0; }
 
 /* Pagination toolbar: a raised "Page N" tab overlapping the top-left of the
-   recessed results box, with a horizontal Prev/Next arrow pair alongside it. */
-.repo-toolbar { position: relative; z-index: 2; display: flex; align-items: flex-end; gap: 6px; margin-bottom: 4px; }
+   recessed results box, with a horizontal Prev/Next arrow pair alongside it,
+   then the search tab. Wrapping is what makes the open search field work on a
+   narrow screen — it drops to its own full-width row instead of squeezing the
+   controls, so no width breakpoint has to name the crossover. */
+.repo-toolbar { position: relative; z-index: 2; display: flex; flex-wrap: wrap; align-items: flex-end; gap: 6px; margin-bottom: 4px; }
 .pagination-tab { display: inline-flex; align-items: flex-end; min-height: 24px; padding: 0 4px; color: var(--ink); margin-left: 0px; background: var(--field); box-shadow: var(--sink-shallow); font-size: 14px; font-weight: bold; letter-spacing: .05em;}
 .pagination-arrows { display: flex; gap: 4px; }
-.page-arrow { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; min-height: 24px; padding: 4px; color: var(--ink); background: var(--face); border: 0; box-shadow: var(--raise); font-size: 14px; line-height: 1; }
+/* The search tab and its clear button are the same raised control as an arrow,
+   so they share every rule below rather than restating the bevel. */
+.page-arrow, .search-tab, .search-clear {  outline-offset: -1px; display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 24px; padding: 4px; color: var(--ink); background: var(--face); border: 0; box-shadow: var(--raise-shallow); font-size: 14px; line-height: 1; }
+.search-tab { padding: 4px 8px; font-weight: bold; letter-spacing: .05em; }
 /* No .is-touched counterpart on purpose: like the detail tokens, the hover wash
    is a cursor preview, and on touch it would only linger after the press that
    already answered it. The .is-pressing bevel below is the whole affordance. */
 @media (hover: hover) {
-    .page-arrow:hover:not(:disabled) {  }
+    .page-arrow:hover:not(:disabled), .search-tab:hover, .search-clear:hover { }
 }
-.page-arrow.is-pressing:not(:disabled) { box-shadow: var(--sink); padding: 3px 5px 1px 7px; }
+/* Both pairs total the same 8px the 4px rest state does — the press moves the
+   glyph a pixel down and right, it does not resize the box. Any other split
+   grows the control the moment its glyph is wider than min-width minus the
+   padding, and one arrow gaining a fraction of a pixel shunts everything after
+   it along the row, which is what made the search tab look like it wobbled. */
+.page-arrow.is-pressing:not(:disabled), .search-tab.is-pressing, .search-clear.is-pressing { box-shadow: var(--sink-shallow); padding: 5px 3px 3px 5px; }
 @media (hover: hover) {
-    .page-arrow:active:not(:disabled) { box-shadow: var(--sink); padding: 3px 5px 1px 7px; }
+    .page-arrow:active:not(:disabled), .search-tab:active { box-shadow: var(--sink-shallow); padding: 5px 3px 3px 5px; }
 }
 /* At 24px these sit under the ~44px a fingertip actually covers, so WebKit's
    touch adjustment quietly redirects near-misses to them. That fires the click
@@ -263,11 +337,69 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
    is half the 4px gap between the two arrows, and 4px is the toolbar's bottom
    margin, past which this would start intercepting taps meant for the cards. */
 @media (pointer: coarse) {
-    .page-arrow { position: relative; }
-    .page-arrow:not(:disabled)::after { content: ""; position: absolute; inset: -8px -2px -4px; }
+    .page-arrow, .search-tab, .search-clear { position: relative; }
+    .page-arrow:not(:disabled)::after, .search-tab::after, .search-clear::after { content: ""; position: absolute; inset: -8px -2px -4px; }
 }
-.page-arrow:focus-visible { outline: 1px dotted var(--ink); outline-offset: 2px; }
-.page-arrow:disabled { color: var(--muted); background: var(--face); box-shadow: var(--sink); cursor: default;}
+.page-arrow:focus-visible, .search-tab:focus-visible, .search-clear:focus-visible { outline: 1px dotted var(--ink); outline-offset: 2px; }
+.page-arrow:disabled { color: var(--field); background: var(--face); outline-color: var(--field); outline: 1px solid var(--field); box-shadow: var(--sink-shallow); cursor: default; padding: 5px 3px 3px 5px; }
+
+/* Search tab and the field it opens. The tab stays pressed in while the field
+   is showing, the way a latched toolbar button does. Its own press padding
+   shifts the 4px 8px rest state by 1px rather than adopting the arrows' 24px
+   one, which would visibly narrow a text label. */
+.search-tab[aria-expanded="true"] { box-shadow: var(--sink-shallow); padding: 5px 7px 3px 9px; }
+.search-tab.is-pressing { padding: 5px 7px 3px 9px; }
+@media (hover: hover) {
+    .search-tab:active { padding: 5px 7px 3px 9px; }
+}
+/* Only the press that closes the field lights up. The open now happens on
+   pointerdown, so aria-expanded is already true by the time the press visual
+   lands — .search-opening excludes that initial press. */
+.search-tab[aria-expanded="true"]:not(.search-opening).is-pressing { background: var(--field); }
+@media (hover: hover) {
+    .search-tab[aria-expanded="true"]:not(.search-opening):active { background: var(--field); }
+}
+/* font-size: 0 retires the markup's × in favour of the plotted one, which the
+   aria-label carries for anyone not looking at it. 7px of glyph cannot sit on
+   whole pixels in a 24px box, so it takes the pixel above and left of centre
+   rather than blurring itself across two. */
+.search-clear { position: relative; font-size: 0; box-shadow: none; }
+.search-clear:active { background: var(--field); }
+.search-clear::before { top: 8px; left: 8px; width:2px !important; height:2px !important; }
+/* An absolutely positioned glyph is measured from the padding box, so the press
+   padding cannot move it; the same 1px shift is restated here instead. */
+.search-clear.is-pressing::before {  }
+@media (hover: hover) {
+    .search-clear:active::before { }
+}
+/* Stepped rather than smooth, to match the screen-refresh wipe elsewhere in the
+   file. Only opening plays it: hidden still flips straight to display:none, and
+   a CSS animation can't run across that, so closing stays the instant it always
+   was. Keyed to :not([hidden]) rather than a class — the element is re-created
+   in the render tree each time hidden comes off, which restarts the animation
+   on its own, and there's nothing to remember to toggle. */
+@keyframes search-reveal-steps {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+.search-field:not([hidden]), .search-clear:not([hidden]) { animation: search-reveal-steps 300ms steps(2, end); }
+@media (prefers-reduced-motion: reduce) {
+    .search-field, .search-clear { animation: none; }
+}
+/* Grows into the room beside the arrows but stops well short of the toolbar's
+   full width, which a name-length query would leave mostly empty; the cap is
+   under a phone row, so a wrapped field still fills its own line. */
+/* Height is pinned, not floored: the toolbar aligns to flex-end, so a field even
+   a pixel taller than the 24px controls beside it lifts the flex line and pushes
+   every one of them down to keep the bottoms level. The input inherits the body's
+   1.35 line-height over a generic monospace family, so its natural height is
+   whatever that font resolves to on the machine — not something to leave loose. */
+.search-field { display: flex; align-items: stretch; gap: 4px; flex: 1 1 240px; max-width: 360px; min-width: 0; height: 24px; }
+.search-field[hidden] { display: none; }
+.search-input { flex: 1; min-width: 0; height: 24px; padding: 2px 6px; color: var(--ink); background: var(--white); border: 0; border-radius: 0; box-shadow: var(--sink); outline: 0; font-size: 14px; line-height: 1; }
+.search-input:focus { }
+/* WebKit's own cancel button would sit beside the one the toolbar already draws. */
+.search-input::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; }
 .repo { position: relative; min-width: 0; min-height: 520px; padding: 3px; background: var(--face); box-shadow: var(--sink); }
 /* Keep the inner bevel above the scrolling cards. An inset shadow painted on
    .repobox itself sits behind its children, so the cards conceal it as they
@@ -485,9 +617,16 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
 .filter-item { font-size: 14px; color: var(--muted); }
 .active-filter { display: flex; gap: 5px; align-items: center; padding: 2px 4px; color: #fff; background: var(--blue-bright); }
 .exclude-filter { background: var(--red); }
-.rolling-filter { background: var(--green); }
+.rolling-filter { background: var(--field); color: var(--ink); font-weight: bold; outline: 1px solid var(--ink); }
+/* Typed text rather than a facet, so it doesn't take the blue every chip picked
+   from a menu wears. The × inherits this colour. */
+.search-filter { background: var(--green); }
 .remove-filter-btn { position: relative; flex: 0 0 15px; width: 15px; height: 15px; padding: 0; border: 0; color: inherit; background: transparent; font-size: 0; }
-.remove-filter-btn::before { content: ""; position: absolute; top: 4px; left: 4px; width: 1px; height: 1px; background: currentColor; box-shadow: 6px 0 currentColor, 1px 1px currentColor, 5px 1px currentColor, 2px 2px currentColor, 4px 2px currentColor, 3px 3px currentColor, 2px 4px currentColor, 4px 4px currentColor, 1px 5px currentColor, 5px 5px currentColor, 0 6px currentColor, 6px 6px currentColor; }
+/* One 7x7 plotted × for both the chips and the search field's dismiss button; a
+   font glyph at this size lands differently per platform. Each caller supplies
+   its own offset, since the boxes are different sizes. */
+.remove-filter-btn::before, .search-clear::before { content: ""; position: absolute; width: 1px; height: 1px; background: currentColor; box-shadow: 6px 0 currentColor, 1px 1px currentColor, 5px 1px currentColor, 2px 2px currentColor, 4px 2px currentColor, 3px 3px currentColor, 2px 4px currentColor, 4px 4px currentColor, 1px 5px currentColor, 5px 5px currentColor, 0 6px currentColor, 6px 6px currentColor; }
+.remove-filter-btn::before { top: 4px; left: 4px; }
 .remove-filter-btn.is-touched { color: var(--ink); background: #fff; }
 @media (hover: hover) {
     .remove-filter-btn:hover { color: var(--ink); background: #fff; }
@@ -612,7 +751,39 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
 @media (prefers-reduced-motion: reduce) {
     .form-spinner { animation: none; }
     .thanks-item.is-leaving { opacity: 0; animation: none; }
+    .featured-item { transition: none; }
 }
+
+/* Article page. A reading copy of a Praxis blog post, so the column is measured
+   for prose rather than filling the wrapper. */
+.article { margin: 0 auto; padding: 24px clamp(16px, 4vw, 32px) 32px; background: var(--green); color: white; }
+.article-title { margin: 0 0 4px; font-family: var(--mono); font-size: clamp(26px, 4.5vw, 38px); font-weight: 600; line-height: 1.05; }
+.article-byline { margin: 0 0 20px; font-family: var(--mono); font-size: 13px; letter-spacing: .03em; }
+.article p, .article li { margin: 0 0 15px; font-size: 16px; line-height: 1.5; }
+/* An opportunity listing: a linked name plus a bolded deadline, flagged by the
+   pipeline (readListing) rather than sniffed for here. Outlined rather than
+   bordered so the box costs no layout and the prose stays on the same measure;
+   the roomier margin keeps consecutive listings' outlines from touching. */
+.article p.article-listing { margin-bottom: 26px; padding: 2px 8px; outline: 2px solid var(--white); outline-offset: 6px; }
+.article h2, .article h3 { margin: 26px 0 10px; font-family: var(--mono); font-weight: 600; line-height: 1.15; }
+.article h2 { font-size: 21px; }
+.article h3 { font-size: 17px; }
+.article strong { border: 2px solid var(--white); outline-offset: 0px; padding: 0 6px; }
+.article blockquote { margin: 0 0 15px; padding-left: 14px; border-left: var(--stroke) solid var(--blue-bright); font-size: 15px; line-height: 1.5; }
+.article-list { margin: 0 0 15px; padding-left: 22px; }
+.article-list li { margin-bottom: 6px; }
+.article hr { margin: 24px 0; border: 0; border-top: 1px solid var(--ink); }
+.article-image { display: block; max-width: 100%; height: auto; margin: 0 0 15px; }
+.article a { color: var(--white); font-weight: bold; text-decoration: underline; text-decoration-thickness: 2px; }
+@media (hover: hover) {
+    .article a:hover { outline: 2px solid var(--white); outline-offset: 3px; }
+    
+}
+.article a.is-touched { text-decoration-thickness: 2px; }
+.article a.is-pressing, .article a.is-navigating { color: var(--white); outline-color: var(--white); }
+.article-source { margin: 28px 0 0; padding-top: 14px; border-top: 1px solid var(--white); font-family: var(--mono); font-size: 13px; }
+.article-status { margin: 0 0 12px; color: var(--muted); font-size: 15px; }
+.article-return { color: var(--blue); font-size: 15px; text-decoration: underline; }
 
 ::-webkit-scrollbar { width: 14px; height: 14px; }
 ::-webkit-scrollbar-track { background: var(--face); }
@@ -620,7 +791,13 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
 
 @media (max-width: 700px) {
     .content-wrapper { width: 100%; padding: 10px; }
-    .options-container { grid-template-columns: 1fr; min-height: 0; }
+    /* Zeroed here rather than on .featured-group, so whatever desktop value is set
+       above stays desktop-only without needing a second edit. */
+    .options-container { --featured-offset: 0px; grid-template-columns: 1fr; grid-template-rows: none; min-height: 0; }
+    /* Source order takes over, which puts Featured under all three buttons. */
+    .opportunity-group, .action-group, .featured-group { grid-column: 1; grid-row: auto; }
+    .option-details { display: none; }
+    .option-details.open { display: flex; }
     .columns { grid-template-columns: 1fr; }
     .filters { order: -1; }
     .filter-selectors { display: grid; grid-template-columns: 1fr 1fr; align-items: center; }
@@ -642,7 +819,7 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
    and offers no way back out. Keyed to the pointer rather than the width so a
    narrow desktop window keeps the 14px body type in its form. */
 @media (pointer: coarse) {
-    .form-input, .form-textarea { font-size: 16px; }
+    .form-input, .form-textarea, .search-input { font-size: 16px; }
     /* Mobile draws its own overlay scrollbars and ignores the ::-webkit-scrollbar
        rules above entirely, leaving a pale bar that vanishes against these light
        fills. scrollbar-color is the one lever those overlay bars do respect. It
