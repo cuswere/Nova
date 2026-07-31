@@ -45,7 +45,7 @@
    enough to scroll — the article page, mostly — keeps the wrapper on the same
    centre line as a page that isn't. Ignored where scrollbars are overlays, which
    is every touch browser, and there they never shifted anything to begin with. */
-html { min-height: 100%; background: var(--field); scrollbar-gutter: stable both-edges; }
+html { min-height: 100%; background: var(--face); scrollbar-gutter: stable both-edges; }
 body {
     min-height: 100vh;
     margin: 0;
@@ -115,8 +115,9 @@ button { cursor: pointer; }
     margin: 0 auto;
     padding: 16px;
     background: var(--face);
-    border-left: 1px solid var(--line);
-    border-right: 1px solid var(--line);
+    outline: 4px double var(--face);
+    outline-offset: 4px;
+    box-shadow: 0 0 8px 8px var(--face);
 }
 
 .field { background: var(--face); }
