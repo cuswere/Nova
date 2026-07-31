@@ -119,7 +119,7 @@ button { cursor: pointer; }
     border-right: 1px solid var(--line);
 }
 
-.field { background: var(--face); box-shadow: var(--raise); }
+.field { background: var(--face); }
 
 /* Shared page-title bar: identity and page name on the left, page actions right. */
 .page-header {
@@ -251,11 +251,11 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
 .option-details a.is-pressing,
 .option-btn a.is-navigating,
 .option-details a.is-navigating,
-.option-btn .info.is-pressing { color: var(--white); outline-color: var(--white); }
+.option-btn .info.is-pressing { color: var(--red); outline-color: var(--red); }
 @media (hover: hover) {
     .option-btn a:active,
     .option-details a:active,
-    .option-btn .info:active { color: var(--white); outline-color: var(--white); }
+    .option-btn .info:active { color: var(--red); outline-color: var(--red); }
 }
 
 /* Featured articles. Same fill and blue drop shadow as the option buttons so it
