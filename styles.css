@@ -758,7 +758,7 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
 .article { margin: 0 auto; padding: 24px clamp(16px, 4vw, 32px) 32px; background: var(--green); color: white; box-shadow: var(--sink); }
 .article-title { margin: 0 0 4px; font-family: var(--mono); font-size: clamp(26px, 4.5vw, 38px); font-weight: 600; line-height: 1.05; }
 .article-byline { margin: 0 0 20px; font-family: var(--mono); font-size: 13px; letter-spacing: .03em; }
-.article p, .article li { margin: 0 0 15px; font-size: 16px; line-height: 1.5; }
+.article p, .article li { margin: 0 0 15px; font-size: 16px; line-height: 1.75; }
 /* An opportunity listing: a linked name plus a bolded deadline, flagged by the
    pipeline (readListing) rather than sniffed for here. Outlined rather than
    bordered so the box costs no layout and the prose stays on the same measure;
@@ -767,15 +767,21 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
 .article h2, .article h3 { margin: 26px 0 10px; font-family: var(--mono); font-weight: 600; line-height: 1.15; }
 .article h2 { font-size: 21px; }
 .article h3 { font-size: 17px; }
+/* A link or a date that wraps is one inline box split in two, and by default the
+   padding and border are sliced: they land on the outer edges of the whole run and
+   nowhere near the break, leaving the fragments either side of it flush against
+   their own text. clone gives every fragment the full set instead. Prefixed for
+   WebKit, which is what the phones run. */
+.article strong, .article a { -webkit-box-decoration-break: clone; box-decoration-break: clone; }
 .article strong { border: 2px solid var(--white); outline-offset: 0px; padding: 0 6px; }
 .article blockquote { margin: 0 0 15px; padding-left: 14px; border-left: var(--stroke) solid var(--blue-bright); font-size: 15px; line-height: 1.5; }
 .article-list { margin: 0 0 15px; padding-left: 22px; }
 .article-list li { margin-bottom: 6px; }
 .article hr { margin: 24px 0; border: 0; border-top: 1px solid var(--ink); }
 .article-image { display: block; max-width: 100%; height: auto; margin: 0 0 15px; }
-.article a { color: var(--blue-bright); font-weight: bold; text-decoration: underline; text-decoration-thickness: 2px; }
+.article a { color: var(--blue-bright); font-weight: bold; text-decoration: underline; text-decoration-thickness: 2px; background: var(--white); padding: 6px }
 @media (hover: hover) {
-    .article a:hover { outline: 2px solid var(--blue-bright); outline-offset: 2px; }
+    .article a:hover { outline: 2px solid var(--blue-bright); outline-offset: -4px; }
     
 }
 .article a.is-touched { text-decoration-thickness: 2px; }
