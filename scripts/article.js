@@ -38,7 +38,12 @@ function bridgeLeg(container, left, top, width, height) {
     leg.style.top = `${top}px`;
     leg.style.width = `${width}px`;
     leg.style.height = `${height}px`;
-    container.append(leg);
+    /* Prepended, not appended: the legs are absolutely positioned, so their place
+       in the DOM changes nothing about where they land — but appended they become
+       the article's last children, and any :last-child rule meant for the prose
+       silently lands on a leg instead. Painting behind the text is also the safer
+       order for decoration that is only ever meant to sit in the gutter. */
+    container.prepend(leg);
 }
 
 /* Ties the two halves of a wrapped link together: out from the right edge of the
