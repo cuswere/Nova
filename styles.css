@@ -45,12 +45,11 @@
    enough to scroll — the article page, mostly — keeps the wrapper on the same
    centre line as a page that isn't. Ignored where scrollbars are overlays, which
    is every touch browser, and there they never shifted anything to begin with. */
-html { min-height: 100%; background: var(--desktop); scrollbar-gutter: stable both-edges; }
+html { min-height: 100%; background: var(--field); scrollbar-gutter: stable both-edges; }
 body {
     min-height: 100vh;
     margin: 0;
     color: var(--ink);
-    background: var(--desktop);
     font: 14px/1.35 var(--mono);
     font-variant-ligatures: none;
     -webkit-font-smoothing: none;
@@ -756,7 +755,7 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
 
 /* Article page. A reading copy of a Praxis blog post, so the column is measured
    for prose rather than filling the wrapper. */
-.article { margin: 0 auto; padding: 24px clamp(16px, 4vw, 32px) 32px; background: var(--green); color: white; }
+.article { margin: 0 auto; padding: 24px clamp(16px, 4vw, 32px) 32px; background: var(--green); color: white; box-shadow: var(--sink); }
 .article-title { margin: 0 0 4px; font-family: var(--mono); font-size: clamp(26px, 4.5vw, 38px); font-weight: 600; line-height: 1.05; }
 .article-byline { margin: 0 0 20px; font-family: var(--mono); font-size: 13px; letter-spacing: .03em; }
 .article p, .article li { margin: 0 0 15px; font-size: 16px; line-height: 1.5; }
