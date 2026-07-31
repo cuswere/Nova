@@ -773,13 +773,13 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
 .article-list li { margin-bottom: 6px; }
 .article hr { margin: 24px 0; border: 0; border-top: 1px solid var(--ink); }
 .article-image { display: block; max-width: 100%; height: auto; margin: 0 0 15px; }
-.article a { color: var(--white); font-weight: bold; text-decoration: underline; text-decoration-thickness: 2px; }
+.article a { color: var(--blue-bright); font-weight: bold; text-decoration: underline; text-decoration-thickness: 2px; }
 @media (hover: hover) {
-    .article a:hover { outline: 2px solid var(--white); outline-offset: 3px; }
+    .article a:hover { outline: 2px solid var(--blue-bright); outline-offset: 2px; }
     
 }
 .article a.is-touched { text-decoration-thickness: 2px; }
-.article a.is-pressing, .article a.is-navigating { color: var(--white); outline-color: var(--white); }
+.article a.is-pressing, .article a.is-navigating { color: var(--blue-bright); outline-color: var(--blue-bright); }
 .article-source { margin: 28px 0 0; padding-top: 14px; border-top: 1px solid var(--white); font-family: var(--mono); font-size: 13px; }
 .article-status { margin: 0 0 12px; color: var(--muted); font-size: 15px; }
 .article-return { color: var(--blue); font-size: 15px; text-decoration: underline; }
