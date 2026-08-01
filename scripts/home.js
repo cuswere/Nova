@@ -19,11 +19,8 @@ function setupOptionDetails() {
 }
 
 /* One random offset, shared by every cloud in the header, so no two visits open
-   on the same sky. It's a single time offset rather than a fresh random phase
-   per cloud because the spacing in styles.css was solved across an hour of
-   drift: sliding the whole set along that hour lands on an arrangement that was
-   already checked, where independent rolls would sooner or later pile them up or
-   empty the bar. An hour is also long enough that the repeat is unreachable. */
+   on the same sky. A shared offset preserves the even spacing inside each depth
+   band; independently randomized clouds would eventually pile up. */
 function setupSky() {
     const sky = document.querySelector('.header-sky');
     if (!sky) return;
