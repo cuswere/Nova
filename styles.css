@@ -201,19 +201,20 @@ button { cursor: pointer; }
 }
 /* Three internally consistent depth bands. The finer step counts keep each tick
    near one device-independent pixel on a full-width header without softening the
-   SVG artwork. DOM order interleaves the bands so responsive thinning stays
-   balanced. */
+   SVG artwork. Each band begins at a different rotation so the no-script
+   fallback is spread out too. DOM order interleaves the bands so responsive
+   thinning stays balanced. */
 /* Near: largest, brightest, and quickest. */
 .cloud:nth-child(1) { --art: var(--art-lg-a); --h: 9px; --top: 4px;  --fade: .52; --dur: 150s; --steps: 640; --delay: 0s; }
 .cloud:nth-child(4) { --art: var(--art-lg-b); --h: 9px; --top: 18px; --fade: .48; --dur: 150s; --steps: 640; --delay: -50s; }
 .cloud:nth-child(8) { --art: var(--art-lg-a); --h: 9px; --top: 11px; --fade: .50; --dur: 150s; --steps: 640; --delay: -100s; }
 /* Mid. */
-.cloud:nth-child(2) { --art: var(--art-md-a); --h: 9px; --top: 17px; --fade: .40; --dur: 220s; --steps: 600; --delay: 0s; }
-.cloud:nth-child(5) { --art: var(--art-md-b); --h: 9px; --top: 8px;  --fade: .37; --dur: 220s; --steps: 600; --delay: -73.333s; }
-.cloud:nth-child(7) { --art: var(--art-md-a); --h: 9px; --top: 1px;  --fade: .38; --dur: 220s; --steps: 600; --delay: -146.667s; }
+.cloud:nth-child(2) { --art: var(--art-md-a); --h: 9px; --top: 17px; --fade: .40; --dur: 220s; --steps: 600; --delay: -24.444s; }
+.cloud:nth-child(5) { --art: var(--art-md-b); --h: 9px; --top: 8px;  --fade: .37; --dur: 220s; --steps: 600; --delay: -97.778s; }
+.cloud:nth-child(7) { --art: var(--art-md-a); --h: 9px; --top: 1px;  --fade: .38; --dur: 220s; --steps: 600; --delay: -171.111s; }
 /* Far: smallest, faintest, and slowest. */
-.cloud:nth-child(3) { --art: var(--art-sm-a); --h: 6px; --top: 2px;  --fade: .30; --dur: 300s; --steps: 560; --delay: 0s; }
-.cloud:nth-child(6) { --art: var(--art-sm-b); --h: 6px; --top: 21px; --fade: .27; --dur: 300s; --steps: 560; --delay: -150s; }
+.cloud:nth-child(3) { --art: var(--art-sm-a); --h: 6px; --top: 2px;  --fade: .30; --dur: 300s; --steps: 560; --delay: -66.667s; }
+.cloud:nth-child(6) { --art: var(--art-sm-b); --h: 6px; --top: 21px; --fade: .27; --dur: 300s; --steps: 560; --delay: -216.667s; }
 /* The path is only a little wider than the window the mask opens (52%–100%), so
    a cloud spends most of its cycle on screen rather than queued off-stage —
    that, more than the count, is what keeps the sky populated. It starts inside
@@ -279,7 +280,7 @@ button { cursor: pointer; }
 /* Leave-site confirmation, styled as a system dialog. */
 /* margin: 0 defeats the UA's centring so top/left can place it; both are set
    before it is shown, so it never paints centred first. */
-.exit-dialog { outline: 1px solid var(--ink); position: fixed; margin: 0; max-width: min(380px, calc(100vw - 32px)); padding: 3px; color: var(--ink); border: 0; box-shadow: 0px 0px 4px 2px var(--white); font: inherit; }
+.exit-dialog { position: fixed; margin: 0; max-width: min(380px, calc(100vw - 32px)); padding: 3px; color: var(--ink); border: 0; box-shadow: 0px 0px 4px 2px var(--white); font: inherit; }
 /* Invisible handle over the top third, standing in for the removed title bar.
    An element rather than a coordinate check, so the drag region is defined once
    here and the script just listens to it. */
@@ -914,7 +915,7 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
    pipeline (readListing) rather than sniffed for here. Outlined rather than
    bordered so the box costs no layout and the prose stays on the same measure;
    the roomier margin keeps consecutive listings' outlines from touching. */
-.article p.article-listing { margin-bottom: 26px; padding: 12px 24px; background: var(--face); color: var(--ink); outline: 0px solid var(--face); outline-offset: 12px; line-height: 2.2; }
+.article p.article-listing { margin-bottom: 26px; padding: 12px 24px; background: var(--field); color: var(--ink); outline: 0px solid var(--face); outline-offset: 12px; line-height: 2.2; }
 .article h2, .article h3 { margin: 26px 0 10px; font-family: var(--mono); font-weight: 600; line-height: 1.15; }
 .article h2 { font-size: 21px; }
 .article h3 { font-size: 17px; }
@@ -933,13 +934,20 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
 .article-image { display: block; max-width: 100%; height: auto; margin: 0 0 15px; }
 .article a { color: var(--blue-bright); font-weight: bold; text-decoration: underline; text-decoration-thickness: 2px; padding: 0px }
 .article .article-listing a{ background: var(--blue-bright); color: var(--white); padding: 6px }
+/* Hook for the opportunity's own name and website, the listing's first link.
+   :first-of-type is not a guess at which link that is: readListing takes the
+   paragraph's first href span, and a link is always a direct child of the <p>,
+   so the two select the same element. Empty on purpose — it only overrides what
+   is put in it. */
+.article .article-listing a:first-of-type { background: var(--green); color: var(--white); box-shadow: 0 0 4px 2px var(--green);}
 @media (hover: hover) {
     .article a:hover { outline: 2px solid var(--blue-bright); outline-offset: 2px; }
     .article .article-listing a:hover { outline: 2px solid var(--white); outline-offset: -4px; }
+    .article .article-listing a:first-of-type:hover { outline-color: var(--white); }
 }
 .article a.is-touched { text-decoration-thickness: 2px; }
 .article a.is-pressing, .article a.is-navigating { color: var(--blue-bright); outline-color: var(--blue-bright); }
-.article-source { margin: 28px 0 0; padding-top: 14px; border-top: 1px solid var(--white); font-family: var(--mono); font-size: 13px; }
+.article-source { margin: 28px 0 0; padding-top: 14px; border-top: 1px solid var(--blue-bright); font-family: var(--mono); font-size: 13px; }
 /* Trailing margin at the end of a scroll container is dead space you can still
    scroll to. The last element's bottom margin goes, leaving the article's own
    padding as the only gutter under the text. */
