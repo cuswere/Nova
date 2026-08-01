@@ -915,7 +915,7 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
    pipeline (readListing) rather than sniffed for here. Outlined rather than
    bordered so the box costs no layout and the prose stays on the same measure;
    the roomier margin keeps consecutive listings' outlines from touching. */
-.article p.article-listing { margin-bottom: 26px; padding: 12px 24px; background: var(--field); color: var(--ink); outline: 0px solid var(--face); outline-offset: 12px; line-height: 2.2; }
+.article p.article-listing { margin-bottom: 26px; padding: 12px 24px; background: var(--field); box-shadow: var(--sink-shallow); color: var(--ink); outline: 0px solid var(--face); outline-offset: 12px; line-height: 2.2; }
 .article h2, .article h3 { margin: 26px 0 10px; font-family: var(--mono); font-weight: 600; line-height: 1.15; }
 .article h2 { font-size: 21px; }
 .article h3 { font-size: 17px; }
