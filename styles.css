@@ -561,7 +561,7 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
     .opportunity-card a.line-background-ready:has(.link-text:hover, .link-line-background:hover) .link-line-background { background: var(--field); }
 }
 
-.top-right-grid { border: 1px solid var(--ink); padding: 8px; min-width: 0; max-width: 100%; }
+.top-right-grid { box-shadow: var(--sink-shallow); padding: 8px; min-width: 0; max-width: 100%; }
 .details-summary-row { display: flex; justify-content: flex-start; align-items: flex-start; align-self: stretch; flex-wrap: wrap; gap: 4px; }
 .grid-cell, .date-cell { min-width: 0; padding: 4px 5px; text-align: center; font-size: 14px; text-transform: uppercase; letter-spacing: .04em; }
 .grid-cell { background: none; border: 1px solid var(--ink); flex: 0 1 auto; display: flex; align-items: center; justify-content: center; max-width: 100%; overflow: hidden; overflow-wrap: anywhere; line-height: 1.15; box-shadow: none; }
@@ -915,7 +915,7 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
    pipeline (readListing) rather than sniffed for here. Outlined rather than
    bordered so the box costs no layout and the prose stays on the same measure;
    the roomier margin keeps consecutive listings' outlines from touching. */
-.article p.article-listing { margin-bottom: 26px; padding: 12px 24px; background: var(--field); box-shadow: var(--sink-shallow); color: var(--ink); outline: 0px solid var(--face); outline-offset: 12px; line-height: 2.2; }
+.article p.article-listing { margin-bottom: 26px; padding: 12px 24px; background: var(--field); box-shadow: var(--sink); color: var(--ink); outline: 0px solid var(--face); outline-offset: 12px; line-height: 2.2; }
 .article h2, .article h3 { margin: 26px 0 10px; font-family: var(--mono); font-weight: 600; line-height: 1.15; }
 .article h2 { font-size: 21px; }
 .article h3 { font-size: 17px; }
