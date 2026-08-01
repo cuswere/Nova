@@ -31,6 +31,20 @@
     --sink-blue: inset 1px 1px #000090, inset -1px -1px #a8a8ff, inset 2px 2px #00002e, inset -2px -2px #5a5aff;
     --label-bevel: inset 1px 1px #eee, inset -1px -1px #888;
     --mono: monospace;
+    /* Home controls (the three option buttons, their details row, and the
+       Featured cards) share one accent: --home-accent draws the resting blue and
+       the hover outline, --home-accent-press the red a press swaps in. Retune
+       these two to recolour the whole panel in step. The outline knobs are split
+       by scale — the big buttons and Featured sit inside their own edge, the
+       prose-sized details links outside theirs. */
+    --home-accent: var(--blue-bright);
+    --home-accent-press: var(--white);
+    --home-outline-width: var(--stroke);
+    --home-outline-offset: -8px;
+    /* Featured cards and the info button's focus ring, whose padding is tighter. */
+    --home-outline-offset-tight: -6px;
+    --home-details-outline-width: 2px;
+    --home-details-outline-offset: 2px;
 }
 
 /* Keyed to width, not pointer: the home-button font is vw-clamped, so it's a
@@ -210,14 +224,14 @@ button { cursor: pointer; }
 .opportunity-group, .action-group, .option-btn-container { display: flex; flex-direction: column; align-items: stretch; }
 .action-group { gap: 12px; }
 .option-btn-container { min-width: 0; }
-span.option-btn { display: flex; background: var(--field); box-shadow: var(--stroke) var(--stroke) 0 var(--blue-bright); font-family: var(--mono); font-size: clamp(23px, 3.3vw, 37px); line-height: .98; }
+span.option-btn { display: flex; background: var(--field); box-shadow: var(--stroke) var(--stroke) 0 var(--home-accent); font-family: var(--mono); font-size: clamp(23px, 3.3vw, 37px); line-height: .98; }
 .option-btn a { flex: 1; padding: 12px; text-decoration: underline; }
 @media (hover: hover) {
-    .option-btn a:hover { text-decoration: underline; text-decoration-thickness: var(--stroke); outline: var(--stroke) solid var(--blue-bright); outline-offset: -8px;}
+    .option-btn a:hover { text-decoration: underline; text-decoration-thickness: var(--stroke); outline: var(--home-outline-width) solid var(--home-accent); outline-offset: var(--home-outline-offset);}
 }
 /* The press and navigating rules further down only recolour this outline, so it
    has to be drawn here too — on touch there is no hover to have drawn it. */
-.option-btn a.is-touched, .option-btn a.is-navigating { text-decoration: underline; outline: var(--stroke) solid var(--blue-bright); outline-offset: -8px; }
+.option-btn a.is-touched, .option-btn a.is-navigating { text-decoration: underline; outline: var(--home-outline-width) solid var(--home-accent); outline-offset: var(--home-outline-offset); }
 /* The underline's natural thickness follows the font, which shrinks with the
    clamped size on a phone until it no longer reads as the same weight as the
    outline beside it. Pinned to --stroke to match, and keyed to the pointer rather
@@ -226,12 +240,12 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
 @media (pointer: coarse) {
     .option-btn a.is-touched, .option-btn a.is-navigating { text-decoration-thickness: var(--stroke); }
 }
-.option-btn .info { flex: 0 0 46px; display: grid; place-items: center; padding: 0; background: none; color: var(--blue-bright); border: 0; border-left: 0px solid var(--ink); font: inherit; line-height: 1; user-select: none; -webkit-user-select: none; }
+.option-btn .info { flex: 0 0 46px; display: grid; place-items: center; padding: 0; background: none; color: var(--home-accent); border: 0; border-left: 0px solid var(--ink); font: inherit; line-height: 1; user-select: none; -webkit-user-select: none; }
 @media (hover: hover) {
-    .option-btn .info:hover { text-decoration: none; outline: var(--stroke) solid var(--blue-bright); outline-offset: -8px; }
+    .option-btn .info:hover { text-decoration: none; outline: var(--home-outline-width) solid var(--home-accent); outline-offset: var(--home-outline-offset); }
 }
-.option-btn .info.is-touched { text-decoration: none; outline: var(--stroke) solid var(--blue-bright); outline-offset: -8px; }
-.option-btn .info:focus-visible { outline: var(--stroke) solid var(--blue-bright); outline-offset: -6px; }
+.option-btn .info.is-touched { text-decoration: none; outline: var(--home-outline-width) solid var(--home-accent); outline-offset: var(--home-outline-offset); }
+.option-btn .info:focus-visible { outline: var(--home-outline-width) solid var(--home-accent); outline-offset: var(--home-outline-offset-tight); }
 
 /* Laid out whether or not it is open, and only revealed by the toggle, so the
    room it needs is always reserved: opening it can neither displace the Featured
@@ -244,47 +258,47 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
 .option-details-row { display: contents; color: var(--ink); font-size: 16px; }
 .option-details a { text-decoration: underline; text-decoration-thickness: 2px; }
 @media (hover: hover) {
-    .option-details a:hover { outline: 2px solid var(--blue-bright); outline-offset: 2px;}
+    .option-details a:hover { outline: var(--home-details-outline-width) solid var(--home-accent); outline-offset: var(--home-details-outline-offset);}
 }
-.option-details a.is-touched, .option-details a.is-navigating { outline: 2px solid var(--blue-bright); outline-offset: 2px; }
+.option-details a.is-touched, .option-details a.is-navigating { outline: var(--home-details-outline-width) solid var(--home-accent); outline-offset: var(--home-details-outline-offset); }
 
 .option-btn a.is-pressing,
 .option-details a.is-pressing,
 .option-btn a.is-navigating,
 .option-details a.is-navigating,
-.option-btn .info.is-pressing { color: var(--red); outline-color: var(--red); }
+.option-btn .info.is-pressing { color: var(--home-accent-press); outline-color: var(--home-accent-press); }
 @media (hover: hover) {
     .option-btn a:active,
     .option-details a:active,
-    .option-btn .info:active { color: var(--red); outline-color: var(--red); }
+    .option-btn .info:active { color: var(--home-accent-press); outline-color: var(--home-accent-press); }
 }
 
 /* Featured articles. Same fill and blue drop shadow as the option buttons so it
    reads as part of the same panel, at prose sizes so it stays secondary to them. */
-.featured-group { display: flex; flex-direction: column; min-width: 0; margin-top: var(--featured-offset); padding: 4px 12px 12px; background: var(--field); outline: 0 solid var(--blue-bright); box-shadow: var(--stroke) calc(var(--stroke) * -1) 0 var(--blue-bright); font-family: var(--mono); }
-.featured-heading { margin: 0 0 4px; padding-bottom: 2px; border-bottom: var(--stroke) solid var(--blue-bright); color: var(--blue-bright); font-size: 16px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+.featured-group { display: flex; flex-direction: column; min-width: 0; margin-top: var(--featured-offset); padding: 4px 12px 12px; background: var(--field); outline: 0 solid var(--home-accent); box-shadow: var(--stroke) calc(var(--stroke) * -1) 0 var(--home-accent); font-family: var(--mono); }
+.featured-heading { margin: 0 0 4px; padding-bottom: 2px; border-bottom: var(--stroke) solid var(--home-accent); color: var(--home-accent); font-size: 16px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
 .featured-list { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; }
 /* The whole card is the anchor, so the colour and the press states live here and
    everything inside inherits them — one source of truth, and a press reddens the
    card in one go. The resting shadow is the transparent twin of the hover one:
    box-shadow only steps cleanly between two shadows of the same shape. */
-.featured-item { display: flex; flex-direction: column; gap: 2px; padding: 8px; box-shadow: 0 0 4px 2px var(--blue-bright); background: var(--field);
-    outline-offset: 0px; color: var(--blue-bright); transition: box-shadow 0ms steps(4, end);  }
+.featured-item { display: flex; flex-direction: column; gap: 2px; padding: 8px; box-shadow: 0 0 4px 2px var(--home-accent); background: var(--field);
+    outline-offset: 0px; color: var(--home-accent); transition: box-shadow 0ms steps(4, end);  }
 .featured-line { margin: 0; font-size: 16px; line-height: 1.2; }
 .featured-title { color: inherit; text-decoration: underline; font-weight: bold; text-decoration-thickness: 2px !important;  }
 .featured-date { white-space: nowrap; font-size: 13px; }
 @media (hover: hover) {
     /* text-decoration: none overrides the site-wide a:hover underline, which would
        otherwise draw a line under every row of the card. */
-    .featured-item:hover { text-decoration: none; outline: var(--stroke) solid var(--blue-bright); outline-offset: -5px; outline-width: 0px;
-      box-shadow: 0 0 4px 2px var(--blue-bright); background-color: var(--white); }
+    .featured-item:hover { text-decoration: none; outline: var(--home-outline-width) solid var(--home-accent); outline-offset: var(--home-outline-offset-tight);
+      box-shadow: 0 0 4px 2px var(--home-accent); }
     /* The press has to read as instant, so it cancels the transition rather than
        stepping the glow away. Releasing hands the element back to the rules above,
        whose transition is still in force, so the glow steps back in on the way out. */
-    .featured-item:active { color: var(--white); background: var(--green); outline-color: var(--green); box-shadow: none; outline-offset: 2px; outline-width: var(--stroke); }
+    .featured-item:active { color: var(--home-accent-press); background: var(--field); outline-color: var(--home-accent-press); box-shadow: none; outline-offset: -2px; outline-width: var(--home-outline-width); }
 }
 .featured-item.is-touched {  }
-.featured-item.is-pressing, .featured-item.is-navigating { color: var(--white); background: var(--green); outline-color: var(--green); box-shadow: none; outline-offset: 2px; outline-width: var(--stroke); }
+.featured-item.is-pressing, .featured-item.is-navigating { color: var(--home-accent-press); background: var(--field); outline-color: var(--home-accent-press); box-shadow: none; outline-offset: -2px; outline-width: var(--home-outline-width); }
 /* The opportunities the article carries: name to the left, deadline held to the
    right edge so the dates line up down the column. */
 .featured-opportunities { display: flex; flex-direction: column; gap: 4px; margin: 0; padding: 0; list-style: none; font-size: 13px; line-height: 1.25; }
@@ -760,7 +774,7 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
    measured rects, resolve against this padding box. */
 /* position: relative so the wrap connectors, which are absolutely placed from
    measured rects, resolve against this padding box. */
-.article { position: relative; margin: 0 auto; padding: 16px clamp(16px, 4vw, 32px) 32px; padding-bottom: 0; background: var(--green); color: white; }
+.article { position: relative; margin: 0 auto; padding: 16px clamp(16px, 4vw, 32px) 32px; padding-bottom: 0; background: var(--field); color: var(--ink); }
 /* Holds a boxed run and the punctuation after it on one line; applied by
    spanNodes, which is where the reasoning lives. */
 .nowrap { white-space: nowrap; }
@@ -811,7 +825,7 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
    pipeline (readListing) rather than sniffed for here. Outlined rather than
    bordered so the box costs no layout and the prose stays on the same measure;
    the roomier margin keeps consecutive listings' outlines from touching. */
-.article p.article-listing { margin-bottom: 26px; padding: 12px 24px; background: var(--field); color: var(--ink); outline: 2px solid var(--field); outline-offset: 12px; line-height: 2.2; }
+.article p.article-listing { margin-bottom: 26px; padding: 12px 24px; background: var(--field); color: var(--ink); outline: 2px solid var(--blue-bright); outline-offset: 12px; line-height: 2.2; }
 .article h2, .article h3 { margin: 26px 0 10px; font-family: var(--mono); font-weight: 600; line-height: 1.15; }
 .article h2 { font-size: 21px; }
 .article h3 { font-size: 17px; }
