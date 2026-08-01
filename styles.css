@@ -387,8 +387,8 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
        whose transition is still in force, so the glow steps back in on the way out. */
     .featured-item:active { color: var(--home-accent-press); background: var(--field); outline-color: var(--home-accent-press); box-shadow: none; outline-offset: -2px; outline-width: var(--home-outline-width); }
 }
-.featured-item.is-touched {  }
-.featured-item.is-pressing, .featured-item.is-navigating { color: var(--home-accent-press); background: var(--field); outline-color: var(--home-accent-press); box-shadow: none; outline-offset: -2px; outline-width: var(--home-outline-width); }
+.featured-item.is-touched { color: var(--home-accent-press); background: var(--field); outline: var(--home-outline-width) solid var(--home-accent-press); box-shadow: none; outline-offset: -2px; outline-width: var(--home-outline-width); }
+.featured-item.is-pressing, .featured-item.is-navigating { color: var(--home-accent-press); background: var(--field); outline: var(--home-outline-width) solid var(--home-accent-press); box-shadow: none; outline-offset: -2px; outline-width: var(--home-outline-width); }
 /* The opportunities the article carries: name to the left, deadline held to the
    right edge so the dates line up down the column. */
 .featured-opportunities { display: flex; flex-direction: column; gap: 4px; margin: 0; padding: 0; list-style: none; font-size: 13px; line-height: 1.25; }
