@@ -42,7 +42,7 @@
     --home-outline-width: var(--stroke);
     --home-outline-offset: -8px;
     /* Featured cards and the info button's focus ring, whose padding is tighter. */
-    --home-outline-offset-tight: -6px;
+    --home-outline-offset-tight: -2px;
     --home-details-outline-width: 2px;
     --home-details-outline-offset: 2px;
 }
@@ -415,7 +415,7 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
    everything inside inherits them — one source of truth, and a press reddens the
    card in one go. The resting shadow is the transparent twin of the hover one:
    box-shadow only steps cleanly between two shadows of the same shape. */
-.featured-item { display: flex; flex-direction: column; gap: 2px; padding: 8px; box-shadow: 0 0 4px 2px var(--home-accent); background: var(--field);
+.featured-item { display: flex; flex-direction: column; gap: 2px; padding: 8px; background: var(--field);
     outline-offset: 0px; color: var(--home-accent); transition: box-shadow 0ms steps(4, end);  }
 .featured-line { margin: 0; font-size: 16px; line-height: 1.2; }
 .featured-title { color: inherit; text-decoration: underline; font-weight: bold; text-decoration-thickness: 2px !important;  }
@@ -424,7 +424,7 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
     /* text-decoration: none overrides the site-wide a:hover underline, which would
        otherwise draw a line under every row of the card. */
     .featured-item:hover { text-decoration: none; outline: var(--home-outline-width) solid var(--home-accent); outline-offset: var(--home-outline-offset-tight);
-      box-shadow: 0 0 4px 2px var(--home-accent); }
+       }
     /* The press has to read as instant, so it cancels the transition rather than
        stepping the glow away. Releasing hands the element back to the rules above,
        whose transition is still in force, so the glow steps back in on the way out. */
@@ -958,7 +958,7 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
    pipeline (readListing) rather than sniffed for here. Outlined rather than
    bordered so the box costs no layout and the prose stays on the same measure;
    the roomier margin keeps consecutive listings' outlines from touching. */
-.article p.article-listing { margin-bottom: 26px; padding: 12px 24px; background: var(--face); color: var(--ink); outline: 2px dashed var(--face); outline-offset: 12px; line-height: 2.2; }
+.article p.article-listing { margin-bottom: 26px; padding: 12px 24px; background: var(--face); color: var(--ink); outline: 0px solid var(--face); outline-offset: 12px; line-height: 2.2; }
 .article h2, .article h3 { margin: 26px 0 10px; font-family: var(--mono); font-weight: 600; line-height: 1.15; }
 .article h2 { font-size: 21px; }
 .article h3 { font-size: 17px; }
