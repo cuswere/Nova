@@ -142,6 +142,7 @@ button { cursor: pointer; }
     min-height: 31px;
     margin: 0 0 8px;
     padding: 4px 5px;
+    position: relative;
     display: flex;
     align-items: center;
     gap: 0;
@@ -152,7 +153,139 @@ button { cursor: pointer; }
 }
 /* The gradient is the landing page's flourish; inner pages keep it flat. */
 .page-home .page-header { background: linear-gradient(90deg, var(--blue-bright), var(--praxis-blue)); }
-.page-title { display: flex; align-items: center; min-width: 0; margin: 0; font: inherit; }
+/* Clouds drifting into the bright end of that gradient. Each cloud is its own
+   element carrying its own art, speed, step size, bob and phase, because a
+   shared tile can only ever march — the giveaway isn't the speed, it's a dozen
+   things changing at the same instant. The layout is fixed here rather than
+   generated per cloud at runtime, and the one thing script does supply is a
+   single offset (--shift) that slides the whole set along its own timeline, so
+   every visit opens on a different arrangement. Drift runs on `translate` and
+   the bob on `transform` so the two animations never contend for one property,
+   and neither touches layout.
+
+   Four shapes, all flat rects at 1:1 — no curves and no scaling, so the edges
+   stay pixel-crisp, and all four keep the same stepped silhouette (narrow top
+   row, wide base) so a cloud still reads as one at 11px. A single-bar wisp was
+   tried here and read as a stray dash rather than a small cloud. */
+.header-sky {
+    position: absolute;
+    z-index: 0;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    --art-lg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34' height='9'%3E%3Cg fill='white'%3E%3Crect x='12' y='0' width='13' height='3'/%3E%3Crect x='5' y='3' width='25' height='3'/%3E%3Crect x='0' y='6' width='34' height='3'/%3E%3C/g%3E%3C/svg%3E");
+    --art-md: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='9'%3E%3Cg fill='white'%3E%3Crect x='9' y='0' width='10' height='3'/%3E%3Crect x='3' y='3' width='19' height='3'/%3E%3Crect x='0' y='6' width='24' height='3'/%3E%3C/g%3E%3C/svg%3E");
+    --art-sm: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='6'%3E%3Cg fill='white'%3E%3Crect x='5' y='0' width='9' height='3'/%3E%3Crect x='0' y='3' width='16' height='3'/%3E%3C/g%3E%3C/svg%3E");
+    --art-xs: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='6'%3E%3Cg fill='white'%3E%3Crect x='3' y='0' width='6' height='3'/%3E%3Crect x='0' y='3' width='11' height='3'/%3E%3C/g%3E%3C/svg%3E");
+    /* The sky is only the empty right end of the bar, past the breadcrumb: fully
+       out at 52%, up by 64%, holding to 90%, gone again by the edge. Keep the
+       plateau a good share of that — with narrow solid stops almost every cloud
+       sits in one fade or the other, and a sky that is busy on paper reads as
+       three or four faint marks. */
+    -webkit-mask-image: linear-gradient(90deg, transparent 52%, #000 64%, #000 90%, transparent 100%);
+    mask-image: linear-gradient(90deg, transparent 52%, #000 64%, #000 90%, transparent 100%);
+    /* Set per load by setupSky in home.js; the fallback is a still-good layout
+       rather than a broken one if the script never runs. */
+    --shift: 0s;
+}
+/* Each cloud spans the full bar and carries its art at the left edge, drawing
+   nothing else. That's what lets the drift run on a percentage translate, which
+   resolves against the element's own width and so tracks the header at every
+   size — vw would drift past it once the wrapper hits its 1120px cap. */
+.cloud {
+    position: absolute;
+    top: var(--top);
+    left: 0;
+    right: 0;
+    height: var(--h);
+    background: var(--art) no-repeat left top;
+    opacity: var(--fade);
+    animation-name: cloud-drift, cloud-bob;
+    animation-duration: var(--dur), var(--bob);
+    animation-delay: calc(var(--delay) - var(--shift)), var(--bob-delay);
+    animation-timing-function: steps(var(--steps), end), step-end;
+    animation-iteration-count: infinite;
+}
+/* Four depth bands, not twelve independent clouds. Varying size, speed, step
+   rate and opacity separately per cloud is what made this read as chaos — the
+   eye gets no rule to hold on to. Here each band locks them together the way
+   distance does: a cloud that is smaller is also fainter, slower, and moves less
+   per step, all at once. Variation inside a band is small and only breaks the
+   lockstep; it never crosses a band.
+
+   --steps is set as --dur divided by a cadence held near half a second across
+   every band, which is the trick that makes it feel drawn rather than random:
+   the whole sky ticks on roughly one beat, like cels shot on twos, while the
+   distance covered per tick falls away with depth (~3.2px near, ~2.5px far).
+   Earlier these were picked independently, so distant clouds could lurch further
+   per step than near ones — parallax inverted, which the eye reads as noise.
+   Both numbers scale with the path, so narrowing the sky meant shortening every
+   --dur to match: the drift is a speed, and it shouldn't change because the
+   window did.
+
+   The --delay values set where each cloud sits in its cycle. Evenly-spaced
+   phases don't survive contact with unequal durations — the clouds re-cluster,
+   and the bar empties out for a while every few minutes — so these were solved
+   for rather than eyeballed, against two objectives at once: keep enough clouds
+   in the readable band, and keep them apart while doing it (a count alone is
+   happy to pile six into one corner). Both are measured on opacity after the
+   mask, not on position, since a cloud sitting in a fade is not one you can see,
+   and both are scored on a low percentile rather than the single worst instant —
+   a sky that briefly thins is a sky, not a bug. The bands are interleaved
+   through DOM order, so the rules below — which drop the tail of the list —
+   thin the sky evenly and keep every band represented rather than leaving only
+   the small faint ones. */
+
+/* Near: large, brightest, quickest, 2px bob. */
+.cloud:nth-child(1)  { --art: var(--art-lg); --h: 9px; --top: 5px;  --fade: .55; --dur: 106s; --steps: 204; --delay: -88s;  --bob: 6s;    --amp: 2px; --bob-delay: -1s; }
+.cloud:nth-child(4)  { --art: var(--art-lg); --h: 9px; --top: 18px; --fade: .52; --dur: 102s; --steps: 203; --delay: -30s;  --bob: 5.5s;  --amp: 2px; --bob-delay: -2s; }
+.cloud:nth-child(8)  { --art: var(--art-lg); --h: 9px; --top: 12px; --fade: .55; --dur: 116s; --steps: 214; --delay: -10s;  --bob: 6.5s;  --amp: 2px; --bob-delay: -3.5s; }
+/* Mid. */
+.cloud:nth-child(2)  { --art: var(--art-md); --h: 9px; --top: 16px; --fade: .45; --dur: 144s; --steps: 232; --delay: -60s;  --bob: 8.5s;  --amp: 1px; --bob-delay: -3s; }
+.cloud:nth-child(5)  { --art: var(--art-md); --h: 9px; --top: 9px;  --fade: .42; --dur: 139s; --steps: 231; --delay: -81s;  --bob: 8s;    --amp: 1px; --bob-delay: -4.5s; }
+.cloud:nth-child(7)  { --art: var(--art-md); --h: 9px; --top: 2px;  --fade: .46; --dur: 148s; --steps: 256; --delay: -43s;  --bob: 9s;    --amp: 1px; --bob-delay: -6.5s; }
+.cloud:nth-child(10) { --art: var(--art-md); --h: 9px; --top: 6px;  --fade: .44; --dur: 153s; --steps: 239; --delay: -32s;  --bob: 8.2s;  --amp: 1px; --bob-delay: -4s; }
+/* Far. */
+.cloud:nth-child(3)  { --art: var(--art-sm); --h: 6px; --top: 3px;  --fade: .36; --dur: 174s; --steps: 248; --delay: -65s;  --bob: 11s;   --amp: 1px; --bob-delay: -5s; }
+.cloud:nth-child(9)  { --art: var(--art-sm); --h: 6px; --top: 21px; --fade: .34; --dur: 179s; --steps: 248; --delay: -164s; --bob: 10.5s; --amp: 1px; --bob-delay: -8s; }
+.cloud:nth-child(12) { --art: var(--art-sm); --h: 6px; --top: 10px; --fade: .37; --dur: 183s; --steps: 270; --delay: -61s;  --bob: 11.6s; --amp: 1px; --bob-delay: -6s; }
+/* Furthest: smallest and faintest, but still a cloud silhouette, not a speck. */
+.cloud:nth-child(6)  { --art: var(--art-xs); --h: 6px; --top: 20px; --fade: .30; --dur: 204s; --steps: 256; --delay: -34s;  --bob: 13s;   --amp: 1px; --bob-delay: -6s; }
+.cloud:nth-child(11) { --art: var(--art-xs); --h: 6px; --top: 14px; --fade: .28; --dur: 210s; --steps: 270; --delay: -175s; --bob: 13.5s; --amp: 1px; --bob-delay: -7.5s; }
+/* The path is only a little wider than the window the mask opens (52%–100%), so
+   a cloud spends most of its cycle on screen rather than queued off-stage —
+   that, more than the count, is what keeps the sky populated. It starts inside
+   the mask's transparent margin, so nothing is ever seen appearing. */
+@keyframes cloud-drift {
+    from { translate: 44%; }
+    to { translate: 105%; }
+}
+/* Amplitude tops out at 2px: more reads as a wobble rather than air. step-end
+   holds each position so the bob snaps between whole pixels like the drift. */
+@keyframes cloud-bob {
+    0% { transform: translateY(0); }
+    25% { transform: translateY(var(--amp)); }
+    50% { transform: translateY(0); }
+    75% { transform: translateY(calc(var(--amp) * -1)); }
+}
+/* Density is set by the count, but the count that reads as airy on a 1120px bar
+   is a traffic jam on a phone, where the same mask window is a third as wide.
+   Dropping the tail of the list thins it evenly — see the phase note above. */
+@media (max-width: 700px) {
+    .cloud:nth-child(n+10) { display: none; }
+}
+@media (max-width: 460px) {
+    .cloud:nth-child(n+7) { display: none; }
+}
+/* Hidden rather than frozen: with the drift stopped every cloud sits at the same
+   start offset, which is both a stack of sixteen and behind the mask's
+   transparent end — a static sky here would just be an empty one. */
+@media (prefers-reduced-motion: reduce) {
+    .header-sky { display: none; }
+}
+/* Sits above the clouds: the pseudo-element is positioned and later in source,
+   so the title needs its own layer to stay clear of them on narrow headers. */
+.page-title { position: relative; z-index: 1; display: flex; align-items: center; min-width: 0; margin: 0; font: inherit; }
 .page-title::before { content: "PRAXIS NOVA /"; align-self: stretch; display: flex; align-items: center; padding: 0 3px; margin-right: 6px; font-size: 14px; font-weight: 600; letter-spacing: .05em; }
 .title { color: inherit; font-size: 14px; font-weight: 600; letter-spacing: .05em; }
 .title-options { display: flex; gap: 6px; margin-left: auto; }
@@ -825,7 +958,7 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
    pipeline (readListing) rather than sniffed for here. Outlined rather than
    bordered so the box costs no layout and the prose stays on the same measure;
    the roomier margin keeps consecutive listings' outlines from touching. */
-.article p.article-listing { margin-bottom: 26px; padding: 12px 24px; background: var(--field); color: var(--ink); outline: 2px solid var(--blue-bright); outline-offset: 12px; line-height: 2.2; }
+.article p.article-listing { margin-bottom: 26px; padding: 12px 24px; background: var(--face); color: var(--ink); outline: 2px dashed var(--face); outline-offset: 4px; line-height: 2.2; }
 .article h2, .article h3 { margin: 26px 0 10px; font-family: var(--mono); font-weight: 600; line-height: 1.15; }
 .article h2 { font-size: 21px; }
 .article h3 { font-size: 17px; }
@@ -836,17 +969,17 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
    WebKit, which is what the phones run. */
 .article strong, .article a { -webkit-box-decoration-break: clone; box-decoration-break: clone; }
 .article strong { border: 2px solid var(--white); outline-offset: 0px; padding: 0 6px; display: inline-block; line-height: 20px; border-top: 0; border-left: 0; }
-.article-listing strong { border-color: var(--blue-bright); color: var(--blue-bright); }
+.article-listing strong { border-color: var(--blue-bright); color: var(--blue-bright); background: var(--field); }
 .article blockquote { margin: 0 0 15px; padding-left: 14px; border-left: var(--stroke) solid var(--blue-bright); font-size: 15px; line-height: 1.5; }
 .article-list { margin: 0 0 15px; padding-left: 22px; }
 .article-list li { margin-bottom: 6px; }
 .article hr { margin: 24px 0; border: 0; border-top: 1px solid var(--ink); }
 .article-image { display: block; max-width: 100%; height: auto; margin: 0 0 15px; }
-.article a { color: var(--blue-bright); font-weight: bold; text-decoration: underline; text-decoration-thickness: 2px; background: var(--white); padding: 6px }
-.article .article-listing a{ background: var(--blue-bright); color: var(--white); }
+.article a { color: var(--blue-bright); font-weight: bold; text-decoration: underline; text-decoration-thickness: 2px; padding: 0px }
+.article .article-listing a{ background: var(--blue-bright); color: var(--white); padding: 6px }
 @media (hover: hover) {
-    .article a:hover { outline: 2px solid var(--blue-bright); outline-offset: -4px; }
-    .article .article-listing a:hover { outline: 2px solid var(--white); outline-offset: -4px; }
+    .article a:hover { outline: 2px solid var(--blue-bright); outline-offset: 2px; }
+    .article .article-listing a:hover { outline: 2px solid var(--white); outline-offset: -5px; }
 }
 .article a.is-touched { text-decoration-thickness: 2px; }
 .article a.is-pressing, .article a.is-navigating { color: var(--blue-bright); outline-color: var(--blue-bright); }
