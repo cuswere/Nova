@@ -336,7 +336,7 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
 /* Three quarters of the primary button at every width — the clamp is scaled at
    both ends and at the vw term, so the two never cross over mid-resize. The
    padding follows by the same factor so the boxes stay in proportion. */
-.action-group { --option-btn-size: clamp(17px, 2.5vw, 28px); --option-btn-padding: 9px; }
+.action-group { --option-btn-size: clamp(16px, 2.5vw, 28px); --option-btn-padding: 9px; }
 /* One hook per button. Everything the shared rules read — the size, the padding,
    the accent, both outline knobs — is a custom property, so retuning a single
    button means overriding one of them here rather than restating a rule. Grouped
@@ -1017,6 +1017,10 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
     /* The wide layout's centring and widths are meaningless in one column. */
     .opportunity-group, .action-group { justify-self: stretch; width: auto; }
     .action-group { order: 1; }
+    /* Stacked, these two lose the size contrast that set them apart from the
+       button above; bold carries the weight back at the smaller type. Set on the
+       span so the link inherits it — nothing below declares a weight. */
+    .action-group .option-btn { font-weight: 700; }
     .option-details { display: none; }
     .option-details.open { display: flex; }
     .columns { grid-template-columns: 1fr; }
