@@ -747,10 +747,30 @@ function setupDetailsPopups() {
     }, true);
     box.addEventListener('mouseover', (event) => { const cell = tokenFrom(event); if (cell) place(cell); });
     box.addEventListener('focusin', (event) => { const cell = tokenFrom(event); if (cell) place(cell); });
+    /* Pinned on the way down, not on release: the popup is the token's entire
+       response, so waiting for the finger to lift left the press looking inert
+       for as long as it lasted. The click that follows is the same gesture
+       already answered, so it is swallowed rather than toggling back. */
+    let pinnedOnDown = false;
+    box.addEventListener('pointerdown', (event) => {
+        // Cleared here as well as on use, so a press that never becomes a click —
+        // dragged off the token, or turned into a scroll — leaves nothing armed.
+        pinnedOnDown = false;
+        if (event.button !== 0) return;
+        if (event.target.closest('.details-popup')) return;
+        const cell = tokenFrom(event);
+        if (!cell) return;
+        togglePinned(cell);
+        pinnedOnDown = true;
+    });
     box.addEventListener('click', (event) => {
         if (event.target.closest('.details-popup')) return;
         const cell = tokenFrom(event);
-        if (cell) togglePinned(cell);
+        if (!cell) return;
+        // Keyboard and assistive activations arrive as a click with no press
+        // before it, and still need the toggle.
+        if (pinnedOnDown) pinnedOnDown = false;
+        else togglePinned(cell);
     });
     box.addEventListener('keydown', (event) => {
         const cell = tokenFrom(event);
@@ -877,7 +897,14 @@ function setupSearch() {
             setSearchOpen(true);
             return;
         }
-        afterPress(tab, closeSearch);
+        // The closing wash is keyed to this class rather than to the press, so it
+        // reads as the release even on touch, where afterPress still has the
+        // pressed bevel to wait out. closeSearch ends it by flipping the tab back.
+        tab.classList.add('search-releasing');
+        afterPress(tab, () => {
+            closeSearch();
+            tab.classList.remove('search-releasing');
+        });
     });
     input.addEventListener('input', () => {
         window.clearTimeout(typingTimer);

@@ -285,7 +285,15 @@ button { cursor: pointer; }
    An element rather than a coordinate check, so the drag region is defined once
    here and the script just listens to it. */
 .exit-dialog-grip { position: absolute; top: 0; left: 0; right: 0; height: 20%; user-select: none; -webkit-user-select: none; touch-action: none; }
-.exit-dialog:focus {  }
+/* A finger has no cursor to find the top strip with, so the whole box drags —
+   the buttons stay reachable on their own layer above it. */
+@media (pointer: coarse) {
+    .exit-dialog-grip { height: 100%; }
+}
+/* The script focuses the dialog itself on open (see setupExitConfirm); mobile
+   WebKit answers that programmatic focus with its blue ring, which desktop never
+   paints. The fuzzy white shadow is the whole frame on both. */
+.exit-dialog:focus { outline: none; }
 .exit-dialog::backdrop { background: rgba(0, 0, 0, .25); }
 .exit-dialog-body { padding: 18px 8px 8px; background: var(--white); }
 .exit-dialog-message { margin: 0 0 16px; font-size: 14px; line-height: 1.4; overflow-wrap: anywhere; }
@@ -429,8 +437,14 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
    padding, and one arrow gaining a fraction of a pixel shunts everything after
    it along the row, which is what made the search tab look like it wobbled. */
 .page-arrow.is-pressing:not(:disabled), .search-tab.is-pressing, .search-clear.is-pressing { box-shadow: var(--sink-shallow); padding: 5px 3px 3px 5px; }
+/* Ungated, unlike the :active twins elsewhere in this file: the arrows carry no
+   .is-touched hover look, so touch firing :active on contact and .is-pressing
+   110ms later just repeats one appearance instead of splitting the press into
+   two beats. What it buys is the .custom-selected response — the bevel sinks
+   the instant the finger lands rather than after the scroll test clears. */
+.page-arrow:active:not(:disabled) { box-shadow: var(--sink-shallow); padding: 5px 3px 3px 5px; }
 @media (hover: hover) {
-    .page-arrow:active:not(:disabled), .search-tab:active { box-shadow: var(--sink-shallow); padding: 5px 3px 3px 5px; }
+    .search-tab:active { box-shadow: var(--sink-shallow); padding: 5px 3px 3px 5px; }
 }
 /* At 24px these sit under the ~44px a fingertip actually covers, so WebKit's
    touch adjustment quietly redirects near-misses to them. That fires the click
@@ -456,10 +470,14 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
 @media (hover: hover) {
     .search-tab:active { padding: 5px 7px 3px 9px; }
 }
-/* Only the press that closes the field lights up. The open now happens on
-   pointerdown, so aria-expanded is already true by the time the press visual
-   lands — .search-opening excludes that initial press. */
-.search-tab[aria-expanded="true"]:not(.search-opening).is-pressing { background: var(--field); }
+/* Only the press that closes the field lights up, and only as it lets go. On a
+   mouse that is what :active already amounts to: the wash lasts the click and
+   the field is gone on release. Touch holds its press far longer, which turned
+   the same rule into a wash worn for the whole press, so there it is driven by
+   .search-releasing — set at release and carried until the field actually
+   closes. The open press lights up on neither: .search-opening excludes it, and
+   no release class is set for it. */
+.search-tab[aria-expanded="true"].search-releasing { background: var(--field); }
 @media (hover: hover) {
     .search-tab[aria-expanded="true"]:not(.search-opening):active { background: var(--field); }
 }
@@ -579,20 +597,8 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
    up/down to avoid clipping. */
 .detail-token.has-details { --detail-tail-length: 8px; --detail-tail-width: 12px; --detail-fold-size: 13px; --detail-fold-center-offset: 7.5px; position: relative; overflow: visible; padding-right: 16px; cursor: help; user-select: none; }
 .detail-token.has-details:focus-visible { outline: 1px dotted var(--ink); outline-offset: 2px; }
-/* Pressing the token dims it briefly — the only motion in an otherwise static
-   affordance, so a click reads as registered before the popup pins. A `filter`
-   on the token itself would dim its whole subtree, including the corner fold
-   (z-index 3) and any already-open popup (z-index 40), bleeding their colors
-   into the darkened layer. This overlay sits above the plain label (z-index
-   auto) but below both, so it dims only the token's own face. Excluded when
-   the popup itself is the thing under the pointer: the popup is a DOM
-   descendant of the token, so :active on it bubbles to the token too, and
-   without the :has() guard a press inside the popup would dim the token. */
-/* Touch has no cursor to preview a token with, so the dim would only ever flash
-   as the popup itself opens — feedback for something already answered. */
-@media (hover: hover) {
-    .detail-token.has-details:active:not(:has(.details-popup:hover))::before { content: ""; position: absolute; inset: 0; z-index: 1; background: rgba(0, 0, 0, .15); pointer-events: none; }
-}
+/* No press state: the popup now pins on pointerdown, so the inversion is already
+   on screen by the time a dim would paint. Pinned is the only state left. */
 .detail-token-label { position: relative; display: inline-block; }
 /* The underline is a hover-only cue: the corner fold already advertises that
    details exist at rest. currentColor so it survives the pinned inversion. */
@@ -646,7 +652,9 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
    happen to be touching, so the thumb goes borderless entirely rather than
    doubling into a 2px line wherever it does touch. */
 .details-popup-content::-webkit-scrollbar-track { background: transparent; }
-.details-popup-content::-webkit-scrollbar-thumb { border: none; }
+/* Inked rather than the white the rest of the site uses: this thumb floats on
+   the popup's own white fill, where the default one is invisible. */
+.details-popup-content::-webkit-scrollbar-thumb { background: var(--ink); border: none; }
 /* Only the glyphs themselves take the text caret; the padding and the box
    around them stay a plain pointer. */
 .details-popup-text { cursor: text; }
