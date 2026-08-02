@@ -39,7 +39,7 @@
         <div class="field options-container">
             <div class="opportunity-group">
                 <div class="option-btn-container">
-                    <span class="option-btn">
+                    <span class="option-btn option-btn-opportunities">
                         <a href="opportunities.html">Opportunities</a>
                         <button class="info" type="button" aria-expanded="false" aria-controls="opportunities-details">+</button>
                     </span>
@@ -58,14 +58,14 @@
             </div>
             <div class="action-group">
                 <div class="option-btn-container">
-                    <span class="option-btn"><a href="feedback.html">Send<br>Feedback</a></span>
+                    <span class="option-btn option-btn-feedback"><a href="feedback.html">Send<br>Feedback</a></span>
                 </div>
                 <div class="option-btn-container">
-                    <span class="option-btn"><a href="https://page.praxiscenterforaesthetics.com/praxis-grant-kit/grant-application" target="_blank" rel="noopener">Hire a<br>Grant Writer</a></span>
+                    <span class="option-btn option-btn-grant-writer"><a href="https://page.praxiscenterforaesthetics.com/praxis-grant-kit/grant-application" target="_blank" rel="noopener">Hire a<br>Grant Writer</a></span>
                 </div>
             </div>
-            <!-- Last in source so the narrow layout stacks it under all three
-                 buttons; the grid places it back beside them on a wide screen. -->
+            <!-- Last in source because the wide layout places it explicitly; the
+                 narrow one reorders it above the two secondary buttons in CSS. -->
             <section class="featured-group" aria-labelledby="featured-heading">
                 <h2 class="featured-heading" id="featured-heading">Featured Opportunities</h2>
                 <div class="featured-list" data-featured-list>

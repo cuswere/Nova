@@ -311,19 +311,44 @@ button { cursor: pointer; }
    details panel reaching Featured, so a negative value would let them collide.
    To close the gap instead, shrink the details panel itself — its padding or the
    16px .option-details-row type — and the gap follows it down. */
-.options-container { --featured-offset: 24px; background: var(--field); outline: 1px solid var(--ink); outline-offset: -1px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: auto 1fr; gap: 12px; padding: 12px; min-height: 285px; }
+.options-container { --featured-offset: 24px; --options-gap: 12px; background: var(--field); outline: 1px solid var(--ink); outline-offset: -1px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: auto 1fr; gap: var(--options-gap); padding: 12px; min-height: 285px; }
 /* Placed explicitly rather than by source order: Featured comes last in the
-   markup so the narrow layout stacks it under all three buttons, but on a wide
-   screen it belongs in the space left under Opportunities. The 700px query
-   hands placement back to source order. */
-.opportunity-group { grid-column: 1; grid-row: 1; }
+   markup so the narrow layout can stack it directly under Opportunities, but on
+   a wide screen it belongs in the space left below it. The 700px query hands
+   placement back to source order. */
+/* Spans the panel only so it can be centred across the whole of it — the width
+   is still a column's worth, so nothing under it grew. Centred, it reaches past
+   the midline far enough to overlap where the secondary buttons start, which is
+   what ties the two halves of the panel together. */
+.opportunity-group { grid-column: 1 / -1; grid-row: 1; justify-self: center; width: calc(50% - var(--options-gap) / 2); }
 .featured-group { grid-column: 1; grid-row: 2; }
-.action-group { grid-column: 2; grid-row: 1 / -1; }
+/* Second row rather than the full height, and pushed into the bottom-right
+   corner of it: the top right stays empty, which is what drops these two out of
+   the reading order the eye takes through the panel. Two thirds of this
+   half-column is a third of the panel — narrower than the column it sits in, so
+   the buttons stay smaller than the grid alone would make them. */
+.action-group { grid-column: 2; grid-row: 2; align-self: end; justify-self: end; width: calc(200% / 3); }
 .opportunity-group, .action-group, .option-btn-container { display: flex; flex-direction: column; align-items: stretch; }
 .action-group { gap: 12px; }
 .option-btn-container { min-width: 0; }
-span.option-btn { display: flex; background: var(--field); box-shadow: var(--stroke) var(--stroke) 0 var(--home-accent); font-family: var(--mono); font-size: clamp(23px, 3.3vw, 37px); line-height: .98; }
-.option-btn a { flex: 1; padding: 12px; text-decoration: underline; }
+span.option-btn { display: flex; background: var(--field); box-shadow: var(--stroke) var(--stroke) 0 var(--home-accent); font-family: var(--mono); font-size: var(--option-btn-size, clamp(23px, 3.3vw, 37px)); line-height: .98; }
+.option-btn a { flex: 1; padding: var(--option-btn-padding, 12px); text-decoration: underline; text-decoration-thickness: var(--stroke); }
+/* Three quarters of the primary button at every width — the clamp is scaled at
+   both ends and at the vw term, so the two never cross over mid-resize. The
+   padding follows by the same factor so the boxes stay in proportion. */
+.action-group { --option-btn-size: clamp(17px, 2.5vw, 28px); --option-btn-padding: 9px; }
+/* One hook per button. Everything the shared rules read — the size, the padding,
+   the accent, both outline knobs — is a custom property, so retuning a single
+   button means overriding one of them here rather than restating a rule. Grouped
+   where the value happens to be shared; split the selector to diverge.
+
+   The outline is inset from the button's own edge, so it only reads as the same
+   fit at the same padding: at -8px against 9px of it, the line all but touched
+   the text. Scaled by the same three quarters as everything else. */
+.option-btn-opportunities { }
+.option-btn-feedback { box-shadow: calc(var(--stroke)*-1) calc(var(--stroke)*-1) 0 var(--home-accent) !important; }
+.option-btn-feedback,
+.option-btn-grant-writer { --home-outline-offset: -6px; }
 @media (hover: hover) {
     .option-btn a:hover { text-decoration: underline; text-decoration-thickness: var(--stroke); outline: var(--home-outline-width) solid var(--home-accent); outline-offset: var(--home-outline-offset);}
 }
@@ -925,7 +950,14 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
    pipeline (readListing) rather than sniffed for here. Outlined rather than
    bordered so the box costs no layout and the prose stays on the same measure;
    the roomier margin keeps consecutive listings' outlines from touching. */
-.article p.article-listing { box-shadow: var(--sink-shallow); margin-bottom: 26px; padding: 12px 24px; background: var(--field); color: var(--ink); outline: 0px solid var(--face); outline-offset: 12px; line-height: 2.2; }
+/* The recess reads as one shade under the page rather than a colour of its own:
+   --listing-shade is how much --ink is mixed into the surrounding --field, so the
+   fill is always derived from what it sits on and follows any repalette. One knob
+   for the depth — every fill inside the panel reads --listing-field, so nothing
+   patches when it moves. Mixed in srgb, which for a step this small is a plain
+   channel scale and keeps the field's warmth in proportion. */
+.article p.article-listing { --listing-shade: 4%; --listing-field: color-mix(in srgb, var(--ink) var(--listing-shade), var(--field));
+    box-shadow: var(--sink-shallow); margin-bottom: 26px; padding: 12px 24px; background: var(--listing-field); color: var(--ink); outline: 0px solid var(--face); outline-offset: 12px; line-height: 2.2; }
 .article h2, .article h3 { margin: 26px 0 10px; font-family: var(--mono); font-weight: 600; line-height: 1.15; }
 .article h2 { font-size: 21px; }
 .article h3 { font-size: 17px; }
@@ -936,14 +968,14 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
    WebKit, which is what the phones run. */
 .article strong, .article a { -webkit-box-decoration-break: clone; box-decoration-break: clone; }
 .article strong { border: 2px solid var(--white); outline-offset: 0px; padding: 0 6px; display: inline-block; line-height: 20px; border-top: 0; border-left: 0; }
-.article-listing strong { border-color: var(--blue-bright); color: var(--blue-bright); background: var(--field); }
+.article-listing strong { border-color: var(--blue-bright); color: var(--blue-bright); background: var(--listing-field); }
 .article blockquote { margin: 0 0 15px; padding-left: 14px; border-left: var(--stroke) solid var(--blue-bright); font-size: 15px; line-height: 1.5; }
 .article-list { margin: 0 0 15px; padding-left: 22px; }
 .article-list li { margin-bottom: 6px; }
 .article hr { margin: 24px 0; border: 0; border-top: 1px solid var(--ink); }
 .article-image { display: block; max-width: 100%; height: auto; margin: 0 0 15px; }
 .article a { color: var(--blue-bright); font-weight: bold; text-decoration: underline; text-decoration-thickness: 2px; padding: 0px }
-.article .article-listing a{ background: var(--field); color: var(--blue-bright); padding: 0px }
+.article .article-listing a{ background: var(--listing-field); color: var(--blue-bright); padding: 0px }
 /* Hook for the opportunity's own name and website, the listing's first link.
    :first-of-type is not a guess at which link that is: readListing takes the
    paragraph's first href span, and a link is always a direct child of the <p>,
@@ -977,8 +1009,14 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
     /* Zeroed here rather than on .featured-group, so whatever desktop value is set
        above stays desktop-only without needing a second edit. */
     .options-container { --featured-offset: 0px; grid-template-columns: 1fr; grid-template-rows: none; min-height: 0; }
-    /* Source order takes over, which puts Featured under all three buttons. */
+    /* Source order takes over, and `order` moves the two secondary buttons behind
+       Featured — so the column reads Opportunities, what's in it, then the rest.
+       Ordering here rather than in the markup keeps Featured last in source,
+       which is where the wide layout needs it. */
     .opportunity-group, .action-group, .featured-group { grid-column: 1; grid-row: auto; }
+    /* The wide layout's centring and widths are meaningless in one column. */
+    .opportunity-group, .action-group { justify-self: stretch; width: auto; }
+    .action-group { order: 1; }
     .option-details { display: none; }
     .option-details.open { display: flex; }
     .columns { grid-template-columns: 1fr; }
