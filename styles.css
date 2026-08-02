@@ -731,7 +731,7 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
 .filter-item { font-size: 14px; color: var(--muted); }
 .active-filter { display: flex; gap: 5px; align-items: center; padding: 2px 4px; color: #fff; background: var(--blue-bright); }
 .exclude-filter { background: var(--red); }
-.rolling-filter { background: var(--field); color: var(--ink); font-weight: bold; outline: 1px solid var(--ink); }
+.rolling-filter { background: var(--field); color: var(--blue-bright); font-weight: bold; box-shadow: 2px 2px 0 var(--blue-bright); }
 /* Typed text rather than a facet, so it doesn't take the blue every chip picked
    from a menu wears. The × inherits this colour. */
 .search-filter { background: var(--green); }
