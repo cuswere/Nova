@@ -1,5 +1,156 @@
 [
   {
+    "slug": "got-to-roll-with-the-punches",
+    "title": "Got To Roll With The Punches",
+    "link": "https://blog.praxiscenterforaesthetics.com/got-to-roll-with-the-punches/",
+    "date": "2026-08-05T23:00:06.000Z",
+    "author": "Brainard Carey",
+    "opportunities": [
+      {
+        "title": "NYFA Fiscal Sponsorship",
+        "deadline": "August 17"
+      },
+      {
+        "title": "Denver Public Art",
+        "deadline": "August 17"
+      },
+      {
+        "title": "San Marcos, Texas",
+        "deadline": "August 17"
+      }
+    ],
+    "blocks": [
+      {
+        "type": "p",
+        "spans": [
+          {
+            "text": "Sometimes life can throw us curveballs. When things seem to be chugging along, progress happening, out of nowhere we get hit with an obstacle that knocks us down for bit. It happens to everybody at some time or another, and while it can be demoralizing to feel like you’ve been thrown off course, you can and will regain your footing. For artists, this can feel like a particularly existential threat, putting a hard built career in jeopardy. But there are always more opportunities out there, and even when you’re down and out, hope lingers on the horizon."
+          }
+        ]
+      },
+      {
+        "type": "p",
+        "spans": [
+          {
+            "href": "https://www.nyfa.org/fiscal-sponsorship/",
+            "text": "NYFA Fiscal Sponsorship"
+          },
+          {
+            "text": " helps artists and emerging arts organizations secure 501(c)(3) status to fund public projects. "
+          },
+          {
+            "href": "https://www.nyfa.org/fiscal-sponsorship/",
+            "text": "Visit the website for more information"
+          },
+          {
+            "text": ". Free applications are available until "
+          },
+          {
+            "bold": true,
+            "text": "August 17"
+          },
+          {
+            "text": "."
+          }
+        ],
+        "listing": true
+      },
+      {
+        "type": "p",
+        "spans": [
+          {
+            "href": "https://denverpublicart.org/for-artists/rosamond-park-rfq/",
+            "text": "Denver Public Art"
+          },
+          {
+            "text": " seeks U.S.-based artists or teams for a $95,000 permanent public artwork celebrating Rosamond Park’s landscape, community, and year-round vitality. "
+          },
+          {
+            "href": "https://denverpublicart.org/for-artists/rosamond-park-rfq/",
+            "text": "Learn more at the website"
+          },
+          {
+            "text": ". Deadline is "
+          },
+          {
+            "bold": true,
+            "text": "August 17"
+          },
+          {
+            "text": "."
+          }
+        ],
+        "listing": true
+      },
+      {
+        "type": "p",
+        "spans": [
+          {
+            "href": "https://www.visitsanmarcos.com/arts/for-creators/grants/",
+            "text": "San Marcos, Texas"
+          },
+          {
+            "text": " offers four arts grant programs supporting artists, nonprofits, and creative businesses. Funding supports tourism, community arts, emerging projects, and signature events, with eligibility and requirements varying by grant type. "
+          },
+          {
+            "href": "https://www.visitsanmarcos.com/arts/for-creators/grants/",
+            "text": "For more information, visit the website"
+          },
+          {
+            "text": ". Deadline is "
+          },
+          {
+            "bold": true,
+            "text": "August 17"
+          },
+          {
+            "text": "."
+          }
+        ],
+        "listing": true
+      },
+      {
+        "type": "p",
+        "spans": [
+          {
+            "href": "https://praxiscenterforaestheticstudies.com/l/products?sortKey=name&sortDirection=asc&page=1",
+            "text": "Praxis Center"
+          },
+          {
+            "text": " is dedicated to guiding artists every step of the way, through good times and bad, making sure they feel surrounded by community and support. We know success is possible because we’ve seen it time and time again. Give Praxis a try today and see how far it can take you."
+          }
+        ]
+      },
+      {
+        "type": "h3",
+        "spans": [
+          {
+            "italic": true,
+            "text": "Brainard Carey is an author, artist and educator. He is the director of Praxis Center for Aesthetics and is currently faculty at the School of Visual Arts in NYC. He has written seven books for artists, including "
+          },
+          {
+            "italic": true,
+            "href": "https://www.amazon.com/dp/162153765X/ref=redir_mobile_desktop?_encoding=UTF8&fbclid=IwAR0m2cFPe9xHLHPOV6ZWn4LLIYT6KcNYm6pGmWSxRBQedXbFxe-n82LTyfo&ref_=dp_ob_neva_mobile",
+            "text": "Making it in the Art World"
+          },
+          {
+            "italic": true,
+            "text": ". His seventh book, "
+          },
+          {
+            "italic": true,
+            "href": "https://www.amazon.com/Problem-Art-World-Z-Navigation/dp/1621537951",
+            "text": "The Problems in the Art World: An Artist’s A-Z Action Guide"
+          },
+          {
+            "italic": true,
+            "text": ", is available now."
+          }
+        ]
+      }
+    ]
+  },
+  {
     "slug": "just-show-up",
     "title": "Just Show Up",
     "link": "https://blog.praxiscenterforaesthetics.com/just-show-up/",
