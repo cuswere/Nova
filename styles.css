@@ -974,7 +974,7 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
 .article-list li { margin-bottom: 6px; }
 .article hr { margin: 24px 0; border: 0; border-top: 1px solid var(--ink); }
 .article-image { display: block; max-width: 100%; height: auto; margin: 0 0 15px; }
-.article a { color: var(--blue-bright); font-weight: bold; text-decoration: underline; text-decoration-thickness: 2px; padding: 0px }
+.article a { color: var(--blue-bright); font-weight: bold; text-decoration: underline; text-decoration-thickness: 2px; padding: 0px; line-height: 17px; display: inline-block; }
 .article .article-listing a{ background: var(--listing-field); color: var(--blue-bright); padding: 0px }
 /* Hook for the opportunity's own name and website, the listing's first link.
    :first-of-type is not a guess at which link that is: readListing takes the
