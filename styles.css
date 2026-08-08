@@ -19,13 +19,38 @@
        shadow, the open-details offset. One knob so they stay in step; thinned by
        1px on touch (below) so it doesn't overpower the smaller text. */
     --stroke: 3px;
+    /* The bevel ramp, mixed out of the surface it is drawn on rather than written
+       as fixed greys. A chamfer only reads as bevelled material while its face sits
+       between the highlight and the shadow, so the four steps have to move whenever
+       the palette does — which is exactly what they stopped doing once the page
+       went bright. --bevel-base is the one knob: point it at the surface the ramp
+       should be tuned for and every raise and sink follows. The mixes reproduce the
+       greys they replace to within a few points against the original #c5c5c5 face,
+       so nothing shifts today; they just track from here on.
+       Not per-element: a custom property resolves where it is declared, so an
+       element setting its own --bevel-base would inherit this ramp unchanged. A
+       surface that needs its own ramp declares one outright, the way the blue
+       controls below do. */
+    --bevel-base: var(--face);
+    --bevel-hi: color-mix(in srgb, var(--bevel-base) 15%, var(--white));
+    --bevel-hi-soft: color-mix(in srgb, var(--bevel-base) 55%, var(--white));
+    --bevel-lo-soft: color-mix(in srgb, var(--bevel-base) 55%, var(--ink));
+    --bevel-lo: color-mix(in srgb, var(--bevel-base) 12%, var(--ink));
     /* Positive offsets (top/left) come first in each pair: the first shadow paints
        on top, so those edges run full length and the bottom/right ones mitre into
        them, as Windows drew it. Inner 1px pair stays ahead of the outer 2px pair. */
-    --raise: inset 1px 1px #fff, inset -1px -1px #161616, inset 2px 2px #ddd, inset -2px -2px #888;
-    --sink: inset 1px 1px #7b7b7b, inset -1px -1px #fff, inset 2px 2px #202020, inset -2px -2px #ddd;
-    --raise-shallow: inset 1px 1px #fff, inset -1px -1px #7b7b7b;
-    --sink-shallow: inset 1px 1px #7b7b7b, inset -1px -1px #fff;
+    --raise: inset 1px 1px var(--bevel-hi), inset -1px -1px var(--bevel-lo), inset 2px 2px var(--bevel-hi-soft), inset -2px -2px var(--bevel-lo-soft);
+    --sink: inset 1px 1px var(--bevel-lo-soft), inset -1px -1px var(--bevel-hi), inset 2px 2px var(--bevel-lo), inset -2px -2px var(--bevel-hi-soft);
+    --raise-shallow: inset 1px 1px var(--bevel-hi), inset -1px -1px var(--bevel-lo-soft);
+    --sink-shallow: inset 1px 1px var(--bevel-lo-soft), inset -1px -1px var(--bevel-hi);
+    /* The frame's own rail, split from --face so the window edge can be retuned
+       without repainting every button that shares that grey. */
+    --frame-face: var(--face);
+    /* A card is a white sheet lying in the well: --sheet-edge is the edge of the
+       one above it, --sheet-shade the shadow that edge casts down onto it. Mixed
+       from the well's own colour so both follow a repalette. */
+    --sheet-edge: color-mix(in srgb, var(--ink) 38%, var(--field));
+    --sheet-shade: color-mix(in srgb, var(--ink) 8%, var(--field));
     /* Blue controls need their own bevel ramp; the neutral highlight washes out. */
     --raise-blue: inset 1px 1px #a8a8ff, inset -1px -1px #00002e, inset 2px 2px #5a5aff, inset -2px -2px #000090;
     --sink-blue: inset 1px 1px #000090, inset -1px -1px #a8a8ff, inset 2px 2px #00002e, inset -2px -2px #5a5aff;
@@ -475,7 +500,7 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
    the instant the finger lands rather than after the scroll test clears. */
 .page-arrow:active:not(:disabled) { box-shadow: var(--sink-shallow); padding: 5px 3px 3px 5px; }
 @media (hover: hover) {
-    .search-tab:active { box-shadow: var(--sink-shallow); padding: 5px 3px 3px 5px; }
+    .search-tab:active {box-shadow: var(--sink-shallow);padding: 5px 3px 3px 5px;}
 }
 /* At 24px these sit under the ~44px a fingertip actually covers, so WebKit's
    touch adjustment quietly redirects near-misses to them. That fires the click
@@ -510,7 +535,7 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
    no release class is set for it. */
 .search-tab[aria-expanded="true"].search-releasing { background: var(--field); }
 @media (hover: hover) {
-    .search-tab[aria-expanded="true"]:not(.search-opening):active {background: var(--white);}
+    .search-tab[aria-expanded="true"]:not(.search-opening):active {background: var(--face);}
 }
 /* font-size: 0 retires the markup's × in favour of the plotted one, which the
    aria-label carries for anyone not looking at it. 7px of glyph cannot sit on
@@ -553,11 +578,16 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
 .search-input:focus { }
 /* WebKit's own cancel button would sit beside the one the toolbar already draws. */
 .search-input::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; }
-.repo { position: relative; min-width: 0; min-height: 520px; padding: 3px; background: var(--face); box-shadow: var(--sink); }
-/* Keep the inner bevel above the scrolling cards. An inset shadow painted on
-   .repobox itself sits behind its children, so the cards conceal it as they
-   scroll. This non-scrolling overlay preserves the double recessed frame. */
-.repo::after { content: ""; position: absolute; z-index: 1; inset: 3px; box-shadow: var(--sink); pointer-events: none; }
+.repo {position: relative;min-width: 0;min-height: 520px;padding: 2px;background: var(--frame-face);box-shadow: var(--sink);}
+/* One recess, not two. The second --sink stacked eight tonal edges inside 6px,
+   which read as a groove while the well was grey and as banding once it went
+   bright — and a recess that reveals a plane brighter than its own face argues
+   with itself twice over. A hairline states the well's edge and lets the outer
+   bevel carry the depth alone.
+   Still an overlay rather than a border on .repobox: an edge painted on the
+   scroller sits behind its own children, so the cards would wipe over it as they
+   scroll past. This one does not scroll. */
+.repo::after {content: "";position: absolute;z-index: 1;inset: 3px;/* border: 1px solid var(--ink); */pointer-events: none;}
 /* isolation: isolate walls off every z-index used inside (card links z-index:2,
    detail-token folds z-index:3, popups z-index:40/41) into their own stacking
    context. Without it those values are compared directly against .repo::after's
@@ -565,11 +595,18 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
    popups would poke out past the recessed frame instead of being covered by it
    like the rest of the card content. Isolated, the whole repobox paints as one
    auto-stacked unit that the overlay's z-index:1 simply sits in front of. */
-.repobox { isolation: isolate; height: 100%; max-height: 70vh; min-height: 70vh; overflow-x: hidden; overflow-y: scroll; scrollbar-gutter: stable; background: var(--field); padding: 4px; }
+.repobox {isolation: isolate;height: 100%;max-height: 70vh;min-height: 70vh;overflow-x: hidden;overflow-y: scroll;scrollbar-gutter: stable;background: var(--field);padding-right: 0px;}
 .repo-status-message { margin: auto; padding: 20px; color: var(--muted); text-align: center; }
 /* Deliberately NOT a stacking context: popups (z-index 40) must be free to
    overflow this card and paint above the cards below it. */
-.opportunity-card {display: grid;grid-template-columns: minmax(0, 1.5fr) 1fr;column-gap: 14px;padding: 12px;border-bottom: 1px solid #999;background: var(--white);min-height:135px;}
+/* Sheets stacked in the well rather than one unbroken white field: each card
+   carries the edge of the card above it and the shadow that edge casts down onto
+   it. Drawn at the top, since the light has come from the top left everywhere
+   else on the page — and drawn inset, because a shadow cast outside the box would
+   be painted straight over by the next card's own background. The pairing does
+   what a top highlight would in the old grey scheme, which on white sheets has
+   nothing left to say. */
+.opportunity-card {display: grid;grid-template-columns: minmax(0, 1.5fr) 1fr;column-gap: 14px;padding: 12px;box-shadow: inset -3px -3px 3px var(--sheet-shade);background: var(--white);min-height:135px;}
 .opportunity-main-column, .opportunity-details-column { display: flex; flex-direction: column; gap: 8px; min-width: 0; align-self: start; }
 .opportunity-main-column {  gap: 16px; margin-bottom: 8px; align-items: flex-start; }
 .opportunity-details-column { align-items: stretch; }
@@ -668,7 +705,7 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
 .detail-token.has-details:focus-visible:not(.popup-pinned) .details-popup { z-index: 41; }
 .fee-cell .details-popup { --dialogue-background: var(--amber); --popup-inline-offset: 50%; right: var(--detail-fold-center-offset); }
 .fee-cell .details-popup-content { text-align: center; font-size: 18px; }
-.details-popup-content { position: relative; z-index: 1; display: block; max-height: 220px; overflow-y: auto; padding: 6px 10px; overflow-wrap: anywhere; background: var(--dialogue-background, #fff); border: 1px solid var(--ink); box-shadow: 2px 2px 0px var(--ink); cursor: default; }
+.details-popup-content {position: relative;z-index: 1;display: block;max-height: 220px;overflow-y: auto;padding: 6px 10px;overflow-wrap: anywhere;background: var(--dialogue-background, #fff);/* border: 1px solid var(--ink); */box-shadow: 0px 0px 0px 2px var(--ink);cursor: default;}
 /* Applied by fitContent when the text fits within the growth allowance: the cap
    comes off and the scroller is dismantled outright. A class swapping overflow,
    not an inline max-height — iOS WebKit was observed accepting an inline cap
@@ -748,7 +785,7 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
    the 10px inset is carried by the row so both tokens keep the same gap from
    the pane edge the eligibility token used to hold on its own. */
 .detail-token-row { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: flex-start; gap: 4px; margin-right: 10px; }
-.award-cell, .eligibility-cell { min-height: 20px; padding: 3px 5px; color: var(--ink); background: var(--field); box-shadow: none; }
+.award-cell, .eligibility-cell {min-height: 20px;padding: 3px 5px;color: var(--ink);background: var(--white);box-shadow: none;}
 .date-cell { padding: 4px; width: fit-content; color: var(--blue-bright); text-align: left; box-shadow: none; background: transparent; text-transform: none; letter-spacing: 0; font-size: 14px; 
     border-right: 2px solid var(--blue-bright); font-weight: bold;
     border-bottom: 2px solid var(--blue-bright);}
@@ -909,15 +946,16 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
 /* Holds a boxed run and the punctuation after it on one line; applied by
    spanNodes, which is where the reasoning lives. */
 .nowrap { white-space: nowrap; }
-/* Recessed frame around the reading column, built the way .repo is: the outer
-   bevel here, a second one drawn by ::after that does not scroll, and the
-   scroller itself inside — so the scrollbar sits within the recess rather than
-   beside it. */
-.article-frame { position: relative; min-width: 0; padding: 3px; background: var(--face); box-shadow: var(--sink); }
-/* Keeps the inner bevel above the scrolling text. An inset shadow on .article
+/* Recessed frame around the reading column, built the way .repo is: the bevel
+   here, the hairline drawn by ::after that does not scroll, and the scroller
+   itself inside — so the scrollbar sits within the recess rather than beside it.
+   Kept in step with .repo deliberately; the two are the same object seen on two
+   pages, and the last time they were only similar they drifted. */
+.article-frame { position: relative; min-width: 0; padding: 3px; background: var(--frame-face); box-shadow: var(--sink); }
+/* Keeps the well's edge above the scrolling text. An inset shadow on .article
    itself paints behind its own children, so the prose would ride over the recess
    on its way past instead of disappearing under it. */
-.article-frame::after { content: ""; position: absolute; z-index: 1; inset: 3px; box-shadow: var(--sink); pointer-events: none; }
+.article-frame::after { content: ""; position: absolute; z-index: 1; inset: 3px; border: 1px solid var(--ink); pointer-events: none; }
 /* The reading column scrolls inside itself rather than the page scrolling, so the
    title bar and its Home button never leave the screen. The wrapper is pinned to
    the viewport and the frame takes whatever height is left.
