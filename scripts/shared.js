@@ -7,7 +7,6 @@ const PRESSABLE = 'a[href], button, [role="option"]';
 export function initSharedPage() {
     setupNavigationState();
     setupExitConfirm();
-    finishScreenRefresh();
 }
 
 /* Confirms before handing the reader off to another site. Driven by the
@@ -104,17 +103,6 @@ function setupExitConfirm() {
         if (destination) window.open(destination, '_blank', 'noopener');
     });
     dialog.addEventListener('close', () => { destination = null; });
-}
-
-function finishScreenRefresh() {
-    const overlay = document.querySelector('.screen-refresh');
-    if (!overlay) return;
-
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        overlay.remove();
-        return;
-    }
-    window.setTimeout(() => overlay.remove(), 380);
 }
 
 // How long a finger must rest before a press is treated as deliberate, and how

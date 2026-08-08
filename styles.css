@@ -59,7 +59,7 @@
    enough to scroll — the article page, mostly — keeps the wrapper on the same
    centre line as a page that isn't. Ignored where scrollbars are overlays, which
    is every touch browser, and there they never shifted anything to begin with. */
-html { min-height: 100%; background: var(--face); scrollbar-gutter: stable both-edges; }
+html {min-height: 100%;background: var(--field);scrollbar-gutter: stable both-edges;}
 body {
     min-height: 100vh;
     margin: 0;
@@ -104,22 +104,20 @@ button { cursor: pointer; }
 .search-clear,
 .form-submit { user-select: none; -webkit-user-select: none; }
 
-/* Short, stepped page-change signal. */
-.screen-refresh {
-    position: absolute;
-    z-index: 9999;
-    inset: 0;
-    background: var(--face);
-    pointer-events: none;
-    animation: screen-refresh-down 150ms steps(4, end) 100ms forwards;
-}
-.screen-refresh span { display: none; }
-@keyframes screen-refresh-down {
-    from { background: var(--face); clip-path: inset(0 0 0 0); }
-    to { background: var(--face); clip-path: inset(100% 0 0 0); }
+/* Short, stepped page-change signal: the page is banded in from the top by
+   clipping itself, rather than a panel of --face being pulled off the top of it.
+   Nothing is painted over the content, so there is no overlay to tear down once
+   the wipe is done — and nothing to leave behind if the script never runs.
+   backwards rather than both holds the hidden state before the first frame but
+   drops the clip the moment the wipe ends; a clip left in place would cut off
+   descendants that draw outside the box, like the popups' shadows. */
+.screen-refresh { animation: screen-refresh-in 250ms steps(4, jump-start) backwards; }
+@keyframes screen-refresh-in {
+    from { clip-path: inset(0 0 100% 0); }
+    to { clip-path: inset(0 0 0 0); }
 }
 @media (prefers-reduced-motion: reduce) {
-    .screen-refresh { display: none; }
+    .screen-refresh { animation: none; }
 }
 
 .content-wrapper {
@@ -128,13 +126,13 @@ button { cursor: pointer; }
     min-height: 100vh;
     margin: 0 auto;
     padding: 16px;
-    background: var(--face);
-    outline: 4px double var(--face);
+    background: transparent;
+    /* outline: 4px double var(--face); */
     outline-offset: 4px;
-    box-shadow: 0 0 8px 8px var(--face);
+    /* box-shadow: 0 0 8px 8px var(--face); */
 }
 
-.field { background: var(--face); }
+.field {background: transparent;}
 
 /* Shared page-title bar: identity and page name on the left, page actions right. */
 .page-header {
@@ -268,12 +266,12 @@ button { cursor: pointer; }
 .home-wordmark { display: flex; align-items: center; width: fit-content; margin: 0 auto 15px; color: var(--ink); font-size: clamp(30px, 5vw, 40px); font-weight: 600; letter-spacing: -.12em; line-height: 1; }
 .home-wordmark > * {  }
 /* Canon Praxis mark; sans-serif because the letterforms are the logo. */
-.home-wordmark .praxis-mark { padding: 4px; color: var(--praxis-blue); background: var(--white); border-radius: 5px; border-top-right-radius: 0; border-bottom-right-radius: 0; font-family: system-ui, -apple-system, "Segoe UI", Arial, sans-serif; font-weight: normal; letter-spacing: .01em; text-transform: uppercase; }
+.home-wordmark .praxis-mark {padding: 2px 4px;color: var(--praxis-blue);background: var(--white);border-radius: 5px;border-top-right-radius: 0;border-bottom-right-radius: 0;font-family: system-ui, -apple-system, "Segoe UI", Arial, sans-serif;font-weight: normal;letter-spacing: .01em;text-transform: uppercase;border: 0;}
 @media (hover: hover) {
     .home-wordmark .praxis-mark:hover { text-decoration: underline; text-decoration-thickness: 3px; }
 }
 /* Letter-spacing trails the last letter too, eating into the right padding. */
-.home-wordmark .nova-mark { padding: 2px 4px; padding-right: calc(4px + .12em); color: #fff; background: var(--face); border: 2px solid var(--white); text-shadow: 0 0 4px #fff; }
+.home-wordmark .nova-mark {padding: 2px 4px;padding-right: calc(4px + .12em);color: #fff;background: var(--face);/* border: 2px solid var(--white); */text-shadow: 0 0 4px #fff;}
 /* Sized in em so the badge tracks the vw-clamped wordmark. */
 .home-wordmark .beta-mark { align-self: flex-end; margin-left: 4px; padding: 2px 5px; color: var(--ink); background: var(--amber); font-size: .45em; letter-spacing: normal; }
 
@@ -311,7 +309,7 @@ button { cursor: pointer; }
    details panel reaching Featured, so a negative value would let them collide.
    To close the gap instead, shrink the details panel itself — its padding or the
    16px .option-details-row type — and the gap follows it down. */
-.options-container { --featured-offset: 24px; --options-gap: 12px; background: var(--field); outline: 1px solid var(--ink); outline-offset: -1px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: auto 1fr; gap: var(--options-gap); padding: 12px; min-height: 285px; }
+.options-container {--featured-offset: 24px;--options-gap: 12px;background: var(--white);outline: 1px solid var(--ink);outline-offset: -1px;display: grid;grid-template-columns: repeat(2, minmax(0, 1fr));grid-template-rows: auto 1fr;gap: var(--options-gap);padding: 12px;min-height: 285px;}
 /* Placed explicitly rather than by source order: Featured comes last in the
    markup so the narrow layout can stack it directly under Opportunities, but on
    a wide screen it belongs in the space left below it. The 700px query hands
@@ -331,7 +329,7 @@ button { cursor: pointer; }
 .opportunity-group, .action-group, .option-btn-container { display: flex; flex-direction: column; align-items: stretch; }
 .action-group { gap: 12px; }
 .option-btn-container { min-width: 0; }
-span.option-btn { display: flex; background: var(--field); box-shadow: var(--stroke) var(--stroke) 0 var(--home-accent); font-family: var(--mono); font-size: var(--option-btn-size, clamp(23px, 3.3vw, 37px)); line-height: .98; }
+span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke) var(--stroke) 0 var(--home-accent);font-family: var(--mono);font-size: var(--option-btn-size, clamp(23px, 3.3vw, 37px));line-height: .98;}
 .option-btn a { flex: 1; padding: var(--option-btn-padding, 12px); text-decoration: underline; text-decoration-thickness: var(--stroke); }
 /* Three quarters of the primary button at every width — the clamp is scaled at
    both ends and at the vw term, so the two never cross over mid-resize. The
@@ -398,15 +396,23 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
 
 /* Featured articles. Same fill and blue drop shadow as the option buttons so it
    reads as part of the same panel, at prose sizes so it stays secondary to them. */
-.featured-group { display: flex; flex-direction: column; min-width: 0; margin-top: var(--featured-offset); padding: 4px 12px 12px; background: var(--field); outline: 0 solid var(--home-accent); box-shadow: var(--stroke) calc(var(--stroke) * -1) 0 var(--home-accent); font-family: var(--mono); }
+.featured-group {display: flex;flex-direction: column;min-width: 0;margin-top: var(--featured-offset);padding: 4px 12px 12px;background: transparent;outline: 0 solid var(--home-accent);box-shadow: var(--stroke) calc(var(--stroke) * -1) 0 var(--home-accent);font-family: var(--mono);}
 .featured-heading { margin: 0 0 4px; padding-bottom: 2px; border-bottom: var(--stroke) solid var(--home-accent); color: var(--home-accent); font-size: 16px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
 .featured-list { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; }
 /* The whole card is the anchor, so the colour and the press states live here and
    everything inside inherits them — one source of truth, and a press reddens the
    card in one go. The resting shadow is the transparent twin of the hover one:
    box-shadow only steps cleanly between two shadows of the same shape. */
-.featured-item { display: flex; flex-direction: column; gap: 2px; padding: 8px; background: var(--field);
-    outline-offset: 0px; color: var(--home-accent); transition: box-shadow 0ms steps(4, end);  }
+.featured-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 8px;
+    background: transparent;
+    outline-offset: 0px;
+    color: var(--home-accent);
+    transition: box-shadow 0ms steps(4, end);
+    }
 .featured-line { margin: 0; font-size: 16px; line-height: 1.2; }
 .featured-title { color: inherit; text-decoration: underline; font-weight: bold; text-decoration-thickness: 2px !important;  }
 .featured-date { white-space: nowrap; font-size: 13px; }
@@ -448,7 +454,7 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
 .pagination-arrows { display: flex; gap: 4px; }
 /* The search tab and its clear button are the same raised control as an arrow,
    so they share every rule below rather than restating the bevel. */
-.page-arrow, .search-tab, .search-clear {  outline-offset: -1px; display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 24px; padding: 4px; color: var(--ink); background: var(--face); border: 0; box-shadow: var(--raise-shallow); font-size: 14px; line-height: 1; }
+.page-arrow, .search-tab, .search-clear {outline-offset: -1px;display: inline-flex;align-items: center;justify-content: center;min-width: 24px;height: 24px;padding: 4px;color: var(--ink);background: var(--field);border: 0;box-shadow: var(--raise-shallow);font-size: 14px;line-height: 1;}
 .search-tab { padding: 4px 8px; font-weight: bold; letter-spacing: .05em; }
 /* No .is-touched counterpart on purpose: like the detail tokens, the hover wash
    is a cursor preview, and on touch it would only linger after the press that
@@ -484,7 +490,7 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
     .page-arrow:not(:disabled)::after, .search-tab::after, .search-clear::after { content: ""; position: absolute; inset: -8px -2px -4px; }
 }
 .page-arrow:focus-visible, .search-tab:focus-visible, .search-clear:focus-visible { outline: 1px dotted var(--ink); outline-offset: 2px; }
-.page-arrow:disabled { color: var(--field); background: var(--face); outline-color: var(--field); outline: 1px solid var(--field); box-shadow: var(--sink-shallow); cursor: default; padding: 5px 3px 3px 5px; }
+.page-arrow:disabled {color: var(--face);outline-color: var(--field);outline: 1px solid var(--field);box-shadow: var(--sink-shallow);cursor: default;padding: 5px 3px 3px 5px;}
 
 /* Search tab and the field it opens. The tab stays pressed in while the field
    is showing, the way a latched toolbar button does. Its own press padding
@@ -504,7 +510,7 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
    no release class is set for it. */
 .search-tab[aria-expanded="true"].search-releasing { background: var(--field); }
 @media (hover: hover) {
-    .search-tab[aria-expanded="true"]:not(.search-opening):active { background: var(--field); }
+    .search-tab[aria-expanded="true"]:not(.search-opening):active {background: var(--white);}
 }
 /* font-size: 0 retires the markup's × in favour of the plotted one, which the
    aria-label carries for anyone not looking at it. 7px of glyph cannot sit on
@@ -975,6 +981,16 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
 .article hr { margin: 24px 0; border: 0; border-top: 1px solid var(--ink); }
 .article-image { display: block; max-width: 100%; height: auto; margin: 0 0 15px; }
 .article a { color: var(--blue-bright); font-weight: bold; text-decoration: underline; text-decoration-thickness: 2px; padding: 0px; line-height: 17px; display: inline-block; }
+/* Prose links go back to being inline. An inline-block is sized to the width
+   available rather than to its own longest line, so a wrapped one fills the
+   column whatever it holds and pushes the punctuation after it onto a line of its
+   own. Only a listing needs the atomic box — its 17px lines are the point there,
+   and it pays for them by carrying its own stop inside (see .link-tail). Matched
+   by parent rather than as :not(.article-listing a), since every anchor the
+   renderer builds is a direct child of its paragraph, list item or heading.
+   line-height goes back to inheriting: 17px in prose set at 1.5 would close the
+   lines a wrapped link sits on. */
+.article :not(.article-listing) > a { display: inline; line-height: inherit; }
 .article .article-listing a{ background: var(--listing-field); color: var(--blue-bright); padding: 0px }
 /* Sentence punctuation living inside the anchor so the link's own last line can
    hold it; see spanNodes. inline-block is load-bearing twice over: text-decoration

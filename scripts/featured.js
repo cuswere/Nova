@@ -73,7 +73,7 @@ function wrap(tag, child) {
 // Sentence punctuation, which must not be left standing alone on a line.
 const TRAILING_PUNCTUATION = /^[.,;:!?]+/;
 
-function spanNodes(spans) {
+function spanNodes(spans, listing = false) {
     const nodes = [];
     // Copied because gluing punctuation onto one span consumes it from the next.
     const queue = (spans || []).map((span) => ({ ...span }));
@@ -84,9 +84,12 @@ function spanNodes(spans) {
 
         const node = spanNode(span);
         const next = queue[index + 1];
-        const isLink = node.tagName === 'A';
-        /* Both a bolded deadline and a link render as an inline-block, and an
-           inline-block is sized to the width available rather than to its own
+        // Only a listing's links are inline-blocks; in prose they are inline
+        // again and end their last line wherever the words do, so the stop after
+        // one needs no help staying with them.
+        const isLink = listing && node.tagName === 'A';
+        /* A bolded deadline and a listing's links render as an inline-block, and
+           an inline-block is sized to the width available rather than to its own
            longest line — so a line may break between it and whatever follows,
            stranding the sentence's full stop by itself on the next line. Taking
            the punctuation out of the following text removes the opportunity. */
@@ -143,7 +146,7 @@ export function renderBlocks(blocks) {
         }
 
         const tag = ['h2', 'h3', 'blockquote'].includes(block.type) ? block.type : 'p';
-        const node = wrapAll(tag, spanNodes(block.spans));
+        const node = wrapAll(tag, spanNodes(block.spans, Boolean(block.listing)));
         // Set by the pipeline: a linked opportunity name plus a bolded deadline.
         if (block.listing) node.className = 'article-listing';
         fragment.append(node);
