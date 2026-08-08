@@ -93,12 +93,16 @@
     --mono: monospace;
     /* Home controls (the three option buttons, their details row, and the
        Featured cards) share one accent: --home-accent draws the resting blue and
-       the hover outline, --home-accent-press the red a press swaps in. Retune
+       the hover outline, --home-accent-press the colour a press swaps in. Retune
        these two to recolour the whole panel in step. The outline knobs are split
        by scale — the big buttons and Featured sit inside their own edge, the
-       prose-sized details links outside theirs. */
+       prose-sized details links outside theirs.
+       The press colour is not a colour of its own: it is whatever the panel these
+       controls sit on is painted, so a press reads as the label dropping out of
+       sight rather than changing hue. It follows .options-container — move one and
+       the other has to move with it. */
     --home-accent: var(--blue-bright);
-    --home-accent-press: var(--white);
+    --home-accent-press: var(--field);
     --home-outline-width: var(--stroke);
     --home-outline-offset: -8px;
     /* Featured cards and the info button's focus ring, whose padding is tighter. */
@@ -371,7 +375,7 @@ button { cursor: pointer; }
    details panel reaching Featured, so a negative value would let them collide.
    To close the gap instead, shrink the details panel itself — its padding or the
    16px .option-details-row type — and the gap follows it down. */
-.options-container {--featured-offset: 24px;--options-gap: 12px;background: var(--white);outline: 1px solid var(--ink);outline-offset: -1px;display: grid;grid-template-columns: repeat(2, minmax(0, 1fr));grid-template-rows: auto 1fr;gap: var(--options-gap);padding: 12px;min-height: 285px;}
+.options-container {--featured-offset: 24px;--options-gap: 12px;background: var(--field);outline: 1px solid var(--ink);outline-offset: -1px;display: grid;grid-template-columns: repeat(2, minmax(0, 1fr));grid-template-rows: auto 1fr;gap: var(--options-gap);padding: 12px;min-height: 285px;}
 /* Placed explicitly rather than by source order: Featured comes last in the
    markup so the narrow layout can stack it directly under Opportunities, but on
    a wide screen it belongs in the space left below it. The 700px query hands
@@ -435,7 +439,11 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
    panel below nor overlay it, and the gap between the two is exactly the panel's
    own height at any width. Narrow screens go back to toggling display — there the
    panel sits above the other buttons, where a permanent gap is just dead space. */
-.option-details { visibility: hidden; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: var(--stroke); margin-left: var(--stroke); padding: 8px; background: var(--white);
+/* --field rather than a white of its own, because the links inside it press to
+   --home-accent-press like every other control on the panel: the press only reads
+   as a drop-out if the surface underneath is the colour being swapped in. Its own
+   glow is what lifts it off the panel now that the two are painted alike. */
+.option-details { visibility: hidden; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: var(--stroke); margin-left: var(--stroke); padding: 8px; background: var(--field);
     border: 0px solid var(--ink); border-top: 0;}
 .option-details.open { visibility: visible; box-shadow: 0 0px 4px var(--ink); }
 .option-details-row { display: contents; color: var(--ink); font-size: 16px; }
