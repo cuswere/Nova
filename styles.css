@@ -976,6 +976,13 @@ span.option-btn { display: flex; background: var(--field); box-shadow: var(--str
 .article-image { display: block; max-width: 100%; height: auto; margin: 0 0 15px; }
 .article a { color: var(--blue-bright); font-weight: bold; text-decoration: underline; text-decoration-thickness: 2px; padding: 0px; line-height: 17px; display: inline-block; }
 .article .article-listing a{ background: var(--listing-field); color: var(--blue-bright); padding: 0px }
+/* Sentence punctuation living inside the anchor so the link's own last line can
+   hold it; see spanNodes. inline-block is load-bearing twice over: text-decoration
+   does not propagate into an atomic inline, which is what keeps the stop out of
+   the underline, and it can't be declared inline without the underline coming
+   back. Ink rather than link colour, and untouchable, so only the words are the
+   link. */
+.article a .link-tail { display: inline-block; color: var(--ink); text-decoration: none; pointer-events: none; }
 /* Hook for the opportunity's own name and website, the listing's first link.
    :first-of-type is not a guess at which link that is: readListing takes the
    paragraph's first href span, and a link is always a direct child of the <p>,

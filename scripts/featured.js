@@ -84,12 +84,13 @@ function spanNodes(spans) {
 
         const node = spanNode(span);
         const next = queue[index + 1];
-        /* A bolded deadline is an inline-block, and a line may break between it and
-           whatever follows — which strands the sentence's full stop by itself on the
-           next line. Gluing the punctuation to the box removes the opportunity.
-           Links are deliberately left out: they are meant to fragment across lines,
-           and nowrap would stop them wrapping at all. */
-        const glue = span.bold && !span.href && next && !next.href
+        const isLink = node.tagName === 'A';
+        /* Both a bolded deadline and a link render as an inline-block, and an
+           inline-block is sized to the width available rather than to its own
+           longest line — so a line may break between it and whatever follows,
+           stranding the sentence's full stop by itself on the next line. Taking
+           the punctuation out of the following text removes the opportunity. */
+        const glue = (span.bold || isLink) && next && next.text && !next.href
             ? (next.text.match(TRAILING_PUNCTUATION) || [''])[0]
             : '';
 
@@ -98,9 +99,19 @@ function spanNodes(spans) {
             continue;
         }
 
-        const pair = element('span', 'nowrap');
-        pair.append(node, document.createTextNode(glue));
-        nodes.push(pair);
+        /* A link's box spans the whole column, so no outer wrapper can hold the
+           stop beside it — the only line with room left is the link's own last
+           one, which means inside the anchor. .link-tail is what keeps it from
+           reading, or behaving, as part of the link. A deadline is short enough
+           to sit next to its stop, so that one stays a plain nowrap pair. */
+        if (isLink) {
+            node.append(element('span', 'link-tail', glue));
+            nodes.push(node);
+        } else {
+            const pair = element('span', 'nowrap');
+            pair.append(node, document.createTextNode(glue));
+            nodes.push(pair);
+        }
         next.text = next.text.slice(glue.length);
     }
 
