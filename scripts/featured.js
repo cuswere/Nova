@@ -73,7 +73,52 @@ function wrap(tag, child) {
 // Sentence punctuation, which must not be left standing alone on a line.
 const TRAILING_PUNCTUATION = /^[.,;:!?]+/;
 
-function spanNodes(spans, listing = false) {
+// The anchor's final run of text, however deep: a link may carry its words inside
+// an em or a strong, and the stop belongs beside whatever comes last.
+function lastTextNode(node) {
+    for (let index = node.childNodes.length - 1; index >= 0; index -= 1) {
+        const child = node.childNodes[index];
+        if (child.nodeType === Node.TEXT_NODE && child.textContent) return child;
+        if (child.nodeType === Node.ELEMENT_NODE) {
+            const found = lastTextNode(child);
+            if (found) return found;
+        }
+    }
+    return null;
+}
+
+/* Puts the stop beside the link's last word rather than merely at the end of the
+   anchor. .link-tail is an inline-block, and a line may break immediately before an
+   atomic inline the way it may before an image — so a link whose text fills its box
+   to the edge leaves the stop to fall onto a line of its own inside the anchor,
+   which is the same floating punctuation one level further in. Bound to the word
+   ahead of it, the nearest break moves back to the space before that word and the
+   two travel together. */
+function appendTail(link, glue) {
+    const tail = element('span', 'link-tail', glue);
+    const text = lastTextNode(link);
+    if (!text) {
+        link.append(tail);
+        return;
+    }
+
+    const pair = element('span', 'nowrap');
+    const value = text.textContent;
+    const cut = value.lastIndexOf(' ');
+    // One unbroken run: all of it travels with the stop, there being no earlier
+    // space to break at in any case.
+    if (cut === -1) {
+        pair.append(document.createTextNode(value), tail);
+        text.replaceWith(pair);
+        return;
+    }
+
+    text.textContent = value.slice(0, cut + 1);
+    pair.append(document.createTextNode(value.slice(cut + 1)), tail);
+    text.after(pair);
+}
+
+function spanNodes(spans) {
     const nodes = [];
     // Copied because gluing punctuation onto one span consumes it from the next.
     const queue = (spans || []).map((span) => ({ ...span }));
@@ -84,15 +129,16 @@ function spanNodes(spans, listing = false) {
 
         const node = spanNode(span);
         const next = queue[index + 1];
-        // Only a listing's links are inline-blocks; in prose they are inline
-        // again and end their last line wherever the words do, so the stop after
-        // one needs no help staying with them.
-        const isLink = listing && node.tagName === 'A';
-        /* A bolded deadline and a listing's links render as an inline-block, and
-           an inline-block is sized to the width available rather than to its own
-           longest line — so a line may break between it and whatever follows,
-           stranding the sentence's full stop by itself on the next line. Taking
-           the punctuation out of the following text removes the opportunity. */
+        const isLink = node.tagName === 'A';
+        /* Two reasons, and every link needs one of them. A listing's links are
+           inline-blocks, sized to the width available rather than to their own
+           longest line, so a line may break between one and whatever follows and
+           strand the sentence's full stop by itself. Prose links are inline and
+           cannot do that — but their hover outline is drawn 2px outside the box,
+           and the stop after a link starts at the box's very edge, so the outline
+           lands on top of it. Punctuation held inside the anchor answers both: it
+           cannot be left behind, and it sits inside the outline rather than under
+           it. */
         const glue = (span.bold || isLink) && next && next.text && !next.href
             ? (next.text.match(TRAILING_PUNCTUATION) || [''])[0]
             : '';
@@ -102,13 +148,14 @@ function spanNodes(spans, listing = false) {
             continue;
         }
 
-        /* A link's box spans the whole column, so no outer wrapper can hold the
-           stop beside it — the only line with room left is the link's own last
-           one, which means inside the anchor. .link-tail is what keeps it from
-           reading, or behaving, as part of the link. A deadline is short enough
-           to sit next to its stop, so that one stays a plain nowrap pair. */
+        /* Inside the anchor rather than beside it: a listing link's box spans the
+           whole column, so the only line with room left is the link's own last one,
+           and a prose link's outline is drawn outside a box the stop would then be
+           sitting under. .link-tail is what keeps it from reading, or behaving, as
+           part of the link. A deadline is short enough to sit next to its stop and
+           carries no outline, so that one stays a plain nowrap pair. */
         if (isLink) {
-            node.append(element('span', 'link-tail', glue));
+            appendTail(node, glue);
             nodes.push(node);
         } else {
             const pair = element('span', 'nowrap');
@@ -146,7 +193,7 @@ export function renderBlocks(blocks) {
         }
 
         const tag = ['h2', 'h3', 'blockquote'].includes(block.type) ? block.type : 'p';
-        const node = wrapAll(tag, spanNodes(block.spans, Boolean(block.listing)));
+        const node = wrapAll(tag, spanNodes(block.spans));
         // Set by the pipeline: a linked opportunity name plus a bolded deadline.
         if (block.listing) node.className = 'article-listing';
         fragment.append(node);

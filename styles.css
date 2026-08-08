@@ -44,13 +44,48 @@
     --raise-shallow: inset 1px 1px var(--bevel-hi), inset -1px -1px var(--bevel-lo-soft);
     --sink-shallow: inset 1px 1px var(--bevel-lo-soft), inset -1px -1px var(--bevel-hi);
     /* The frame's own rail, split from --face so the window edge can be retuned
-       without repainting every button that shares that grey. */
-    --frame-face: var(--face);
-    /* A card is a white sheet lying in the well: --sheet-edge is the edge of the
-       one above it, --sheet-shade the shadow that edge casts down onto it. Mixed
-       from the well's own colour so both follow a repalette. */
-    --sheet-edge: color-mix(in srgb, var(--ink) 38%, var(--field));
-    --sheet-shade: color-mix(in srgb, var(--ink) 8%, var(--field));
+       without repainting every button that shares that grey — and now white, so the
+       panel is built out of the two colours the page is made of and nothing else.
+       Only four planes, no third tone anywhere: the page in --field, this slab
+       raised out of it in white, the well cut into the slab back down to --field,
+       and the sheets in the well white again. Every boundary is stated by a bevel
+       or a cast shadow rather than by a grey. */
+    --frame-face: var(--white);
+    /* The slab's own ramp, mixed from its face the way the blue controls carry
+       theirs: the shared --raise is tuned to --face and its highlights would be
+       drawn white-on-white here. On a white face the lit half drops out anyway and
+       the shaded half does the talking, which is what raised is supposed to look
+       like from a light source at the top left. */
+    --raise-frame: inset 1px 1px color-mix(in srgb, var(--frame-face) 15%, var(--white)), inset -1px -1px color-mix(in srgb, var(--frame-face) 12%, var(--ink)), inset 2px 2px color-mix(in srgb, var(--frame-face) 55%, var(--white)), inset -2px -2px color-mix(in srgb, var(--frame-face) 55%, var(--ink));
+    /* How much frame the opportunities panel shows around its well. A chamfer only
+       reads as depth when it is the cut edge of a material, and at 2px the bevel
+       covered the entire rail — there was no material left either side of it. This
+       is the width of visible face; the bevel still paints in the outer 2px of it.
+       .repo::after keys its own inset to the same token, so the cast shadow lands
+       on the well's edge wherever this lands. */
+    --frame-rail: 10px;
+    /* The floor of the well. A recess still has to be darker than the frame around
+       it, but with the rail white that costs no new colour — --field is already a
+       step down from it, and it is the page's own tone rather than a grey invented
+       for the job. */
+    --well: var(--field);
+    /* The frame's shadow falling into the well, four hard bands rather than a blur —
+       the same stepped vocabulary as the screen refresh. Alpha rather than solid
+       greys because it crosses two surfaces, the well and the white sheets on it,
+       and a cast shadow has to darken whatever it lands on. */
+    --well-cast: inset 1px 1px 0 color-mix(in srgb, var(--ink) 34%, transparent), inset 2px 2px 0 color-mix(in srgb, var(--ink) 22%, transparent), inset 3px 3px 0 color-mix(in srgb, var(--ink) 13%, transparent), inset 4px 4px 0 color-mix(in srgb, var(--ink) 6%, transparent);
+    /* The far wall of the same recess, which is the side the light reaches: the
+       mirror of --well-cast in white, and the thing that closes the well off at the
+       bottom and right. Without it the panel is lit on two sides and simply stops
+       on the other two, running out into a page of the same --field.
+       Shorter than the cast on purpose — a lit edge carries further than a shadow
+       at equal width — and listed after it, so the cast keeps the two corners where
+       the pair overlap, the way the bevels mitre everywhere else. */
+    --well-lip: inset -1px -1px 0 var(--white), inset -2px -2px 0 color-mix(in srgb, var(--white) 65%, transparent), inset -3px -3px 0 color-mix(in srgb, var(--white) 30%, transparent);
+    /* A card is a white sheet lying on the floor of the well, lifted just clear of
+       it. Hard-edged and offset down-right, the same 2px 2px 0 the menus and popups
+       are drawn with, and the same top-left light as everything else. */
+    --sheet-cast: 2px 2px 0 color-mix(in srgb, var(--ink) 30%, transparent);
     /* Blue controls need their own bevel ramp; the neutral highlight washes out. */
     --raise-blue: inset 1px 1px #a8a8ff, inset -1px -1px #00002e, inset 2px 2px #5a5aff, inset -2px -2px #000090;
     --sink-blue: inset 1px 1px #000090, inset -1px -1px #a8a8ff, inset 2px 2px #00002e, inset -2px -2px #5a5aff;
@@ -76,7 +111,9 @@
    narrow viewport — not a touchscreen — that shrinks it enough for 3px to
    overpower it. Same 700px breakpoint the pagination uses. */
 @media (max-width: 700px) {
-    :root { --stroke: 2px; }
+    /* The rail comes in with it: 10px each side is a fifth of a phone's column,
+       and the frame should not be paid for out of the cards' measure. */
+    :root { --stroke: 2px; --frame-rail: 6px; }
 }
 
 * { box-sizing: border-box; }
@@ -288,15 +325,15 @@ button { cursor: pointer; }
     .title-option:active { box-shadow: var(--sink-shallow); padding: 3px 7px 1px 9px; }
 }
 
-.home-wordmark { display: flex; align-items: center; width: fit-content; margin: 0 auto 15px; color: var(--ink); font-size: clamp(30px, 5vw, 40px); font-weight: 600; letter-spacing: -.12em; line-height: 1; }
+.home-wordmark {display: flex;align-items: center;width: fit-content;margin: 0 auto 8px;color: var(--ink);font-size: clamp(30px, 5vw, 40px);font-weight: 600;letter-spacing: -.12em;line-height: 1;}
 .home-wordmark > * {  }
 /* Canon Praxis mark; sans-serif because the letterforms are the logo. */
-.home-wordmark .praxis-mark {padding: 2px 4px;color: var(--praxis-blue);background: var(--white);border-radius: 5px;border-top-right-radius: 0;border-bottom-right-radius: 0;font-family: system-ui, -apple-system, "Segoe UI", Arial, sans-serif;font-weight: normal;letter-spacing: .01em;text-transform: uppercase;border: 0;}
+.home-wordmark .praxis-mark {padding: 4px 4px;color: var(--praxis-blue);background: var(--white);border-radius: 5px;border-top-right-radius: 0;border-bottom-right-radius: 0;font-family: system-ui, -apple-system, "Segoe UI", Arial, sans-serif;font-weight: normal;letter-spacing: .01em;text-transform: uppercase;border: 0;}
 @media (hover: hover) {
     .home-wordmark .praxis-mark:hover { text-decoration: underline; text-decoration-thickness: 3px; }
 }
 /* Letter-spacing trails the last letter too, eating into the right padding. */
-.home-wordmark .nova-mark {padding: 2px 4px;padding-right: calc(4px + .12em);color: #fff;background: var(--face);/* border: 2px solid var(--white); */text-shadow: 0 0 4px #fff;}
+.home-wordmark .nova-mark {padding: 4px 4px;padding-right: calc(4px + .12em);color: #fff;background: var(--face);/* border: 2px solid var(--white); */text-shadow: 0 0 4px #fff;}
 /* Sized in em so the badge tracks the vw-clamped wordmark. */
 .home-wordmark .beta-mark { align-self: flex-end; margin-left: 4px; padding: 2px 5px; color: var(--ink); background: var(--amber); font-size: .45em; letter-spacing: normal; }
 
@@ -449,10 +486,10 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
     /* The press has to read as instant, so it cancels the transition rather than
        stepping the glow away. Releasing hands the element back to the rules above,
        whose transition is still in force, so the glow steps back in on the way out. */
-    .featured-item:active { color: var(--home-accent-press); background: var(--field); outline-color: var(--home-accent-press); box-shadow: none; outline-offset: -2px; outline-width: var(--home-outline-width); }
+    .featured-item:active {color: var(--home-accent-press);/* background: var(--field); */outline-color: var(--face);box-shadow: none;outline-offset: -2px;outline-width: var(--home-outline-width);}
 }
-.featured-item.is-touched { color: var(--home-accent-press); background: var(--field); outline: var(--home-outline-width) solid var(--home-accent-press); box-shadow: none; outline-offset: -2px; outline-width: var(--home-outline-width); }
-.featured-item.is-pressing, .featured-item.is-navigating { color: var(--home-accent-press); background: var(--field); outline: var(--home-outline-width) solid var(--home-accent-press); box-shadow: none; outline-offset: -2px; outline-width: var(--home-outline-width); }
+.featured-item.is-touched { color: var(--home-accent-press); outline: var(--home-outline-width) solid var(--face); box-shadow: none; outline-offset: -2px; outline-width: var(--home-outline-width); }
+.featured-item.is-pressing, .featured-item.is-navigating { color: var(--home-accent-press); outline: var(--home-outline-width) solid var(--face); box-shadow: none; outline-offset: -2px; outline-width: var(--home-outline-width); }
 /* The opportunities the article carries: name to the left, deadline held to the
    right edge so the dates line up down the column. */
 .featured-opportunities { display: flex; flex-direction: column; gap: 4px; margin: 0; padding: 0; list-style: none; font-size: 13px; line-height: 1.25; }
@@ -474,8 +511,8 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
    then the search tab. Wrapping is what makes the open search field work on a
    narrow screen — it drops to its own full-width row instead of squeezing the
    controls, so no width breakpoint has to name the crossover. */
-.repo-toolbar { position: relative; z-index: 2; display: flex; flex-wrap: wrap; align-items: flex-end; gap: 6px; margin-bottom: 4px; }
-.pagination-tab { display: inline-flex; align-items: flex-end; min-height: 24px; padding: 0 4px; color: var(--ink); margin-left: 0px; background: var(--field); box-shadow: var(--sink-shallow); font-size: 14px; font-weight: bold; letter-spacing: .05em;}
+.repo-toolbar {position: relative;z-index: 2;display: flex;flex-wrap: wrap;align-items: flex-end;gap: 6px;margin-bottom: 6px;}
+.pagination-tab {display: inline-flex;align-items: flex-end;min-height: 24px;padding: 0 4px;color: var(--ink);margin-left: 0px;background: var(--field);font-size: 14px;font-weight: bold;letter-spacing: .05em;}
 .pagination-arrows { display: flex; gap: 4px; }
 /* The search tab and its clear button are the same raised control as an arrow,
    so they share every rule below rather than restating the bevel. */
@@ -578,16 +615,20 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
 .search-input:focus { }
 /* WebKit's own cancel button would sit beside the one the toolbar already draws. */
 .search-input::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; }
-.repo {position: relative;min-width: 0;min-height: 520px;padding: 2px;background: var(--frame-face);box-shadow: var(--sink);}
-/* One recess, not two. The second --sink stacked eight tonal edges inside 6px,
-   which read as a groove while the well was grey and as banding once it went
-   bright — and a recess that reveals a plane brighter than its own face argues
-   with itself twice over. A hairline states the well's edge and lets the outer
-   bevel carry the depth alone.
-   Still an overlay rather than a border on .repobox: an edge painted on the
-   scroller sits behind its own children, so the cards would wipe over it as they
-   scroll past. This one does not scroll. */
-.repo::after {content: "";position: absolute;z-index: 1;inset: 3px;/* border: 1px solid var(--ink); */pointer-events: none;}
+/* Raised, not sunk. The rail is white and the page is --field, so the slab is
+   already tonally above what surrounds it; a sink drawn on it would say the
+   opposite of what the colour says, which is the contradiction this frame kept
+   falling into. The recess is one level in, where the well is. */
+.repo {position: relative;min-width: 0;min-height: 520px;padding: var(--frame-rail);/* background: var(--frame-face); */box-shadow: var(--raise-frame);}
+/* The rail's shadow thrown down onto the well. This is what states the depth now:
+   an edge alone cannot, since the plane it borders is white sheets and the light
+   half of any bevel drawn against those is invisible. Only the top and left carry
+   it — the far side of a recess catches the light, and asymmetry is the whole cue.
+   An overlay rather than a shadow on .repobox: one painted on the scroller sits
+   behind its own children, so the cards would wipe over it as they scroll past.
+   This one does not scroll, so the shade stays pinned to the frame while the
+   content moves under it. */
+.repo::after {content: "";position: absolute;z-index: 1;inset: var(--frame-rail);box-shadow: var(--well-cast), var(--well-lip);pointer-events: none;}
 /* isolation: isolate walls off every z-index used inside (card links z-index:2,
    detail-token folds z-index:3, popups z-index:40/41) into their own stacking
    context. Without it those values are compared directly against .repo::after's
@@ -595,18 +636,16 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
    popups would poke out past the recessed frame instead of being covered by it
    like the rest of the card content. Isolated, the whole repobox paints as one
    auto-stacked unit that the overlay's z-index:1 simply sits in front of. */
-.repobox {isolation: isolate;height: 100%;max-height: 70vh;min-height: 70vh;overflow-x: hidden;overflow-y: scroll;scrollbar-gutter: stable;background: var(--field);padding-right: 0px;}
+.repobox {isolation: isolate;height: 100%;max-height: 70vh;min-height: 70vh;overflow-x: hidden;overflow-y: scroll;scrollbar-gutter: stable;background: var(--well);padding: 4px;padding-right: 8px;}
 .repo-status-message { margin: auto; padding: 20px; color: var(--muted); text-align: center; }
 /* Deliberately NOT a stacking context: popups (z-index 40) must be free to
    overflow this card and paint above the cards below it. */
-/* Sheets stacked in the well rather than one unbroken white field: each card
-   carries the edge of the card above it and the shadow that edge casts down onto
-   it. Drawn at the top, since the light has come from the top left everywhere
-   else on the page — and drawn inset, because a shadow cast outside the box would
-   be painted straight over by the next card's own background. The pairing does
-   what a top highlight would in the old grey scheme, which on white sheets has
-   nothing left to say. */
-.opportunity-card {display: grid;grid-template-columns: minmax(0, 1.5fr) 1fr;column-gap: 14px;padding: 12px;box-shadow: inset -3px -3px 3px var(--sheet-shade);background: var(--white);min-height:135px;}
+/* Separate sheets lying in the well, not one unbroken white field: the gap lets
+   the well's floor show between them, which is what makes the panel read as
+   holding something rather than being filled by it. The shadow can be a real one
+   now — cards no longer touch, so it falls in the gap instead of being painted
+   over by the next card's background, which is why this was drawn inset before. */
+.opportunity-card {display: grid;grid-template-columns: minmax(0, 1.5fr) 1fr;column-gap: 14px;padding: 12px;margin-bottom: 3px;box-shadow: var(--sheet-cast);background: var(--white);min-height:135px;}
 .opportunity-main-column, .opportunity-details-column { display: flex; flex-direction: column; gap: 8px; min-width: 0; align-self: start; }
 .opportunity-main-column {  gap: 16px; margin-bottom: 8px; align-items: flex-start; }
 .opportunity-details-column { align-items: stretch; }
@@ -699,13 +738,13 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
 /* The fold stays black-filled whenever pinned, hover/focus notwithstanding —
    no white-border variant. */
 .detail-token.popup-pinned .detail-token-fold { color: #fff; background: var(--ink); }
-.details-popup { position: absolute; right: -1px; bottom: 100%; transform: translateX(calc(var(--popup-inline-offset, 0px) + var(--popup-shift-x, 0px))); z-index: 40; display: none; width: max-content; min-width: 150px; max-width: min(340px, 75vw); padding-bottom: var(--detail-tail-length); color: var(--ink); font-size: 14px; font-weight: 400; line-height: 1.4; text-align: left; text-transform: none; letter-spacing: 0; cursor: default; user-select: text; }
+.details-popup {position: absolute;right: -1px;bottom: 100%;transform: translateX(calc(var(--popup-inline-offset, 0px) + var(--popup-shift-x, 0px)));z-index: 40;display: none;width: max-content;min-width: 25px;max-width: min(340px, 75vw);padding-bottom: var(--detail-tail-length);color: var(--ink);font-size: 14px;font-weight: 400;line-height: 1.4;text-align: left;text-transform: none;letter-spacing: 0;cursor: default;user-select: text;}
 /* An actively hovered popup always wins over a merely pinned one that happens
    to sit later in paint order. */
 .detail-token.has-details:focus-visible:not(.popup-pinned) .details-popup { z-index: 41; }
-.fee-cell .details-popup { --dialogue-background: var(--amber); --popup-inline-offset: 50%; right: var(--detail-fold-center-offset); }
-.fee-cell .details-popup-content { text-align: center; font-size: 18px; }
-.details-popup-content {position: relative;z-index: 1;display: block;max-height: 220px;overflow-y: auto;padding: 6px 10px;overflow-wrap: anywhere;background: var(--dialogue-background, #fff);/* border: 1px solid var(--ink); */box-shadow: 0px 0px 0px 2px var(--ink);cursor: default;}
+.fee-cell .details-popup {--dialogue-background: var(--amber);--popup-inline-offset: 50%;right: var(--detail-fold-center-offset);}
+.fee-cell .details-popup-content {text-align: center;font-size: 16px;}
+.details-popup-content {position: relative;z-index: 1;display: block;max-height: 220px;overflow-y: auto;padding: 6px 10px;overflow-wrap: anywhere;background: var(--dialogue-background, #fff);box-shadow: 0px 0px 0px 1px var(--ink);border: 1px solid var(--ink);cursor: default;}
 /* Applied by fitContent when the text fits within the growth allowance: the cap
    comes off and the scroller is dismantled outright. A class swapping overflow,
    not an inline max-height — iOS WebKit was observed accepting an inline cap
@@ -818,14 +857,14 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
 .checkbox-filters { display: flex; flex-wrap: wrap; gap: 9px 14px; }
 .custom-select { position: relative; width: 100%; }
 .custom-selected { position: relative; width: 100%; min-height: 23px; padding: 4px 29px 4px 7px; border: 0; color: var(--ink); background: #fff; box-shadow: var(--sink); cursor: pointer; font-size: 14px; line-height: 15px; text-align: left; }
-.custom-selected::after { content: "▼"; position: absolute; top: 2px; right: 2px; bottom: 2px; display: grid; place-items: center; width: 19px; color: var(--ink); background: var(--face); box-shadow: var(--raise); font-size: 9px; line-height: 1; }
-.custom-selected:active { background: var(--face); }
-.custom-selected:active::after { box-shadow: var(--sink); padding-top: 1px; }
+.custom-selected::after {content: "▼";position: absolute;top: 2px;right: 2px;bottom: 2px;display: grid;place-items: center;width: 19px;color: var(--ink);background: var(--field);box-shadow: var(--raise);font-size: 9px;line-height: 1;}
+.custom-selected:active {background: var(--field);}
+.custom-selected:active::after {box-shadow: var(--sink);padding-top: 1px;}
 .custom-selected:focus-visible { outline: none; }
 .custom-selected:focus-visible::before,
 .custom-select.open .custom-selected::before { content: ""; position: absolute; top: 4px; right: 23px; bottom: 4px; left: 4px; border: 1px dotted var(--ink); pointer-events: none; }
 .custom-select.open .custom-selected { color: #fff; background: #fff; outline: none; }
-.custom-select.open .custom-selected:active { background: var(--face); }
+.custom-select.open .custom-selected:active {background: var(--field);color: var(--ink);}
 .custom-options { position: absolute; z-index: 20; top: 100%; right: 0; left: 0; display: none; margin: 1px 0 0; padding: 2px; list-style: none; background: #fff; border: 1px solid var(--ink); box-shadow: 2px 2px 0 rgba(0,0,0,.5); }
 .custom-options[aria-hidden="false"] { display: block; }
 .custom-options li { position: relative; padding: 4px 6px; cursor: pointer; font-size: 14px; }
@@ -951,11 +990,11 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
    itself inside — so the scrollbar sits within the recess rather than beside it.
    Kept in step with .repo deliberately; the two are the same object seen on two
    pages, and the last time they were only similar they drifted. */
-.article-frame { position: relative; min-width: 0; padding: 3px; background: var(--frame-face); box-shadow: var(--sink); }
+.article-frame {position: relative;min-width: 0;padding: 3px;/* background: var(--frame-face); *//* box-shadow: var(--sink); */}
 /* Keeps the well's edge above the scrolling text. An inset shadow on .article
    itself paints behind its own children, so the prose would ride over the recess
    on its way past instead of disappearing under it. */
-.article-frame::after { content: ""; position: absolute; z-index: 1; inset: 3px; border: 1px solid var(--ink); pointer-events: none; }
+.article-frame::after {content: "";position: absolute;z-index: 1;inset: 2px;border: 2px solid var(--face);pointer-events: none;}
 /* The reading column scrolls inside itself rather than the page scrolling, so the
    title bar and its Home button never leave the screen. The wrapper is pinned to
    the viewport and the frame takes whatever height is left.
@@ -1028,7 +1067,7 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
    renderer builds is a direct child of its paragraph, list item or heading.
    line-height goes back to inheriting: 17px in prose set at 1.5 would close the
    lines a wrapped link sits on. */
-.article :not(.article-listing) > a { display: inline; line-height: inherit; }
+.article :not(.article-listing) > a {display: inline-block;line-height: 17px;}
 .article .article-listing a{ background: var(--listing-field); color: var(--blue-bright); padding: 0px }
 /* Sentence punctuation living inside the anchor so the link's own last line can
    hold it; see spanNodes. inline-block is load-bearing twice over: text-decoration
@@ -1119,4 +1158,11 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
     .page-title::before { padding: 0 5px; }
     .filter-selectors { grid-template-columns: 1fr; }
     .feedback-form { padding: 13px; }
+}
+
+
+.article .article-listing a:first-of-type {}
+
+.article .article-listing a:first-of-type .link-tail {
+    color: var(--white);
 }
