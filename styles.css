@@ -981,20 +981,21 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
    measured rects, resolve against this padding box. */
 /* position: relative so the wrap connectors, which are absolutely placed from
    measured rects, resolve against this padding box. */
-.article { position: relative; margin: 0 auto; padding: 16px clamp(16px, 4vw, 32px) 32px; padding-bottom: 0; background: var(--field); color: var(--ink); }
+.article { position: relative; margin: 0 auto; padding: 16px clamp(16px, 4vw, 32px) 32px; padding-bottom: 0; background: var(--well); color: var(--ink); }
 /* Holds a boxed run and the punctuation after it on one line; applied by
    spanNodes, which is where the reasoning lives. */
 .nowrap { white-space: nowrap; }
-/* Recessed frame around the reading column, built the way .repo is: the bevel
-   here, the hairline drawn by ::after that does not scroll, and the scroller
-   itself inside — so the scrollbar sits within the recess rather than beside it.
-   Kept in step with .repo deliberately; the two are the same object seen on two
-   pages, and the last time they were only similar they drifted. */
-.article-frame {position: relative;min-width: 0;padding: 3px;/* background: var(--frame-face); *//* box-shadow: var(--sink); */}
-/* Keeps the well's edge above the scrolling text. An inset shadow on .article
-   itself paints behind its own children, so the prose would ride over the recess
-   on its way past instead of disappearing under it. */
-.article-frame::after {content: "";position: absolute;z-index: 1;inset: 2px;border: 2px solid var(--face);pointer-events: none;}
+/* The reading column framed exactly as the opportunities panel is: the same rail
+   width, the same raised edge on the slab, the same shadow cast into the well by
+   ::after, and the scroller itself inside — so the scrollbar sits within the recess
+   rather than beside it. Every value comes from the same tokens rather than being
+   matched by eye; the two are one object seen on two pages, and the last time they
+   were merely similar they drifted apart. */
+.article-frame {position: relative;min-width: 0;padding: var(--frame-rail);box-shadow: var(--raise-frame);}
+/* Keeps the cast above the scrolling text. A shadow painted on .article itself
+   sits behind its own children, so the prose would ride over it on the way past
+   instead of passing underneath. This one does not scroll. */
+.article-frame::after {content: "";position: absolute;z-index: 1;inset: var(--frame-rail);box-shadow: var(--well-cast), var(--well-lip);pointer-events: none;}
 /* The reading column scrolls inside itself rather than the page scrolling, so the
    title bar and its Home button never leave the screen. The wrapper is pinned to
    the viewport and the frame takes whatever height is left.
