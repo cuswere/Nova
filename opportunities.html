@@ -21,7 +21,11 @@
         <div class="field columns">
             <div class="repo-column">
                 <div class="repo-toolbar">
-                    <div class="pagination-tab" aria-live="polite">Page 1</div>
+                    <!-- Worded exactly as updatePagination writes it: the tab is
+                         sized by its text, so "Page 1" here would have the box and
+                         the arrows beside it jump 8px left the moment the first
+                         render replaced it. -->
+                    <div class="pagination-tab" aria-live="polite">Pg. 1</div>
                     <div class="pagination-arrows">
                         <button type="button" class="page-arrow page-prev" aria-label="Previous page" disabled>◀</button>
                         <button type="button" class="page-arrow page-next" aria-label="Next page">▶</button>

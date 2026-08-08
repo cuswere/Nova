@@ -569,7 +569,7 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
 .repo-status-message { margin: auto; padding: 20px; color: var(--muted); text-align: center; }
 /* Deliberately NOT a stacking context: popups (z-index 40) must be free to
    overflow this card and paint above the cards below it. */
-.opportunity-card { display: grid; grid-template-columns: minmax(0, 1.5fr) 1fr; column-gap: 14px; padding: 12px; border-bottom: 1px solid #999; background: var(--field); min-height:135px; }
+.opportunity-card {display: grid;grid-template-columns: minmax(0, 1.5fr) 1fr;column-gap: 14px;padding: 12px;border-bottom: 1px solid #999;background: var(--white);min-height:135px;}
 .opportunity-main-column, .opportunity-details-column { display: flex; flex-direction: column; gap: 8px; min-width: 0; align-self: start; }
 .opportunity-main-column {  gap: 16px; margin-bottom: 8px; align-items: flex-start; }
 .opportunity-details-column { align-items: stretch; }
@@ -607,7 +607,7 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
     .opportunity-card a.line-background-ready:has(.link-text:hover, .link-line-background:hover) .link-text { text-decoration-thickness: 2px; outline: 2px solid var(--blue-bright); outline-offset: 6px; }
     .opportunity-card a:not(.line-background-ready):hover { color: var(--blue-bright); background: var(--field); }
     .opportunity-card a.line-background-ready:has(.link-text:hover, .link-line-background:hover) { color: var(--blue-bright); text-decoration-color: var(--blue-bright); }
-    .opportunity-card a.line-background-ready:has(.link-text:hover, .link-line-background:hover) .link-line-background { background: var(--field); }
+    .opportunity-card a.line-background-ready:has(.link-text:hover, .link-line-background:hover) .link-line-background {background: var(--white);}
 }
 
 .top-right-grid { outline: 1px solid var(--ink); padding: 8px; min-width: 0; max-width: 100%; }
