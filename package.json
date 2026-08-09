@@ -5,9 +5,10 @@
   "type": "module",
   "description": "An updating roster of opportunities for artists.",
   "scripts": {
-    "publish-data": "node publish.js",
-    "sync-opportunities": "node sync-opportunities.js",
-    "sync-featured": "node sync-featured.js",
+    "stamp": "node stamp.js",
+    "publish-data": "node publish.js && node stamp.js",
+    "sync-opportunities": "node sync-opportunities.js && node stamp.js",
+    "sync-featured": "node sync-featured.js && node stamp.js",
     "dry-run-opportunities": "node sync-opportunities.js --dry-run",
     "test": "node --test"
   },

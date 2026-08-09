@@ -1,4 +1,4 @@
-import { initSharedPage } from './shared.js';
+import { initSharedPage } from './shared.js?v=31ca9b7b';
 
 // Matches the mobile breakpoint the stylesheet switches on (max-width: 700px);
 // a full 50-card page is a lot of scrolling once cards stack to one column.
@@ -68,18 +68,39 @@ function parseUrlFilters() {
     state.filters.query = (params.get('q') || '').trim();
 }
 
-function statusMessage(text) {
-    return element('div', 'repo-status-message', text);
+function statusMessage(text, variant = '') {
+    return element('div', `repo-status-message ${variant}`.trim(), text);
+}
+
+/* How long the well stays wordless before admitting it is waiting, and how long
+   the admission then stands. The first has to match the hold in
+   .repo-status-message.is-pending, which is what actually keeps the message off
+   the screen — under it nothing is ever painted, so a load that beats the
+   threshold says nothing at all. The second closes the other edge: data landing a
+   moment after the message appears would otherwise blink it away far faster than
+   it could be read, which is the flicker this is here to prevent, not cause. */
+const STATUS_DELAY_MS = 400;
+const STATUS_MIN_MS = 300;
+
+function settleStatus(shownAt) {
+    const elapsed = Date.now() - shownAt;
+    // Never painted; there is nothing on screen to hold.
+    if (elapsed < STATUS_DELAY_MS) return Promise.resolve();
+    const remaining = STATUS_DELAY_MS + STATUS_MIN_MS - elapsed;
+    if (remaining <= 0) return Promise.resolve();
+    return new Promise((resolve) => { window.setTimeout(resolve, remaining); });
 }
 
 async function loadOpportunities() {
     const container = document.querySelector('.repobox');
-    container.replaceChildren(statusMessage('Loading…'));
+    const shownAt = Date.now();
+    container.replaceChildren(statusMessage('Loading…', 'is-pending'));
 
     try {
-        const response = await fetch('data/opportunities.json');
+        const response = await fetch('data/opportunities.json?v=c93a63dc');
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         state.opportunities = await response.json();
+        await settleStatus(shownAt);
         renderCategoryMenu();
         renderFilters();
         renderOpportunities();
@@ -158,9 +179,20 @@ function setupCategoryMenu() {
         const items = [...list.querySelectorAll('li')];
         focusCategory(items, event.key === 'ArrowDown' ? 0 : items.length - 1);
     });
-    list.addEventListener('click', (event) => {
+    /* Committed on the press rather than on the release, the way a native menu
+       does it: the option is gone before a finger or a mouse button comes back up.
+       Primary button only — a right-click opens a context menu, and selecting
+       underneath it would be a surprise. preventDefault stops the press taking
+       focus, which would otherwise land on an element this handler is about to
+       replace. The click that follows lands on nothing, since the list is rebuilt
+       by then; it reaches the document handler, which only closes an already
+       closed menu. */
+    list.addEventListener('pointerdown', (event) => {
+        if (event.button !== 0) return;
         const item = event.target.closest('li[data-value]');
-        if (item) selectCategory(item.dataset.value);
+        if (!item) return;
+        event.preventDefault();
+        selectCategory(item.dataset.value);
     });
     list.addEventListener('keydown', (event) => {
         const items = [...list.querySelectorAll('li')];
@@ -239,7 +271,18 @@ function filterChip(label, className, remove) {
     const button = element('button', 'remove-filter-btn');
     button.type = 'button';
     button.setAttribute('aria-label', `Remove ${label} filter`);
-    button.addEventListener('click', remove);
+    /* Removed on the press, like the category options. The chip is gone before the
+       button comes back up, so no click follows it — but a keyboard activation
+       never sent a pointerdown in the first place, and arrives as a click carrying
+       no pointer behind it (detail 0). Both routes, no double removal. */
+    button.addEventListener('pointerdown', (event) => {
+        if (event.button !== 0) return;
+        event.preventDefault();
+        remove();
+    });
+    button.addEventListener('click', (event) => {
+        if (event.detail === 0) remove();
+    });
     chip.append(element('span', '', label), button);
     return chip;
 }

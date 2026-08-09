@@ -177,7 +177,7 @@ button { cursor: pointer; }
    backwards rather than both holds the hidden state before the first frame but
    drops the clip the moment the wipe ends; a clip left in place would cut off
    descendants that draw outside the box, like the popups' shadows. */
-.screen-refresh { animation: screen-refresh-in 250ms steps(4, jump-start) backwards; }
+.screen-refresh { animation: screen-refresh-in 350ms steps(4, jump-start) backwards; }
 @keyframes screen-refresh-in {
     from { clip-path: inset(0 0 100% 0); }
     to { clip-path: inset(0 0 0 0); }
@@ -338,7 +338,7 @@ button { cursor: pointer; }
     .title-option:active { box-shadow: var(--sink-shallow); padding: 3px 7px 1px 9px; }
 }
 
-.home-wordmark {display: flex;align-items: center;width: fit-content;margin: 0 auto 8px;color: var(--ink);font-size: clamp(30px, 5vw, 40px);font-weight: 600;letter-spacing: -.12em;line-height: 1;}
+.home-wordmark {display: flex;align-items: center;width: fit-content;margin: 0 auto 8px;color: var(--ink);font-size: clamp(30px, 5vw, 40px);font-weight: bold;line-height: 1;}
 .home-wordmark > * {  }
 /* Canon Praxis mark; sans-serif because the letterforms are the logo. */
 .home-wordmark .praxis-mark {padding: 4px 4px;color: var(--praxis-blue);background: var(--white);border-radius: 5px;border-top-right-radius: 0;border-bottom-right-radius: 0;font-family: system-ui, -apple-system, "Segoe UI", Arial, sans-serif;font-weight: normal;letter-spacing: .01em;text-transform: uppercase;border: 0;}
@@ -346,9 +346,9 @@ button { cursor: pointer; }
     .home-wordmark .praxis-mark:hover { text-decoration: underline; text-decoration-thickness: 3px; }
 }
 /* Letter-spacing trails the last letter too, eating into the right padding. */
-.home-wordmark .nova-mark {padding: 4px 4px;padding-right: calc(4px + .12em);color: #fff;background: var(--face);/* border: 2px solid var(--white); */text-shadow: 0 0 4px #fff;}
+.home-wordmark .nova-mark {padding: 2px 4px;color: var(--white);background: transparent;text-shadow: 0 0 4px var(--white);border: 2px solid var(--white);}
 /* Sized in em so the badge tracks the vw-clamped wordmark. */
-.home-wordmark .beta-mark { align-self: flex-end; margin-left: 4px; padding: 2px 5px; color: var(--ink); background: var(--amber); font-size: .45em; letter-spacing: normal; }
+.home-wordmark .beta-mark {align-self: flex-end;margin-left: 4px;padding: 2px 5px;color: var(--ink);background: var(--amber);font-size: .45em;font-weight: normal;}
 
 /* Leave-site confirmation, styled as a system dialog. */
 /* margin: 0 defeats the UA's centring so top/left can place it; both are set
@@ -503,10 +503,10 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
     /* The press has to read as instant, so it cancels the transition rather than
        stepping the glow away. Releasing hands the element back to the rules above,
        whose transition is still in force, so the glow steps back in on the way out. */
-    .featured-item:active {color: var(--home-accent-press);/* background: var(--field); */outline-color: var(--face);box-shadow: none;outline-offset: -2px;outline-width: var(--home-outline-width);}
+    .featured-item:active {color: var(--home-accent-press);/* background: var(--field); */outline-color: var(--field);box-shadow: none;outline-offset: -2px;outline-width: var(--home-outline-width);}
 }
-.featured-item.is-touched { color: var(--home-accent-press); outline: var(--home-outline-width) solid var(--face); box-shadow: none; outline-offset: -2px; outline-width: var(--home-outline-width); }
-.featured-item.is-pressing, .featured-item.is-navigating { color: var(--home-accent-press); outline: var(--home-outline-width) solid var(--face); box-shadow: none; outline-offset: -2px; outline-width: var(--home-outline-width); }
+.featured-item.is-touched { color: var(--home-accent-press); outline: var(--home-outline-width) solid var(--field); box-shadow: none; outline-offset: -2px; outline-width: var(--home-outline-width); }
+.featured-item.is-pressing, .featured-item.is-navigating { color: var(--home-accent-press); outline: var(--home-outline-width) solid var(--field); box-shadow: none; outline-offset: -2px; outline-width: var(--home-outline-width); }
 /* The opportunities the article carries: name to the left, deadline held to the
    right edge so the dates line up down the column. */
 .featured-opportunities { display: flex; flex-direction: column; gap: 4px; margin: 0; padding: 0; list-style: none; font-size: 13px; line-height: 1.25; }
@@ -655,6 +655,20 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
    auto-stacked unit that the overlay's z-index:1 simply sits in front of. */
 .repobox {isolation: isolate;height: 100%;max-height: 70vh;min-height: 70vh;overflow-x: hidden;overflow-y: scroll;scrollbar-gutter: stable;background: var(--well);padding: 4px;padding-right: 8px;}
 .repo-status-message { margin: auto; padding: 20px; color: var(--muted); text-align: center; }
+/* The waiting message earns its place only if the wait is real. The wipe clears in
+   250ms and the data usually beats it, so an unconditional "Loading…" reads as a
+   blink in the middle of an empty well rather than as news. Held out of sight for
+   the first stretch, a load that beats the threshold replaces the message before it
+   has ever painted; a slow one still gets told. A 0s animation on a delay rather
+   than a transition, so it steps in at the mark rather than fading — and the delay
+   is mirrored by STATUS_DELAY_MS, which keeps it on screen long enough to read once
+   it does appear. Only the pending message defers: an error is the final word and
+   should be there at once. */
+.repo-status-message.is-pending { animation: status-pending 0s 400ms both; }
+@keyframes status-pending {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
 /* Deliberately NOT a stacking context: popups (z-index 40) must be free to
    overflow this card and paint above the cards below it. */
 /* Separate sheets lying in the well, not one unbroken white field: the gap lets
@@ -719,7 +733,7 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
    cell reserves matching right-side padding to keep the centered label clear
    of its footprint. Both reveal the details on hover/focus, flipping
    up/down to avoid clipping. */
-.detail-token.has-details { --detail-tail-length: 8px; --detail-tail-width: 12px; --detail-fold-size: 13px; --detail-fold-center-offset: 7.5px; position: relative; overflow: visible; padding-right: 16px; cursor: help; user-select: none; }
+.detail-token.has-details { --detail-tail-length: 8px; --detail-tail-width: 12px; --detail-fold-size: 13px; --detail-fold-center-offset: 7.5px; --detail-fold-clear: var(--white); position: relative; overflow: visible; padding-right: 16px; cursor: help; user-select: none; }
 .detail-token.has-details:focus-visible { outline: 1px dotted var(--ink); outline-offset: 2px; }
 /* No press state: the popup now pins on pointerdown, so the inversion is already
    on screen by the time a dim would paint. Pinned is the only state left. */
@@ -754,7 +768,10 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
 .eligibility-cell.detail-token.has-details.popup-pinned:focus-visible { color: #fff; background: var(--ink); }
 /* The fold stays black-filled whenever pinned, hover/focus notwithstanding —
    no white-border variant. */
-.detail-token.popup-pinned .detail-token-fold { color: #fff; background: var(--ink); }
+.detail-token.popup-pinned .detail-token-fold {color: var(--detail-fold-clear);background: var(--detail-fold-clear);}
+/* The cleared fold has to match the cell it sits in, or the corner reads as a
+   hole rather than a lifted flap; the fee token's field is amber, not white. */
+.fee-cell.detail-token.has-details { --detail-fold-clear: var(--amber); }
 .details-popup {position: absolute;right: -1px;bottom: 100%;transform: translateX(calc(var(--popup-inline-offset, 0px) + var(--popup-shift-x, 0px)));z-index: 40;display: none;width: max-content;min-width: 25px;max-width: min(340px, 75vw);padding-bottom: var(--detail-tail-length);color: var(--ink);font-size: 14px;font-weight: 400;line-height: 1.4;text-align: left;text-transform: none;letter-spacing: 0;cursor: default;user-select: text;}
 /* An actively hovered popup always wins over a merely pinned one that happens
    to sit later in paint order. */
@@ -832,7 +849,7 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
    These trail the pinned rules, but pinned wins on specificity, not order. */
 @media (hover: hover) {
     .detail-token.has-details:hover .detail-token-label::after { display: block; }
-    .detail-token.has-details:hover .detail-token-fold { color: #fff; background: var(--ink); }
+    .detail-token.has-details:hover .detail-token-fold {color: var(--detail-fold-clear);background: var(--detail-fold-clear);}
     .award-cell.detail-token.has-details:hover,
     .eligibility-cell.detail-token.has-details:hover { }
     .detail-token.has-details:hover .details-popup { z-index: 41; display: block; }
@@ -865,7 +882,10 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
    its own offset, since the boxes are different sizes. */
 .remove-filter-btn::before, .search-clear::before { content: ""; position: absolute; width: 1px; height: 1px; background: currentColor; box-shadow: 6px 0 currentColor, 1px 1px currentColor, 5px 1px currentColor, 2px 2px currentColor, 4px 2px currentColor, 3px 3px currentColor, 2px 4px currentColor, 4px 4px currentColor, 1px 5px currentColor, 5px 5px currentColor, 0 6px currentColor, 6px 6px currentColor; }
 .remove-filter-btn::before { top: 4px; left: 4px; }
-.remove-filter-btn.is-touched { color: var(--ink); background: #fff; }
+/* No touch state: .is-touched lands PRESS_DELAY_MS after a finger settles, and the
+   chip is removed on the pointerdown well before that, so it could only ever paint
+   on something already gone. The mouse keeps its hover, which happens before the
+   press rather than during it. */
 @media (hover: hover) {
     .remove-filter-btn:hover { color: var(--ink); background: #fff; }
 }
@@ -882,7 +902,7 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
 .custom-select.open .custom-selected::before { content: ""; position: absolute; top: 4px; right: 23px; bottom: 4px; left: 4px; border: 1px dotted var(--ink); pointer-events: none; }
 .custom-select.open .custom-selected { color: #fff; background: #fff; outline: none; }
 .custom-select.open .custom-selected:active {background: var(--field);color: var(--ink);}
-.custom-options { position: absolute; z-index: 20; top: 100%; right: 0; left: 0; display: none; margin: 1px 0 0; padding: 2px; list-style: none; background: #fff; border: 1px solid var(--ink); box-shadow: 2px 2px 0 rgba(0,0,0,.5); }
+.custom-options {position: absolute;z-index: 20;top: 100%;right: 0;left: 0;display: none;margin: 1px 0 0;padding: 2px;list-style: none;background: #fff;/* border: 1px solid var(--ink); */box-shadow: 2px 2px 0 rgba(0,0,0,.5);}
 .custom-options[aria-hidden="false"] { display: block; }
 .custom-options li { position: relative; padding: 4px 6px; cursor: pointer; font-size: 14px; }
 /* aria-selected is the menu's own keyboard/tap highlight and stays ungated;
@@ -891,15 +911,11 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
 @media (hover: hover) {
     .custom-options li:hover { color: var(--field); background: var(--blue-bright); outline: 0px solid var(--ink); }
 }
-.custom-options li.is-pressing .opt-label { display: inline-block; transform: translate(1px, 1px); }
-@media (hover: hover) {
-    .custom-options li:active .opt-label { display: inline-block; transform: translate(1px, 1px); }
-}
+/* No pressed look on an option: selection commits on pointerdown, so the item is
+   off the screen before a depressed label could paint. The hover and aria-selected
+   highlights above are the whole affordance now. */
 .custom-options li.clear-filter-option { color: var(--red); }
 .custom-options li.clear-filter-option[aria-selected="true"], .custom-options li.clear-filter-option.is-touched { color: var(--field); background: var(--red); }
-@media (hover: hover) {
-    .custom-options li.clear-filter-option:active { color: var(--field); background: var(--red); }
-}
 @media (hover: hover) {
     .custom-options li.clear-filter-option:hover { color: var(--field); background: var(--red); }
 }
