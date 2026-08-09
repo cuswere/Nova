@@ -1056,7 +1056,7 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
 .link-bridge { position: absolute; pointer-events: none; border: 0 dashed var(--blue-bright); }
 .link-bridge-h { border-top-width: var(0px); }
 .link-bridge-v { border-left-width: var(0px); }
-.article-title { margin: 0 0 4px; font-family: var(--mono); font-size: clamp(26px, 4.5vw, 38px); font-weight: 600; line-height: 1.05; }
+.article-title {margin: 0 0 4px;font-family: var(--mono);font-size: clamp(26px, 4.5vw, 38px);font-weight: 600;line-height: 1.05;color: var(--white);background: var(--green);padding: 2px 8px;}
 .article-byline { margin: 0 0 20px; font-family: var(--mono); font-size: 13px; letter-spacing: .03em; }
 /* 2.5 rather than a prose 1.5–1.75: the links carry a 6px-padded box standing
    31px tall, so a tighter line leaves consecutive lines' boxes overlapping and
@@ -1073,8 +1073,18 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
    for the depth — every fill inside the panel reads --listing-field, so nothing
    patches when it moves. Mixed in srgb, which for a step this small is a plain
    channel scale and keeps the field's warmth in proportion. */
-.article p.article-listing { --listing-shade: 4%; --listing-field: color-mix(in srgb, var(--ink) var(--listing-shade), var(--field));
-    box-shadow: var(--sink-shallow); margin-bottom: 26px; padding: 12px 24px; background: var(--listing-field); color: var(--ink); outline: 0px solid var(--face); outline-offset: 12px; line-height: 2.2; }
+.article p.article-listing {
+    --listing-shade: 4%;
+    /* --listing-field: color-mix(in srgb, var(--ink) var(--listing-shade), var(--white)); */
+    box-shadow: 2px 2px 0 var(--blue-bright);
+    margin-bottom: 26px;
+    padding: 12px 24px;
+    background: var(--listing-field);
+    color: var(--ink);
+    outline: 0px solid var(--face);
+    outline-offset: 12px;
+    line-height: 2.2;
+    }
 .article h2, .article h3 { margin: 26px 0 10px; font-family: var(--mono); font-weight: 600; line-height: 1.15; }
 .article h2 { font-size: 21px; }
 .article h3 { font-size: 17px; }
