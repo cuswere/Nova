@@ -1074,8 +1074,8 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
    patches when it moves. Mixed in srgb, which for a step this small is a plain
    channel scale and keeps the field's warmth in proportion. */
 .article p.article-listing {
-    --listing-shade: 4%;
-    /* --listing-field: color-mix(in srgb, var(--ink) var(--listing-shade), var(--white)); */
+    --listing-shade: 10%;
+   --listing-field: color-mix(in srgb, var(--ink) var(--listing-shade), var(--field));
     box-shadow: 2px 2px 0 var(--blue-bright);
     margin-bottom: 26px;
     padding: 12px 24px;
