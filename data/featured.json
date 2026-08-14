@@ -1,5 +1,156 @@
 [
   {
+    "slug": "give-a-little",
+    "title": "Give A Little",
+    "link": "https://blog.praxiscenterforaesthetics.com/give-a-little/",
+    "date": "2026-08-13T14:22:10.000Z",
+    "author": "Brainard Carey",
+    "opportunities": [
+      {
+        "title": "The Lure of the Local’s fifth annual juried exhibition",
+        "deadline": "August 30"
+      },
+      {
+        "title": "The Liu Shiming Artist Grants",
+        "deadline": "August 31"
+      },
+      {
+        "title": "Discover AMAZÓNICA 2026",
+        "deadline": "August 31"
+      }
+    ],
+    "blocks": [
+      {
+        "type": "p",
+        "spans": [
+          {
+            "text": "Sometimes life asks more of us than others, not because we have everything figured out, but because someone else needs us to show up. In difficult moments, when uncertainty, loss, change, or simply the weight of the world has you feeling stretched thin, it can be tempting to turn inward. But these can be the moments when coming through for one another matters most."
+          }
+        ]
+      },
+      {
+        "type": "p",
+        "spans": [
+          {
+            "href": "https://www.mundelein.org/592/Lure-of-the-Local",
+            "text": "The Lure of the Local’s fifth annual juried exhibition"
+          },
+          {
+            "text": ", presented by the Mundelein Arts Commission, invites artists to explore “Love Letters” through diverse media and perspectives. Interactive, participatory installation proposals are especially encouraged for this 10th Anniversary celebration. "
+          },
+          {
+            "href": "https://www.mundelein.org/592/Lure-of-the-Local",
+            "text": "Learn more at the website"
+          },
+          {
+            "text": ". Application deadline is "
+          },
+          {
+            "bold": true,
+            "text": "August 30"
+          },
+          {
+            "text": "."
+          }
+        ],
+        "listing": true
+      },
+      {
+        "type": "p",
+        "spans": [
+          {
+            "href": "https://www.lsmartfund.org/artistgrants2026",
+            "text": "The Liu Shiming Artist Grants"
+          },
+          {
+            "text": " award up to five visual artists $5,000 each to develop projects exploring connections between traditional cultural or historical influences and contemporary practice. Open to artists with 2–10 years of experience. "
+          },
+          {
+            "href": "https://www.lsmartfund.org/artistgrants2026",
+            "text": "Visit the website for more information"
+          },
+          {
+            "text": ". Deadline is "
+          },
+          {
+            "bold": true,
+            "text": "August 31"
+          },
+          {
+            "text": "."
+          }
+        ],
+        "listing": true
+      },
+      {
+        "type": "p",
+        "spans": [
+          {
+            "href": "https://www.artjobs.com/open-calls/residency/peru/37904/amaz%c3%b3nica-2026-artist-residence-%e2%80%93-amazon-rainforest-peru",
+            "text": "Discover AMAZÓNICA 2026"
+          },
+          {
+            "text": ", a four-week international residency in Iquitos, Peru, connecting artists with Amazonian biodiversity, Indigenous communities, culture, and decolonial practice. "
+          },
+          {
+            "href": "https://www.artjobs.com/open-calls/residency/peru/37904/amaz%c3%b3nica-2026-artist-residence-%e2%80%93-amazon-rainforest-peru",
+            "text": "For more details, visit the website"
+          },
+          {
+            "text": ". Deadline is "
+          },
+          {
+            "bold": true,
+            "text": "August 31"
+          },
+          {
+            "text": "."
+          }
+        ],
+        "listing": true
+      },
+      {
+        "type": "p",
+        "spans": [
+          {
+            "href": "https://praxiscenterforaestheticstudies.com/l/products?sortKey=name&sortDirection=asc&page=1",
+            "text": "Praxis Center"
+          },
+          {
+            "text": " recognizes that showing up doesn’t always mean having the right words or knowing how to fix what’s broken. Sometimes it means listening. Sometimes it means offering a hand, making space, sharing what we have, or reminding someone that they don’t have to carry everything alone. That’s why we exist, to help artists feel less alone as they navigate the art world."
+          }
+        ]
+      },
+      {
+        "type": "h3",
+        "spans": [
+          {
+            "italic": true,
+            "text": "Brainard Carey is an author, artist and educator. He is the director of Praxis Center for Aesthetics and is currently faculty at the School of Visual Arts in NYC. He has written seven books for artists, including "
+          },
+          {
+            "italic": true,
+            "href": "https://www.amazon.com/dp/162153765X/ref=redir_mobile_desktop?_encoding=UTF8&fbclid=IwAR0m2cFPe9xHLHPOV6ZWn4LLIYT6KcNYm6pGmWSxRBQedXbFxe-n82LTyfo&ref_=dp_ob_neva_mobile",
+            "text": "Making it in the Art World"
+          },
+          {
+            "italic": true,
+            "text": ". His seventh book, "
+          },
+          {
+            "italic": true,
+            "href": "https://www.amazon.com/Problem-Art-World-Z-Navigation/dp/1621537951",
+            "text": "The Problems in the Art World: An Artist’s A-Z Action Guide"
+          },
+          {
+            "italic": true,
+            "text": ", is available now."
+          }
+        ]
+      }
+    ]
+  },
+  {
     "slug": "got-to-roll-with-the-punches",
     "title": "Got To Roll With The Punches",
     "link": "https://blog.praxiscenterforaesthetics.com/got-to-roll-with-the-punches/",
