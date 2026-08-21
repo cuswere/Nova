@@ -338,7 +338,7 @@ button { cursor: pointer; }
     .title-option:active { box-shadow: var(--sink-shallow); padding: 3px 7px 1px 9px; }
 }
 
-.home-wordmark {display: flex;align-items: center;width: fit-content;margin: 0 auto 8px;color: var(--ink);font-size: clamp(30px, 5vw, 40px);font-weight: bold;line-height: 1;}
+.home-wordmark {display: flex;align-items: center;width: fit-content;margin: 0 auto 16px;color: var(--ink);font-size: clamp(30px, 5vw, 40px);font-weight: bold;line-height: 1;}
 .home-wordmark > * {  }
 /* Canon Praxis mark; sans-serif because the letterforms are the logo. */
 .home-wordmark .praxis-mark {padding: 4px 4px;color: var(--praxis-blue);background: var(--white);border-radius: 5px;border-top-right-radius: 0;border-bottom-right-radius: 0;font-family: system-ui, -apple-system, "Segoe UI", Arial, sans-serif;font-weight: normal;letter-spacing: .01em;text-transform: uppercase;border: 0;}
@@ -384,7 +384,7 @@ button { cursor: pointer; }
    details panel reaching Featured, so a negative value would let them collide.
    To close the gap instead, shrink the details panel itself — its padding or the
    16px .option-details-row type — and the gap follows it down. */
-.options-container {--featured-offset: 24px;--options-gap: 12px;background: var(--field);outline: var(--stroke) solid var(--blue-bright);outline-offset: -1px;display: grid;grid-template-columns: repeat(2, minmax(0, 1fr));grid-template-rows: auto 1fr;gap: var(--options-gap);padding: 12px;min-height: 285px;}
+.options-container {--featured-offset: 24px;--options-gap: 12px;background: var(--white);/* box-shadow: 0 0 4px 4px white; *//* outline: var(--stroke) solid var(--blue-bright); */outline-offset: -1px;display: grid;grid-template-columns: repeat(2, minmax(0, 1fr));grid-template-rows: auto 1fr;gap: var(--options-gap);padding: 12px;min-height: 285px;}
 /* Placed explicitly rather than by source order: Featured comes last in the
    markup so the narrow layout can stack it directly under Opportunities, but on
    a wide screen it belongs in the space left below it. The 700px query hands
@@ -1014,7 +1014,7 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
    measured rects, resolve against this padding box. */
 /* position: relative so the wrap connectors, which are absolutely placed from
    measured rects, resolve against this padding box. */
-.article { position: relative; margin: 0 auto; padding: 16px clamp(16px, 4vw, 32px) 32px; padding-bottom: 0; background: var(--well); color: var(--ink); }
+.article { position: relative; margin: 0 auto; padding: 16px clamp(16px, 4vw, 32px) 32px; padding-bottom: 0; background: var(--white); color: var(--ink); }
 /* Holds a boxed run and the punctuation after it on one line; applied by
    spanNodes, which is where the reasoning lives. */
 .nowrap { white-space: nowrap; }
@@ -1075,13 +1075,13 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
    channel scale and keeps the field's warmth in proportion. */
 .article p.article-listing {
     --listing-shade: 10%;
-   --listing-field: color-mix(in srgb, var(--ink) var(--listing-shade), var(--field));
-    box-shadow: 2px 2px 0 var(--blue-bright);
+    --listing-field: color-mix(in srgb, var(--ink) var(--listing-shade), var(--white));
+    box-shadow: 0px 0px 2px var(--ink);
     margin-bottom: 26px;
     padding: 12px 24px;
     background: var(--listing-field);
     color: var(--ink);
-    outline: 0px solid var(--face);
+    /* outline: 2px solid var(--listing-field); */
     outline-offset: 12px;
     line-height: 2.2;
     }
@@ -1125,7 +1125,7 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
    paragraph's first href span, and a link is always a direct child of the <p>,
    so the two select the same element. Empty on purpose — it only overrides what
    is put in it. */
-.article .article-listing a:first-of-type { background: var(--green); color: var(--white); box-shadow: 0 0 4px 2px var(--green); padding: 6px}
+.article .article-listing a:first-of-type {background: var(--green);color: var(--white);/* box-shadow: 0 0 4px 2px var(--green); */padding: 6px}
 @media (hover: hover) {
     .article a:hover { outline: 2px solid var(--blue-bright); outline-offset: 2px; }
     .article .article-listing a:hover { outline: 2px solid var(--blue-bright); outline-offset: 2px; }
