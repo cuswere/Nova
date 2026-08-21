@@ -1,5 +1,159 @@
 [
   {
+    "slug": "there-for-the-taking",
+    "title": "There For The Taking",
+    "link": "https://blog.praxiscenterforaesthetics.com/there-for-the-taking/",
+    "date": "2026-08-20T13:20:12.000Z",
+    "author": "Brainard Carey",
+    "opportunities": [
+      {
+        "title": "Artists Association of Nantucket AIR program",
+        "deadline": "August 31"
+      },
+      {
+        "title": "SYNO Foundation",
+        "deadline": "August 31"
+      },
+      {
+        "title": "Künstlerdorf Schöppingen Foundation",
+        "deadline": "August 31"
+      }
+    ],
+    "blocks": [
+      {
+        "type": "p",
+        "spans": [
+          {
+            "text": "The art world is for you. It is for everyone, viewer and artist alike. While it may feel difficult to break in, the art world in fact needs artists just as much as artists need the art world. Without creators, there simply is no art. The challenge is finding those ways to sustain and grow your practice so you can continue to make inroads toward the career you desire. Here are some upcoming opportunities to keep you on the right track."
+          }
+        ]
+      },
+      {
+        "type": "p",
+        "spans": [
+          {
+            "href": "https://www.nantucketarts.org/artists-in-residence",
+            "text": "Artists Association of Nantucket AIR program"
+          },
+          {
+            "text": " offers funded and non-funded residencies providing studio space, housing, and community engagement for visual artists to advance their practice on Nantucket island. "
+          },
+          {
+            "href": "https://www.nantucketarts.org/artists-in-residence",
+            "text": "Learn more at the website"
+          },
+          {
+            "text": ". Deadline is "
+          },
+          {
+            "bold": true,
+            "text": "August 31"
+          },
+          {
+            "text": "."
+          }
+        ],
+        "listing": true
+      },
+      {
+        "type": "p",
+        "spans": [
+          {
+            "href": "https://syno.art/",
+            "text": "SYNO Foundation"
+          },
+          {
+            "text": " offers Cypriot and diaspora artists a chance to win €3,500 awards, gain dedicated profiles, and feature in editorial coverage with international curators. "
+          },
+          {
+            "href": "https://syno.art/",
+            "text": "For more information, visit the website"
+          },
+          {
+            "text": ". Application deadline is "
+          },
+          {
+            "bold": true,
+            "text": "August 31"
+          },
+          {
+            "text": "."
+          }
+        ],
+        "listing": true
+      },
+      {
+        "type": "p",
+        "spans": [
+          {
+            "href": "https://stiftung-kuenstlerdorf.de/de/home",
+            "text": "Künstlerdorf Schöppingen Foundation"
+          },
+          {
+            "text": " offers 2026 digital residencies (May 15–Nov 30) for four artists exploring digital accessibility, power dynamics, and intersectional, postcolonial critique. "
+          },
+          {
+            "href": "https://stiftung-kuenstlerdorf.de/de/home",
+            "text": "For details and to apply, check the website"
+          },
+          {
+            "text": ". Deadline is "
+          },
+          {
+            "bold": true,
+            "text": "August 31"
+          },
+          {
+            "text": "."
+          }
+        ],
+        "listing": true
+      },
+      {
+        "type": "p",
+        "spans": [
+          {
+            "text": "Praxis Center understands how impenetrable the art world can feel. That’s why we’re here. We gather experts and resources from around the field and put them at your fingertips. There "
+          },
+          {
+            "italic": true,
+            "text": "is"
+          },
+          {
+            "text": " a way to build a career in art, we have witnessed it again and again, and we are here to guide and support you every step of the way."
+          }
+        ]
+      },
+      {
+        "type": "p",
+        "spans": [
+          {
+            "italic": true,
+            "text": "Brainard Carey is an author, artist and educator. He is the director of Praxis Center for Aesthetics and is currently faculty at the School of Visual Arts in NYC. He has written seven books for artists, including "
+          },
+          {
+            "italic": true,
+            "href": "https://www.amazon.com/dp/162153765X/ref=redir_mobile_desktop?_encoding=UTF8&fbclid=IwAR0m2cFPe9xHLHPOV6ZWn4LLIYT6KcNYm6pGmWSxRBQedXbFxe-n82LTyfo&ref_=dp_ob_neva_mobile",
+            "text": "Making it in the Art World"
+          },
+          {
+            "italic": true,
+            "text": ". His seventh book, "
+          },
+          {
+            "italic": true,
+            "href": "https://www.amazon.com/Problem-Art-World-Z-Navigation/dp/1621537951",
+            "text": "The Problems in the Art World: An Artist’s A-Z Action Guide"
+          },
+          {
+            "italic": true,
+            "text": ", is available now."
+          }
+        ]
+      }
+    ]
+  },
+  {
     "slug": "give-a-little",
     "title": "Give A Little",
     "link": "https://blog.praxiscenterforaesthetics.com/give-a-little/",
