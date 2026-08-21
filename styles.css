@@ -102,7 +102,7 @@
        sight rather than changing hue. It follows .options-container — move one and
        the other has to move with it. */
     --home-accent: var(--blue-bright);
-    --home-accent-press: var(--field);
+    --home-accent-press: var(--white);
     --home-outline-width: var(--stroke);
     --home-outline-offset: -8px;
     /* Featured cards and the info button's focus ring, whose padding is tighter. */
@@ -405,7 +405,12 @@ button { cursor: pointer; }
 .action-group { gap: 12px; }
 .option-btn-container { min-width: 0; }
 span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke) var(--stroke) 0 var(--home-accent);font-family: var(--mono);font-size: var(--option-btn-size, clamp(23px, 3.3vw, 37px));line-height: .98;}
-.option-btn a { flex: 1; padding: var(--option-btn-padding, 12px); text-decoration: underline; text-decoration-thickness: var(--stroke); }
+/* The outline is inset the same 6px all round, but the ink inside it is not
+   symmetrical: the top gap is measured to the cap-top, the bottom one to the
+   underline, which hangs below the text box by its offset plus its own
+   thickness. Paying that back as bottom padding is what evens the two. Pinning
+   the offset rather than leaving it auto keeps the sum exact across fonts. */
+.option-btn a { --underline-drop: calc(2px + var(--stroke)); flex: 1; padding: var(--option-btn-padding, 12px); padding-bottom: calc(var(--option-btn-padding, 12px) + var(--underline-drop)); text-decoration: underline; text-decoration-thickness: var(--stroke); text-underline-offset: 2px; }
 /* Three quarters of the primary button at every width — the clamp is scaled at
    both ends and at the vw term, so the two never cross over mid-resize. The
    padding follows by the same factor so the boxes stay in proportion. */
@@ -448,11 +453,10 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
    panel below nor overlay it, and the gap between the two is exactly the panel's
    own height at any width. Narrow screens go back to toggling display — there the
    panel sits above the other buttons, where a permanent gap is just dead space. */
-/* --field rather than a white of its own, because the links inside it press to
-   --home-accent-press like every other control on the panel: the press only reads
-   as a drop-out if the surface underneath is the colour being swapped in. Its own
-   glow is what lifts it off the panel now that the two are painted alike. */
-.option-details { visibility: hidden; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: var(--stroke); margin-left: var(--stroke); padding: 8px; background: var(--field);
+/* The only control on the panel not sitting on the panel's own white, so it
+   carries its own press colour: the drop-out reads only if the swapped-in colour
+   is the surface underneath. Retint the background and this line follows it. */
+.option-details { --home-accent-press: var(--field); visibility: hidden; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: var(--stroke); margin-left: var(--stroke); padding: 8px; background: var(--field);
     border: 0px solid var(--ink); border-top: 0;}
 .option-details.open { visibility: visible; box-shadow: 0 0px 4px var(--ink); }
 .option-details-row { display: contents; color: var(--ink); font-size: 16px; }
@@ -503,10 +507,10 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
     /* The press has to read as instant, so it cancels the transition rather than
        stepping the glow away. Releasing hands the element back to the rules above,
        whose transition is still in force, so the glow steps back in on the way out. */
-    .featured-item:active {color: var(--home-accent-press);/* background: var(--field); */outline-color: var(--field);box-shadow: none;outline-offset: -2px;outline-width: var(--home-outline-width);}
+    .featured-item:active {color: var(--home-accent-press);outline-color: var(--home-accent-press);box-shadow: none;outline-offset: -2px;outline-width: var(--home-outline-width);}
 }
-.featured-item.is-touched { color: var(--home-accent-press); outline: var(--home-outline-width) solid var(--field); box-shadow: none; outline-offset: -2px; outline-width: var(--home-outline-width); }
-.featured-item.is-pressing, .featured-item.is-navigating { color: var(--home-accent-press); outline: var(--home-outline-width) solid var(--field); box-shadow: none; outline-offset: -2px; outline-width: var(--home-outline-width); }
+.featured-item.is-touched { color: var(--home-accent-press); outline: var(--home-outline-width) solid var(--home-accent-press); box-shadow: none; outline-offset: -2px; outline-width: var(--home-outline-width); }
+.featured-item.is-pressing, .featured-item.is-navigating { color: var(--home-accent-press); outline: var(--home-outline-width) solid var(--home-accent-press); box-shadow: none; outline-offset: -2px; outline-width: var(--home-outline-width); }
 /* The opportunities the article carries: name to the left, deadline held to the
    right edge so the dates line up down the column. */
 .featured-opportunities { display: flex; flex-direction: column; gap: 4px; margin: 0; padding: 0; list-style: none; font-size: 13px; line-height: 1.25; }
@@ -1045,7 +1049,7 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
 /* auto rather than .repobox's scroll: an article short enough to fit should not
    show a dead track. scrollbar-gutter still reserves the width either way, so
    nothing reflows when a longer article brings the bar back. */
-.page-article .article { isolation: isolate; flex: 1; min-height: 0; overflow-y: auto; scrollbar-gutter: stable; }
+.page-article .article { isolation: isolate; flex: 1; min-height: 0; overflow-y: auto; scrollbar-gutter: stable; scrollbar-color: var(--green) transparent; }
 /* One leg of the elbow tying a wrapped link's two halves together. Drawn as
    plain rects rather than SVG to stay orthogonal, matching the connector lines
    the opportunities page already draws. */
@@ -1128,8 +1132,8 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
 .article .article-listing a:first-of-type {background: var(--green);color: var(--white);/* box-shadow: 0 0 4px 2px var(--green); */padding: 6px}
 @media (hover: hover) {
     .article a:hover { outline: 2px solid var(--blue-bright); outline-offset: 2px; }
-    .article .article-listing a:hover { outline: 2px solid var(--blue-bright); outline-offset: 2px; }
-    .article .article-listing a:first-of-type:hover { outline-color: var(--white); outline-offset: -4px; }
+    .article .article-listing a:hover {outline: 2px solid var(--blue-bright);outline-offset: 2px;}
+    .article .article-listing a:first-of-type:hover {outline-color: var(--green);outline-offset: 4px;}
 }
 .article a.is-touched { text-decoration-thickness: 2px; }
 .article a.is-pressing, .article a.is-navigating { color: var(--blue-bright); outline-color: var(--blue-bright); }
