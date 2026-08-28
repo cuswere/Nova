@@ -177,7 +177,7 @@ button { cursor: pointer; }
    backwards rather than both holds the hidden state before the first frame but
    drops the clip the moment the wipe ends; a clip left in place would cut off
    descendants that draw outside the box, like the popups' shadows. */
-.screen-refresh { animation: screen-refresh-in 300ms steps(4, jump-start) backwards; }
+.screen-refresh { animation: screen-refresh-in 250ms steps(4, jump-start) backwards; }
 @keyframes screen-refresh-in {
     from { clip-path: inset(0 0 100% 0); }
     to { clip-path: inset(0 0 0 0); }
