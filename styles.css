@@ -404,17 +404,19 @@ button { cursor: pointer; }
 .opportunity-group, .action-group, .option-btn-container { display: flex; flex-direction: column; align-items: stretch; }
 .action-group { gap: 12px; }
 .option-btn-container { min-width: 0; }
-span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke) var(--stroke) 0 var(--home-accent);font-family: var(--mono);font-size: var(--option-btn-size, clamp(23px, 3.3vw, 37px));line-height: .98;}
+span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke) var(--stroke) 0 var(--home-accent);font-family: var(--mono);font-size: var(--option-btn-size, clamp(23px, 3.3vw, 37px));line-height: 1;}
 /* The outline is inset the same 6px all round, but the ink inside it is not
    symmetrical: the top gap is measured to the cap-top, the bottom one to the
    underline, which hangs below the text box by its offset plus its own
    thickness. Paying that back as bottom padding is what evens the two. Pinning
    the offset rather than leaving it auto keeps the sum exact across fonts. */
-.option-btn a { --underline-drop: calc(2px + var(--stroke)); flex: 1; padding: var(--option-btn-padding, 12px); padding-bottom: calc(var(--option-btn-padding, 12px) + var(--underline-drop)); text-decoration: underline; text-decoration-thickness: var(--stroke); text-underline-offset: 2px; }
+.option-btn a {--underline-drop: calc(0px + var(--stroke));flex: 1;padding: var(--option-btn-padding, 12px);padding-bottom: calc(var(--option-btn-padding, 12px) + var(--underline-drop));text-decoration: underline;text-decoration-thickness: var(--stroke);text-underline-offset: 2px;}
 /* Three quarters of the primary button at every width — the clamp is scaled at
    both ends and at the vw term, so the two never cross over mid-resize. The
    padding follows by the same factor so the boxes stay in proportion. */
 .action-group { --option-btn-size: clamp(16px, 2.5vw, 28px); --option-btn-padding: 9px; }
+/* These two buttons wrap, so they need room for the first line's underline. */
+.action-group span.option-btn {line-height: 1.1;}
 /* One hook per button. Everything the shared rules read — the size, the padding,
    the accent, both outline knobs — is a custom property, so retuning a single
    button means overriding one of them here rather than restating a rule. Grouped

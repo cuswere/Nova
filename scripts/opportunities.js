@@ -179,20 +179,23 @@ function setupCategoryMenu() {
         const items = [...list.querySelectorAll('li')];
         focusCategory(items, event.key === 'ArrowDown' ? 0 : items.length - 1);
     });
-    /* Committed on the press rather than on the release, the way a native menu
-       does it: the option is gone before a finger or a mouse button comes back up.
-       Primary button only — a right-click opens a context menu, and selecting
-       underneath it would be a surprise. preventDefault stops the press taking
-       focus, which would otherwise land on an element this handler is about to
-       replace. The click that follows lands on nothing, since the list is rebuilt
-       by then; it reaches the document handler, which only closes an already
-       closed menu. */
+    /* Committed on the click, not the press: WebKit targets a tap's synthesized
+       click by hit-testing where the finger lifts, so closing the menu any
+       earlier hands that click to the card underneath. preventDefault on the
+       press still stops focus landing on an element about to be replaced. */
     list.addEventListener('pointerdown', (event) => {
-        if (event.button !== 0) return;
+        if (event.button === 0) event.preventDefault();
+    });
+    list.addEventListener('click', (event) => {
         const item = event.target.closest('li[data-value]');
         if (!item) return;
-        event.preventDefault();
-        selectCategory(item.dataset.value);
+        event.stopPropagation();
+        /* The touch highlight lands 110ms into the press, so closing on the click
+           tears it off the screen a frame after it appears and the tap reads as a
+           glitch rather than an answer. Waiting for the press to lift lets the
+           highlight finish, which is the confirmation. Mouse runs straight
+           through: :active is already over by the click. */
+        afterPress(item, () => selectCategory(item.dataset.value));
     });
     list.addEventListener('keydown', (event) => {
         const items = [...list.querySelectorAll('li')];
