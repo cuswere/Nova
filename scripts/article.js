@@ -1,4 +1,4 @@
-import { element, formatDate, loadFeatured, renderBlocks } from './featured.js?v=495f6b3e';
+import { element, formatDate, loadFeatured, renderBlocks } from './featured.js?v=3645f58d';
 import { initSharedPage } from './shared.js?v=31ca9b7b';
 
 function notFound(message) {
