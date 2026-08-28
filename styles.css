@@ -285,25 +285,27 @@ button { cursor: pointer; }
     animation-name: cloud-drift;
     animation-duration: var(--dur);
     animation-delay: calc(var(--delay) - var(--shift));
-    animation-timing-function: linear;
+    animation-timing-function: steps(var(--steps), end);
     animation-iteration-count: infinite;
 }
 /* Three internally consistent depth bands, each begun at a different rotation so
    the no-script fallback is spread out too. DOM order interleaves the bands so
    responsive thinning stays balanced. Soft edges read dimmer than a solid
    silhouette of the same opacity, so the fades sit a little above where the
-   drawn clouds had them. */
+   drawn clouds had them. The step counts put each tick near one device-independent
+   pixel on a full-width header: fine enough that the drift stays a drift, coarse
+   enough to keep the mechanical cadence the old sprites moved with. */
 /* Near: largest, brightest, and quickest. */
-.cloud:nth-child(1) { --art: var(--art-lg-a); --w: 44px; --h: 14px; --top: 2px;  --fade: .58; --dur: 150s; --delay: 0s; }
-.cloud:nth-child(4) { --art: var(--art-lg-b); --w: 40px; --h: 13px; --top: 15px; --fade: .54; --dur: 150s; --delay: -50s; }
-.cloud:nth-child(8) { --art: var(--art-lg-a); --w: 44px; --h: 14px; --top: 8px;  --fade: .56; --dur: 150s; --delay: -100s; }
+.cloud:nth-child(1) { --art: var(--art-lg-a); --w: 44px; --h: 14px; --top: 2px;  --fade: .58; --dur: 150s; --steps: 640; --delay: 0s; }
+.cloud:nth-child(4) { --art: var(--art-lg-b); --w: 40px; --h: 13px; --top: 15px; --fade: .54; --dur: 150s; --steps: 640; --delay: -50s; }
+.cloud:nth-child(8) { --art: var(--art-lg-a); --w: 44px; --h: 14px; --top: 8px;  --fade: .56; --dur: 150s; --steps: 640; --delay: -100s; }
 /* Mid. */
-.cloud:nth-child(2) { --art: var(--art-md-a); --w: 30px; --h: 11px; --top: 17px; --fade: .46; --dur: 220s; --delay: -24.444s; }
-.cloud:nth-child(5) { --art: var(--art-md-b); --w: 33px; --h: 11px; --top: 6px;  --fade: .43; --dur: 220s; --delay: -97.778s; }
-.cloud:nth-child(7) { --art: var(--art-md-a); --w: 30px; --h: 11px; --top: 1px;  --fade: .44; --dur: 220s; --delay: -171.111s; }
+.cloud:nth-child(2) { --art: var(--art-md-a); --w: 30px; --h: 11px; --top: 17px; --fade: .46; --dur: 220s; --steps: 600; --delay: -24.444s; }
+.cloud:nth-child(5) { --art: var(--art-md-b); --w: 33px; --h: 11px; --top: 6px;  --fade: .43; --dur: 220s; --steps: 600; --delay: -97.778s; }
+.cloud:nth-child(7) { --art: var(--art-md-a); --w: 30px; --h: 11px; --top: 1px;  --fade: .44; --dur: 220s; --steps: 600; --delay: -171.111s; }
 /* Far: smallest, faintest, and slowest. */
-.cloud:nth-child(3) { --art: var(--art-sm-a); --w: 21px; --h: 8px;  --top: 3px;  --fade: .35; --dur: 300s; --delay: -66.667s; }
-.cloud:nth-child(6) { --art: var(--art-sm-b); --w: 24px; --h: 8px;  --top: 21px; --fade: .32; --dur: 300s; --delay: -216.667s; }
+.cloud:nth-child(3) { --art: var(--art-sm-a); --w: 21px; --h: 8px;  --top: 3px;  --fade: .35; --dur: 300s; --steps: 560; --delay: -66.667s; }
+.cloud:nth-child(6) { --art: var(--art-sm-b); --w: 24px; --h: 8px;  --top: 21px; --fade: .32; --dur: 300s; --steps: 560; --delay: -216.667s; }
 /* The path is only a little wider than the window the mask opens (52%–100%), so
    a cloud spends most of its cycle on screen rather than queued off-stage —
    that, more than the count, is what keeps the sky populated. It starts inside
