@@ -177,7 +177,7 @@ button { cursor: pointer; }
    backwards rather than both holds the hidden state before the first frame but
    drops the clip the moment the wipe ends; a clip left in place would cut off
    descendants that draw outside the box, like the popups' shadows. */
-.screen-refresh { animation: screen-refresh-in 350ms steps(4, jump-start) backwards; }
+.screen-refresh { animation: screen-refresh-in 300ms steps(4, jump-start) backwards; }
 @keyframes screen-refresh-in {
     from { clip-path: inset(0 0 100% 0); }
     to { clip-path: inset(0 0 0 0); }
@@ -374,7 +374,7 @@ button { cursor: pointer; }
 /* Above the grip, so the buttons stay clickable even if a short dialog puts them
    inside its top third. */
 .exit-dialog-actions { position: relative; z-index: 1; display: flex; justify-content: flex-end; gap: 8px; }
-.exit-dialog-actions .form-submit { align-self: auto; min-width: 76px; padding: 5px 12px; text-align: center; background: var(--white); }
+.exit-dialog-actions .form-submit {align-self: auto;min-width: 76px;padding: 5px 12px;text-align: center;background: var(--white);outline: none !important;box-shadow: 0 0 1px var(--ink);}
 .exit-dialog-actions .form-submit:active { padding: 6px 11px 4px 13px; }
 
 /* Home */
@@ -402,7 +402,7 @@ button { cursor: pointer; }
    the buttons stay smaller than the grid alone would make them. */
 .action-group { grid-column: 2; grid-row: 2; align-self: end; justify-self: end; width: calc(200% / 3); }
 .opportunity-group, .action-group, .option-btn-container { display: flex; flex-direction: column; align-items: stretch; }
-.action-group { gap: 12px; }
+.action-group {gap: 4px;}
 .option-btn-container { min-width: 0; }
 span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke) var(--stroke) 0 var(--home-accent);font-family: var(--mono);font-size: var(--option-btn-size, clamp(23px, 3.3vw, 37px));line-height: 1;}
 /* The outline is inset the same 6px all round, but the ink inside it is not
@@ -695,7 +695,7 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
    --connector-x is nudged by drawTitleBackground when the default column would
    graze the end of a wrapped line; see connectorOffset there. */
 .opportunity-title { position: relative; }
-.opportunity-title::after { content: ""; position: absolute; left: var(--connector-x, 75px); top: 4px; bottom: -16px; width: 1px; background: var(--desktop); }
+.opportunity-title::after {content: "";position: absolute;left: var(--connector-x, 75px);top: 4px;bottom: -16px;width: 1px;background: var(--blue-bright);}
 /* z-index raises the title above the deadline connector line (see
    .opportunity-title::after), which would otherwise paint over it by DOM order. The
    isolation here already makes the link an atomic stacking context — it exists
@@ -865,9 +865,21 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
    the pane edge the eligibility token used to hold on its own. */
 .detail-token-row { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: flex-start; gap: 4px; margin-right: 10px; }
 .award-cell, .eligibility-cell {min-height: 20px;padding: 3px 5px;color: var(--ink);background: var(--white);box-shadow: none;}
-.date-cell { padding: 4px; width: fit-content; color: var(--blue-bright); text-align: left; box-shadow: none; background: transparent; text-transform: none; letter-spacing: 0; font-size: 14px; 
-    border-right: 2px solid var(--blue-bright); font-weight: bold;
-    border-bottom: 2px solid var(--blue-bright);}
+.date-cell {
+    padding: 4px;
+    width: fit-content;
+    color: var(--blue-bright);
+    text-align: left;
+    box-shadow: none;
+    background: transparent;
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 14px;
+    outline: 1px solid var(--blue-bright);
+    /* border-right: 2px solid var(--blue-bright); */
+    font-weight: bold;
+    /* border-bottom: 2px solid var(--blue-bright); */
+    }
 .date-cell strong { font-weight: 600; }
 
 /* Filters */
@@ -878,7 +890,7 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
 .filter-item { font-size: 14px; color: var(--muted); }
 .active-filter { display: flex; gap: 5px; align-items: center; padding: 2px 4px; color: #fff; background: var(--blue-bright); }
 .exclude-filter { background: var(--red); }
-.rolling-filter { background: var(--field); color: var(--blue-bright); font-weight: bold; box-shadow: 2px 2px 0 var(--blue-bright); }
+.rolling-filter {background: var(--white);/* outline: 1px solid var(--blue-bright); */outline-offset: -1px;color: var(--blue-bright);font-weight: bold;/* box-shadow: 2px 2px 0 var(--blue-bright); */}
 /* Typed text rather than a facet, so it doesn't take the blue every chip picked
    from a menu wears. The × inherits this colour. */
 .search-filter { background: var(--green); }
