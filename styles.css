@@ -442,6 +442,9 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
 .action-group { --option-btn-size: clamp(16px, 2.5vw, 28px); --option-btn-padding: 9px; }
 /* These two buttons wrap, so they need room for the first line's underline. */
 .action-group span.option-btn {line-height: 1.1;}
+/* The pair reads as one block; right-aligning the second label sets it against
+   the first instead of doubling the left edge. */
+.option-btn-grant-writer a { text-align: right; }
 /* One hook per button. Everything the shared rules read — the size, the padding,
    the accent, both outline knobs — is a custom property, so retuning a single
    button means overriding one of them here rather than restating a rule. Grouped
@@ -450,7 +453,7 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
    The outline is inset from the button's own edge, so it only reads as the same
    fit at the same padding: at -8px against 9px of it, the line all but touched
    the text. Scaled by the same three quarters as everything else. */
-.option-btn-opportunities { }
+.option-btn-opportunities a { text-align: center; }
 .option-btn-feedback { box-shadow: calc(var(--stroke)*-1) calc(var(--stroke)*-1) 0 var(--home-accent) !important; }
 .option-btn-feedback,
 .option-btn-grant-writer { --home-outline-offset: -6px; }
@@ -1203,7 +1206,7 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
     .opportunity-group, .action-group, .featured-group { grid-column: 1; grid-row: auto; }
     /* The wide layout's centring and widths are meaningless in one column. */
     .opportunity-group, .action-group { justify-self: stretch; width: auto; }
-    .action-group { order: 1; }
+    .action-group { order: 1; gap: 0; }
     /* Stacked, these two lose the size contrast that set them apart from the
        button above; bold carries the weight back at the smaller type. Set on the
        span so the link inherits it — nothing below declares a weight. */
