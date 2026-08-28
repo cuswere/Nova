@@ -217,10 +217,12 @@ button { cursor: pointer; }
 }
 /* The gradient is the landing page's flourish; inner pages keep it flat. */
 .page-home .page-header { background: linear-gradient(90deg, var(--blue-bright), var(--praxis-blue)); }
-/* Clouds drifting into the bright end of that gradient. The silhouettes stay
-   on a 3px grid, but offset peaks and uneven shoulders keep the sky from reading
-   as one sprite repeated at several sizes. Every depth band shares one duration
-   and evenly spaced phases: clouds in the same air mass cannot catch each other,
+/* Clouds drifting into the bright end of that gradient. Each one is a stack of
+   soft radial ellipses — a bright core holding to about a third of its radius,
+   then falling to nothing — so a cloud is a blob of light rather than a drawn
+   shape. Offset peaks and uneven shoulders keep the sky from reading as one
+   sprite repeated at several sizes. Every depth band shares one duration and
+   evenly spaced phases: clouds in the same air mass cannot catch each other,
    while the bands still pass at different speeds to provide quiet parallax. */
 .header-sky {
     position: absolute;
@@ -228,12 +230,30 @@ button { cursor: pointer; }
     inset: 0;
     overflow: hidden;
     pointer-events: none;
-    --art-lg-a: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='9'%3E%3Cg fill='white'%3E%3Crect x='15' y='0' width='11' height='3'/%3E%3Crect x='7' y='3' width='24' height='3'/%3E%3Crect x='0' y='6' width='36' height='3'/%3E%3C/g%3E%3C/svg%3E");
-    --art-lg-b: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='9'%3E%3Cg fill='white'%3E%3Crect x='6' y='0' width='11' height='3'/%3E%3Crect x='3' y='3' width='24' height='3'/%3E%3Crect x='0' y='6' width='32' height='3'/%3E%3C/g%3E%3C/svg%3E");
-    --art-md-a: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='25' height='9'%3E%3Cg fill='white'%3E%3Crect x='11' y='0' width='8' height='3'/%3E%3Crect x='5' y='3' width='18' height='3'/%3E%3Crect x='0' y='6' width='25' height='3'/%3E%3C/g%3E%3C/svg%3E");
-    --art-md-b: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='27' height='9'%3E%3Cg fill='white'%3E%3Crect x='4' y='0' width='10' height='3'/%3E%3Crect x='2' y='3' width='21' height='3'/%3E%3Crect x='0' y='6' width='27' height='3'/%3E%3C/g%3E%3C/svg%3E");
-    --art-sm-a: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='6'%3E%3Cg fill='white'%3E%3Crect x='7' y='0' width='8' height='3'/%3E%3Crect x='0' y='3' width='18' height='3'/%3E%3C/g%3E%3C/svg%3E");
-    --art-sm-b: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='6'%3E%3Cg fill='white'%3E%3Crect x='3' y='0' width='10' height='3'/%3E%3Crect x='0' y='3' width='20' height='3'/%3E%3C/g%3E%3C/svg%3E");
+    /* Ellipse radii and centres are percentages of the cloud's own box, so one
+       recipe scales across the three bands without redrawing. A base sitting low
+       and wide gives the flat underside; the puffs above it break the outline. */
+    --art-lg-a:
+        radial-gradient(24% 58% at 57% 44%, rgba(255,255,255,.90) 36%, rgba(255,255,255,0) 100%),
+        radial-gradient(17% 40% at 33% 56%, rgba(255,255,255,.80) 34%, rgba(255,255,255,0) 100%),
+        radial-gradient(52% 46% at 50% 76%, rgba(255,255,255,.85) 38%, rgba(255,255,255,0) 100%);
+    --art-lg-b:
+        radial-gradient(22% 56% at 38% 44%, rgba(255,255,255,.90) 36%, rgba(255,255,255,0) 100%),
+        radial-gradient(16% 38% at 63% 56%, rgba(255,255,255,.78) 34%, rgba(255,255,255,0) 100%),
+        radial-gradient(50% 46% at 52% 76%, rgba(255,255,255,.85) 38%, rgba(255,255,255,0) 100%);
+    --art-md-a:
+        radial-gradient(24% 56% at 55% 46%, rgba(255,255,255,.88) 34%, rgba(255,255,255,0) 100%),
+        radial-gradient(50% 44% at 50% 74%, rgba(255,255,255,.82) 36%, rgba(255,255,255,0) 100%);
+    --art-md-b:
+        radial-gradient(22% 54% at 40% 46%, rgba(255,255,255,.88) 34%, rgba(255,255,255,0) 100%),
+        radial-gradient(15% 34% at 66% 58%, rgba(255,255,255,.72) 32%, rgba(255,255,255,0) 100%),
+        radial-gradient(50% 44% at 48% 74%, rgba(255,255,255,.82) 36%, rgba(255,255,255,0) 100%);
+    --art-sm-a:
+        radial-gradient(26% 54% at 56% 46%, rgba(255,255,255,.85) 32%, rgba(255,255,255,0) 100%),
+        radial-gradient(50% 46% at 50% 72%, rgba(255,255,255,.80) 34%, rgba(255,255,255,0) 100%);
+    --art-sm-b:
+        radial-gradient(24% 52% at 40% 46%, rgba(255,255,255,.85) 32%, rgba(255,255,255,0) 100%),
+        radial-gradient(50% 46% at 50% 72%, rgba(255,255,255,.80) 34%, rgba(255,255,255,0) 100%);
     /* The sky is only the empty right end of the bar, past the breadcrumb: fully
        out at 52%, up by 64%, holding to 90%, gone again by the edge. Keep the
        plateau a good share of that — with narrow solid stops almost every cloud
@@ -255,30 +275,35 @@ button { cursor: pointer; }
     left: 0;
     right: 0;
     height: var(--h);
-    background: var(--art) no-repeat left top;
+    /* Longhands, not the shorthand: --art is a stack of layers, and a shorthand's
+       trailing position/size would reach only the last of them. */
+    background-image: var(--art);
+    background-repeat: no-repeat;
+    background-position: left top;
+    background-size: var(--w) var(--h);
     opacity: var(--fade);
     animation-name: cloud-drift;
     animation-duration: var(--dur);
     animation-delay: calc(var(--delay) - var(--shift));
-    animation-timing-function: steps(var(--steps), end);
+    animation-timing-function: linear;
     animation-iteration-count: infinite;
 }
-/* Three internally consistent depth bands. The finer step counts keep each tick
-   near one device-independent pixel on a full-width header without softening the
-   SVG artwork. Each band begins at a different rotation so the no-script
-   fallback is spread out too. DOM order interleaves the bands so responsive
-   thinning stays balanced. */
+/* Three internally consistent depth bands, each begun at a different rotation so
+   the no-script fallback is spread out too. DOM order interleaves the bands so
+   responsive thinning stays balanced. Soft edges read dimmer than a solid
+   silhouette of the same opacity, so the fades sit a little above where the
+   drawn clouds had them. */
 /* Near: largest, brightest, and quickest. */
-.cloud:nth-child(1) { --art: var(--art-lg-a); --h: 9px; --top: 4px;  --fade: .52; --dur: 150s; --steps: 640; --delay: 0s; }
-.cloud:nth-child(4) { --art: var(--art-lg-b); --h: 9px; --top: 18px; --fade: .48; --dur: 150s; --steps: 640; --delay: -50s; }
-.cloud:nth-child(8) { --art: var(--art-lg-a); --h: 9px; --top: 11px; --fade: .50; --dur: 150s; --steps: 640; --delay: -100s; }
+.cloud:nth-child(1) { --art: var(--art-lg-a); --w: 44px; --h: 14px; --top: 2px;  --fade: .58; --dur: 150s; --delay: 0s; }
+.cloud:nth-child(4) { --art: var(--art-lg-b); --w: 40px; --h: 13px; --top: 15px; --fade: .54; --dur: 150s; --delay: -50s; }
+.cloud:nth-child(8) { --art: var(--art-lg-a); --w: 44px; --h: 14px; --top: 8px;  --fade: .56; --dur: 150s; --delay: -100s; }
 /* Mid. */
-.cloud:nth-child(2) { --art: var(--art-md-a); --h: 9px; --top: 17px; --fade: .40; --dur: 220s; --steps: 600; --delay: -24.444s; }
-.cloud:nth-child(5) { --art: var(--art-md-b); --h: 9px; --top: 8px;  --fade: .37; --dur: 220s; --steps: 600; --delay: -97.778s; }
-.cloud:nth-child(7) { --art: var(--art-md-a); --h: 9px; --top: 1px;  --fade: .38; --dur: 220s; --steps: 600; --delay: -171.111s; }
+.cloud:nth-child(2) { --art: var(--art-md-a); --w: 30px; --h: 11px; --top: 17px; --fade: .46; --dur: 220s; --delay: -24.444s; }
+.cloud:nth-child(5) { --art: var(--art-md-b); --w: 33px; --h: 11px; --top: 6px;  --fade: .43; --dur: 220s; --delay: -97.778s; }
+.cloud:nth-child(7) { --art: var(--art-md-a); --w: 30px; --h: 11px; --top: 1px;  --fade: .44; --dur: 220s; --delay: -171.111s; }
 /* Far: smallest, faintest, and slowest. */
-.cloud:nth-child(3) { --art: var(--art-sm-a); --h: 6px; --top: 2px;  --fade: .30; --dur: 300s; --steps: 560; --delay: -66.667s; }
-.cloud:nth-child(6) { --art: var(--art-sm-b); --h: 6px; --top: 21px; --fade: .27; --dur: 300s; --steps: 560; --delay: -216.667s; }
+.cloud:nth-child(3) { --art: var(--art-sm-a); --w: 21px; --h: 8px;  --top: 3px;  --fade: .35; --dur: 300s; --delay: -66.667s; }
+.cloud:nth-child(6) { --art: var(--art-sm-b); --w: 24px; --h: 8px;  --top: 21px; --fade: .32; --dur: 300s; --delay: -216.667s; }
 /* The path is only a little wider than the window the mask opens (52%–100%), so
    a cloud spends most of its cycle on screen rather than queued off-stage —
    that, more than the count, is what keeps the sky populated. It starts inside
