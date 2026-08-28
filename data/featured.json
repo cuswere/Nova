@@ -1,5 +1,156 @@
 [
   {
+    "slug": "this-is-what-gets-in-the-way",
+    "title": "This Is What Gets In The Way",
+    "link": "https://blog.praxiscenterforaesthetics.com/this-is-what-gets-in-the-way/",
+    "date": "2026-08-27T12:41:59.000Z",
+    "author": "Brainard Carey",
+    "opportunities": [
+      {
+        "title": "Prisma Art Prize",
+        "deadline": "September 10"
+      },
+      {
+        "title": "The Dezi Art Prize",
+        "deadline": "September 10"
+      },
+      {
+        "title": "MacDowell",
+        "deadline": "September 10"
+      }
+    ],
+    "blocks": [
+      {
+        "type": "p",
+        "spans": [
+          {
+            "text": "Life comes at you fast. It doesn’t matter if you have plans made or goals to reach, the demands of the day-to-day don’t quit, and sometimes they go into overdrive without warning. Staying focused can feel next to impossible at times, and there are some instances when the only sensible option is to take a step back and give yourself some needed space. But when your career is on the line, as is often the case for artists, how might you continue nurturing that even when chaos swirls all around you? Taking small steps is often the answer. Submit a small number of applications to opportunities that might work for you in the future, take five minutes to do a little searching around for upcoming deadlines. No matter how small, all forward motion is a good thing."
+          }
+        ]
+      },
+      {
+        "type": "p",
+        "spans": [
+          {
+            "href": "https://www.prismaartprize.com/about/",
+            "text": "Prisma Art Prize"
+          },
+          {
+            "text": " is an international competition for emerging painters and visual artists, offering €2,000 cash prizes, exhibitions in Rome, solo shows, residencies, and global visibility. "
+          },
+          {
+            "href": "https://www.prismaartprize.com/about/",
+            "text": "Learn more at the website"
+          },
+          {
+            "text": ". Deadline is "
+          },
+          {
+            "bold": true,
+            "text": "September 10"
+          },
+          {
+            "text": "."
+          }
+        ],
+        "listing": true
+      },
+      {
+        "type": "p",
+        "spans": [
+          {
+            "href": "https://www.deziart.co/artprize",
+            "text": "The Dezi Art Prize"
+          },
+          {
+            "text": " offers two $1,000 grants plus career support for emerging artists worldwide. Top 30 artists gain features, top 20 receive career audits, and every applicant gets a consultation. "
+          },
+          {
+            "href": "https://www.deziart.co/artprize",
+            "text": "Visit the website for more information"
+          },
+          {
+            "text": ". Deadline is "
+          },
+          {
+            "bold": true,
+            "text": "September 10"
+          },
+          {
+            "text": "."
+          }
+        ],
+        "listing": true
+      },
+      {
+        "type": "p",
+        "spans": [
+          {
+            "href": "https://www.macdowell.org/apply/apply-for-fellowship",
+            "text": "MacDowell"
+          },
+          {
+            "text": " awards approximately 300 residencies annually based solely on artistic excellence. Artists across seven disciplines are encouraged to apply; fellowships include no residency fees, with need-based stipends and travel support available. For more information, "
+          },
+          {
+            "href": "https://www.macdowell.org/apply/apply-for-fellowship",
+            "text": "visit the website"
+          },
+          {
+            "text": ". Deadline is "
+          },
+          {
+            "bold": true,
+            "text": "September 10"
+          },
+          {
+            "text": "."
+          }
+        ],
+        "listing": true
+      },
+      {
+        "type": "p",
+        "spans": [
+          {
+            "href": "https://praxiscenterforaestheticstudies.com/l/products?sortKey=name&sortDirection=asc&page=1",
+            "text": "Praxis Center"
+          },
+          {
+            "text": " was founded on the principle that artists don’t live in a vacuum. We know that life happens, and we know that sometimes it can be pretty difficult to get done those things that might help you advance your career. Don’t treat every setback as an emergency, and don’t beat yourself up if you need to hit pause. We will be here when you’re ready, waiting to help you unlock the future."
+          }
+        ]
+      },
+      {
+        "type": "h3",
+        "spans": [
+          {
+            "italic": true,
+            "text": "Brainard Carey is an author, artist and educator. He is the director of Praxis Center for Aesthetics and is currently faculty at the School of Visual Arts in NYC. He has written seven books for artists, including "
+          },
+          {
+            "italic": true,
+            "href": "https://www.amazon.com/dp/162153765X/ref=redir_mobile_desktop?_encoding=UTF8&fbclid=IwAR0m2cFPe9xHLHPOV6ZWn4LLIYT6KcNYm6pGmWSxRBQedXbFxe-n82LTyfo&ref_=dp_ob_neva_mobile",
+            "text": "Making it in the Art World"
+          },
+          {
+            "italic": true,
+            "text": ". His seventh book, "
+          },
+          {
+            "italic": true,
+            "href": "https://www.amazon.com/Problem-Art-World-Z-Navigation/dp/1621537951",
+            "text": "The Problems in the Art World: An Artist’s A-Z Action Guide"
+          },
+          {
+            "italic": true,
+            "text": ", is available now."
+          }
+        ]
+      }
+    ]
+  },
+  {
     "slug": "there-for-the-taking",
     "title": "There For The Taking",
     "link": "https://blog.praxiscenterforaesthetics.com/there-for-the-taking/",
