@@ -1,4 +1,4 @@
-import { initSharedPage } from './shared.js?v=31ca9b7b';
+import { initSharedPage } from './shared.js?v=17b861e8';
 
 // Matches the mobile breakpoint the stylesheet switches on (max-width: 700px);
 // a full 50-card page is a lot of scrolling once cards stack to one column.
@@ -97,7 +97,7 @@ async function loadOpportunities() {
     container.replaceChildren(statusMessage('Loading…', 'is-pending'));
 
     try {
-        const response = await fetch('data/opportunities.json?v=c93a63dc');
+        const response = await fetch('data/opportunities.json?v=a9c5b531');
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         state.opportunities = await response.json();
         await settleStatus(shownAt);

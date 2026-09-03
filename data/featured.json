@@ -1,5 +1,156 @@
 [
   {
+    "slug": "are-you-an-artist",
+    "title": "Are You An Artist?",
+    "link": "https://blog.praxiscenterforaesthetics.com/are-you-an-artist/",
+    "date": "2026-09-03T00:10:32.000Z",
+    "author": "Brainard Carey",
+    "opportunities": [
+      {
+        "title": "Abbott Watts Residency for Photography at Monson Arts",
+        "deadline": "November 15"
+      },
+      {
+        "title": "The Dedalus Foundation",
+        "deadline": "November 15"
+      },
+      {
+        "title": "GALLERY jENSEITS",
+        "deadline": "November 15"
+      }
+    ],
+    "blocks": [
+      {
+        "type": "p",
+        "spans": [
+          {
+            "text": "Who gets to be called an artist? The answer is less straightforward than it once seemed. Artists today come from every imaginable background, working across disciplines, traditions, and approaches that challenge conventional definitions of what art can be. Whether established, emerging, self-taught, or simply driven by the need to create, artists bring perspectives that deserve to be seen, considered, and given space."
+          }
+        ]
+      },
+      {
+        "type": "p",
+        "spans": [
+          {
+            "href": "https://monsonarts.org/residencies/abbott-watts-residency/",
+            "text": "Abbott Watts Residency for Photography at Monson Arts"
+          },
+          {
+            "text": " supports photographic experimentation and creative risk-taking through five annual residencies. Artists receive housing, meals, studio access, and a $250–$500 stipend, with darkroom, digital, and large-format printing facilities available. "
+          },
+          {
+            "href": "https://monsonarts.org/residencies/abbott-watts-residency/",
+            "text": "Learn more at the website"
+          },
+          {
+            "text": ". Deadline is "
+          },
+          {
+            "bold": true,
+            "text": "November 15"
+          },
+          {
+            "text": "."
+          }
+        ],
+        "listing": true
+      },
+      {
+        "type": "p",
+        "spans": [
+          {
+            "href": "https://dedalusfoundation.org/programs/fellowships-awards/view/senior-fellowship/",
+            "text": "The Dedalus Foundation"
+          },
+          {
+            "text": " offers up to $30,000 to U.S. writers and scholars pursuing independent research on 20th-century painting, sculpture and allied arts. "
+          },
+          {
+            "href": "https://dedalusfoundation.org/programs/fellowships-awards/view/senior-fellowship/",
+            "text": "For more information and to apply, visit the website"
+          },
+          {
+            "text": ". Deadline is "
+          },
+          {
+            "bold": true,
+            "text": "November 15"
+          },
+          {
+            "text": "."
+          }
+        ],
+        "listing": true
+      },
+      {
+        "type": "p",
+        "spans": [
+          {
+            "href": "https://www.galleryjenseits.com/",
+            "text": "GALLERY jENSEITS"
+          },
+          {
+            "text": " in Cincinnati’s Mt. Adams invites artists to submit work for consideration in its 2027 exhibitions, celebrating renowned, emerging, alluring, and unexpected voices in contemporary art. "
+          },
+          {
+            "href": "https://www.galleryjenseits.com/",
+            "text": "Visit the website for more details"
+          },
+          {
+            "text": ". Deadline is "
+          },
+          {
+            "bold": true,
+            "text": "November 15"
+          },
+          {
+            "text": "."
+          }
+        ],
+        "listing": true
+      },
+      {
+        "type": "p",
+        "spans": [
+          {
+            "href": "https://praxiscenterforaestheticstudies.com/l/products?sortKey=name&sortDirection=asc&page=1",
+            "text": "Praxis Center"
+          },
+          {
+            "text": " believes in the power and the possibility of artists. The art world can feel opaque, but we are here – with a roster of experts from around the field – to help navigate and succeed. Who gets to be called an artist? Why not you…"
+          }
+        ]
+      },
+      {
+        "type": "h3",
+        "spans": [
+          {
+            "italic": true,
+            "text": "Brainard Carey is an author, artist and educator. He is the director of Praxis Center for Aesthetics and is currently faculty at the School of Visual Arts in NYC. He has written seven books for artists, including "
+          },
+          {
+            "italic": true,
+            "href": "https://www.amazon.com/dp/162153765X/ref=redir_mobile_desktop?_encoding=UTF8&fbclid=IwAR0m2cFPe9xHLHPOV6ZWn4LLIYT6KcNYm6pGmWSxRBQedXbFxe-n82LTyfo&ref_=dp_ob_neva_mobile",
+            "text": "Making it in the Art World"
+          },
+          {
+            "italic": true,
+            "text": ". His seventh book, "
+          },
+          {
+            "italic": true,
+            "href": "https://www.amazon.com/Problem-Art-World-Z-Navigation/dp/1621537951",
+            "text": "The Problems in the Art World: An Artist’s A-Z Action Guide"
+          },
+          {
+            "italic": true,
+            "text": ", is available now."
+          }
+        ]
+      }
+    ]
+  },
+  {
     "slug": "this-is-what-gets-in-the-way",
     "title": "This Is What Gets In The Way",
     "link": "https://blog.praxiscenterforaesthetics.com/this-is-what-gets-in-the-way/",

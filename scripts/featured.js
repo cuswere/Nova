@@ -1,7 +1,7 @@
 /* Shared by the home-page preview and the article page. The JSON it reads is
    written by sync-featured.js from the Praxis blog feed; see docs/featured.md. */
 
-const FEATURED_DATA = 'data/featured.json?v=9d369fc5';
+const FEATURED_DATA = 'data/featured.json?v=41eb96e9';
 const FEATURED_REQUEST_TIMEOUT_MS = 8000;
 const FEATURED_REQUEST_ATTEMPTS = 2;
 
