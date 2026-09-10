@@ -97,7 +97,7 @@ async function loadOpportunities() {
     container.replaceChildren(statusMessage('Loading…', 'is-pending'));
 
     try {
-        const response = await fetch('data/opportunities.json?v=a9c5b531');
+        const response = await fetch('data/opportunities.json?v=e6749b56');
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         state.opportunities = await response.json();
         await settleStatus(shownAt);
