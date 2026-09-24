@@ -1,5 +1,144 @@
 [
   {
+    "slug": "careers-dont-wait",
+    "title": "Careers Don’t Wait",
+    "link": "https://blog.praxiscenterforaesthetics.com/careers-dont-wait/",
+    "date": "2026-09-23T20:21:41.000Z",
+    "author": "Brainard Carey",
+    "opportunities": [
+      {
+        "title": "BE OPEN Art’s Art Limitless",
+        "deadline": "October 1"
+      },
+      {
+        "title": "Camargo Fellowship",
+        "deadline": "September 30"
+      }
+    ],
+    "blocks": [
+      {
+        "type": "p",
+        "spans": [
+          {
+            "text": "No matter what else is going on in your life at any given moment, a career demands attention. Through family stress, the ups and downs of daily life, and even broader world issues, you must find a way to maintain some focus on the road ahead when it comes to your path in the professional realm. An art career is no different – and in fact it could be argued that launching and maintaining a career in art is even more effort than the traditional path because there’s simply no straightforward roadmap. But where there’s a will there’s a way. And where there’s a way, we are there to help navigate."
+          }
+        ]
+      },
+      {
+        "type": "p",
+        "spans": [
+          {
+            "href": "https://paletteofrosesartleague.org/rose-city-art-gallery-application-2/",
+            "text": "Rose City Art Gallery"
+          },
+          {
+            "text": " showcases high-quality original artwork by Palette of Roses Art League members, maintaining professional presentation standards while fostering community, collaboration, sales, and artist promotion. "
+          },
+          {
+            "href": "https://paletteofrosesartleague.org/rose-city-art-gallery-application-2/",
+            "text": "Learn more at the website"
+          },
+          {
+            "text": ". Deadlines vary depending on exhibition."
+          }
+        ]
+      },
+      {
+        "type": "p",
+        "spans": [
+          {
+            "href": "https://art.beopenfuture.com/art-limitless/",
+            "text": "BE OPEN Art’s Art Limitless"
+          },
+          {
+            "text": " program highlights artists advancing sustainable creation and responsible consumption. Selected artists compete for monthly prizes, grants, public votes, and international visibility. "
+          },
+          {
+            "href": "https://art.beopenfuture.com/art-limitless/",
+            "text": "Visit the website for more information and to apply"
+          },
+          {
+            "text": ". Deadline is "
+          },
+          {
+            "bold": true,
+            "text": "October 1"
+          },
+          {
+            "text": "."
+          }
+        ],
+        "listing": true
+      },
+      {
+        "type": "p",
+        "spans": [
+          {
+            "href": "https://camargofoundation.org/en/camargo-fellowship-2026-2027",
+            "text": "Camargo Fellowship"
+          },
+          {
+            "text": " offers 10-week residencies in France for established and mid-career artists, scholars and thinkers. "
+          },
+          {
+            "href": "https://camargofoundation.org/en/camargo-fellowship-2026-2027",
+            "text": "For more details, visit the webiste"
+          },
+          {
+            "text": ". Deadline is "
+          },
+          {
+            "bold": true,
+            "text": "September 30"
+          },
+          {
+            "text": "."
+          }
+        ],
+        "listing": true
+      },
+      {
+        "type": "p",
+        "spans": [
+          {
+            "href": "https://praxiscenterforaestheticstudies.com/l/products?sortKey=name&sortDirection=asc&page=1",
+            "text": "Praxis Center"
+          },
+          {
+            "text": " works for working artists because we live in the same world you do. We understand that not everything stands aside just because you need it to, and we are here to help. Whether you need a guide to connecting with experts, a helping hand finding opportunities, or just the camaraderie of a peer group who understands, Praxis is there for you."
+          }
+        ]
+      },
+      {
+        "type": "h3",
+        "spans": [
+          {
+            "italic": true,
+            "text": "Brainard Carey is an author, artist and educator. He is the director of Praxis Center for Aesthetics and is currently faculty at the School of Visual Arts in NYC. He has written seven books for artists, including "
+          },
+          {
+            "italic": true,
+            "href": "https://www.amazon.com/dp/162153765X/ref=redir_mobile_desktop?_encoding=UTF8&fbclid=IwAR0m2cFPe9xHLHPOV6ZWn4LLIYT6KcNYm6pGmWSxRBQedXbFxe-n82LTyfo&ref_=dp_ob_neva_mobile",
+            "text": "Making it in the Art World"
+          },
+          {
+            "italic": true,
+            "text": ". His seventh book, "
+          },
+          {
+            "italic": true,
+            "href": "https://www.amazon.com/Problem-Art-World-Z-Navigation/dp/1621537951",
+            "text": "The Problems in the Art World: An Artist’s A-Z Action Guide"
+          },
+          {
+            "italic": true,
+            "text": ", is available now."
+          }
+        ]
+      }
+    ]
+  },
+  {
     "slug": "hows-your-energy",
     "title": "How’s Your Energy?",
     "link": "https://blog.praxiscenterforaesthetics.com/hows-your-energy/",
