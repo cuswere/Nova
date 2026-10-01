@@ -1,5 +1,144 @@
 [
   {
+    "slug": "creating-community-through-art",
+    "title": "Creating Community Through Art",
+    "link": "https://blog.praxiscenterforaesthetics.com/creating-community-through-art/",
+    "date": "2026-09-30T21:15:20.000Z",
+    "author": "Brainard Carey",
+    "opportunities": [
+      {
+        "title": "Mount Allison University",
+        "deadline": "October 7"
+      },
+      {
+        "title": "The Creative Catalyst Fellowship",
+        "deadline": "October 15"
+      }
+    ],
+    "blocks": [
+      {
+        "type": "p",
+        "spans": [
+          {
+            "text": "Art creates connection where words sometimes fail. For those artists exploring questions of identity, community, belonging, and civic life, that connection can open the door to larger conversations. Some opportunities can offer artists the time, resources, and support to develop meaningful work and bring those ideas into the world."
+          }
+        ]
+      },
+      {
+        "type": "p",
+        "spans": [
+          {
+            "href": "https://ocfl.net/ArtsCulture.aspx",
+            "text": "Orange County Arts & Cultural Affairs"
+          },
+          {
+            "text": " has multiple calls for public art. Their mission is to elevate Central Florida’s arts and culture to that befitting a world-class community. "
+          },
+          {
+            "href": "https://ocfl.net/ArtsCulture.aspx",
+            "text": "Visit the website for more information"
+          },
+          {
+            "text": ". Deadlines vary."
+          }
+        ]
+      },
+      {
+        "type": "p",
+        "spans": [
+          {
+            "href": "https://akimbo.ca/listings/call-for-expressions-of-interest-mikmaq-basketry-public-art-mount-allison-university/",
+            "text": "Mount Allison University"
+          },
+          {
+            "text": " invites Mi’kmaq basket makers and Mi’kmaq-led teams to submit Expressions of Interest for a permanent public artwork celebrating Mi’kmaq basketry traditions and cultural knowledge. "
+          },
+          {
+            "href": "https://akimbo.ca/listings/call-for-expressions-of-interest-mikmaq-basketry-public-art-mount-allison-university/",
+            "text": "Learn more at the website"
+          },
+          {
+            "text": ". Deadline is "
+          },
+          {
+            "bold": true,
+            "text": "October 7"
+          },
+          {
+            "text": "."
+          }
+        ],
+        "listing": true
+      },
+      {
+        "type": "p",
+        "spans": [
+          {
+            "href": "https://aapifund.org/2027-creative-catalyst-fellowship-open-call/",
+            "text": "The Creative Catalyst Fellowship"
+          },
+          {
+            "text": " awards up to eight artists $30,000 each to create work exploring AAPI issues and belonging, with opportunities for civic engagement, peer learning, and broader public impact. "
+          },
+          {
+            "href": "https://aapifund.org/2027-creative-catalyst-fellowship-open-call/",
+            "text": "For more details, visit the website"
+          },
+          {
+            "text": ". Deadline is "
+          },
+          {
+            "bold": true,
+            "text": "October 15"
+          },
+          {
+            "text": "."
+          }
+        ],
+        "listing": true
+      },
+      {
+        "type": "p",
+        "spans": [
+          {
+            "href": "https://praxiscenterforaestheticstudies.com/l/products?sortKey=name&sortDirection=asc&page=1",
+            "text": "Praxis Center"
+          },
+          {
+            "text": " is dedicated to helping artists find their best path forward. Whether that means seeking out funding, exhibition, residencies, or other opportunities, we are here every step of the way."
+          }
+        ]
+      },
+      {
+        "type": "h3",
+        "spans": [
+          {
+            "italic": true,
+            "text": "Brainard Carey is an author, artist and educator. He is the director of Praxis Center for Aesthetics and is currently faculty at the School of Visual Arts in NYC. He has written seven books for artists, including "
+          },
+          {
+            "italic": true,
+            "href": "https://www.amazon.com/dp/162153765X/ref=redir_mobile_desktop?_encoding=UTF8&fbclid=IwAR0m2cFPe9xHLHPOV6ZWn4LLIYT6KcNYm6pGmWSxRBQedXbFxe-n82LTyfo&ref_=dp_ob_neva_mobile",
+            "text": "Making it in the Art World"
+          },
+          {
+            "italic": true,
+            "text": ". His seventh book, "
+          },
+          {
+            "italic": true,
+            "href": "https://www.amazon.com/Problem-Art-World-Z-Navigation/dp/1621537951",
+            "text": "The Problems in the Art World: An Artist’s A-Z Action Guide"
+          },
+          {
+            "italic": true,
+            "text": ", is available now."
+          }
+        ]
+      }
+    ]
+  },
+  {
     "slug": "careers-dont-wait",
     "title": "Careers Don’t Wait",
     "link": "https://blog.praxiscenterforaesthetics.com/careers-dont-wait/",
@@ -7,12 +146,12 @@
     "author": "Brainard Carey",
     "opportunities": [
       {
-        "title": "BE OPEN Art’s Art Limitless",
-        "deadline": "October 1"
-      },
-      {
         "title": "Camargo Fellowship",
         "deadline": "September 30"
+      },
+      {
+        "title": "BE OPEN Art’s Art Limitless",
+        "deadline": "October 1"
       }
     ],
     "blocks": [
@@ -47,33 +186,6 @@
         "type": "p",
         "spans": [
           {
-            "href": "https://art.beopenfuture.com/art-limitless/",
-            "text": "BE OPEN Art’s Art Limitless"
-          },
-          {
-            "text": " program highlights artists advancing sustainable creation and responsible consumption. Selected artists compete for monthly prizes, grants, public votes, and international visibility. "
-          },
-          {
-            "href": "https://art.beopenfuture.com/art-limitless/",
-            "text": "Visit the website for more information and to apply"
-          },
-          {
-            "text": ". Deadline is "
-          },
-          {
-            "bold": true,
-            "text": "October 1"
-          },
-          {
-            "text": "."
-          }
-        ],
-        "listing": true
-      },
-      {
-        "type": "p",
-        "spans": [
-          {
             "href": "https://camargofoundation.org/en/camargo-fellowship-2026-2027",
             "text": "Camargo Fellowship"
           },
@@ -90,6 +202,33 @@
           {
             "bold": true,
             "text": "September 30"
+          },
+          {
+            "text": "."
+          }
+        ],
+        "listing": true
+      },
+      {
+        "type": "p",
+        "spans": [
+          {
+            "href": "https://art.beopenfuture.com/art-limitless/",
+            "text": "BE OPEN Art’s Art Limitless"
+          },
+          {
+            "text": " program highlights artists advancing sustainable creation and responsible consumption. Selected artists compete for monthly prizes, grants, public votes, and international visibility. "
+          },
+          {
+            "href": "https://art.beopenfuture.com/art-limitless/",
+            "text": "Visit the website for more information and to apply"
+          },
+          {
+            "text": ". Deadline is "
+          },
+          {
+            "bold": true,
+            "text": "October 1"
           },
           {
             "text": "."
