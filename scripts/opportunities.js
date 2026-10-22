@@ -97,7 +97,7 @@ async function loadOpportunities() {
     container.replaceChildren(statusMessage('Loading…', 'is-pending'));
 
     try {
-        const response = await fetch('data/opportunities.json?v=ccf078c6');
+        const response = await fetch('data/opportunities.json?v=c704d272');
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         state.opportunities = await response.json();
         await settleStatus(shownAt);
@@ -1012,7 +1012,10 @@ function fitRepoHeight() {
     const documentTop = repo.getBoundingClientRect().top + window.scrollY;
     // The var sizes .repobox, so the frame .repo wraps around it comes off the top.
     const frame = box ? repo.offsetHeight - box.offsetHeight : 0;
-    const room = window.innerHeight - documentTop - frame - 8;
+    // The wrapper's bottom padding, not a fixed margin, or the page overflows by the difference.
+    const wrapper = repo.closest('.content-wrapper');
+    const gutter = wrapper ? parseFloat(getComputedStyle(wrapper).paddingBottom) : 8;
+    const room = window.innerHeight - documentTop - frame - gutter;
     repo.style.setProperty('--repobox-fit', `${Math.max(room, 200)}px`);
 }
 

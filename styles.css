@@ -97,12 +97,10 @@
        these two to recolour the whole panel in step. The outline knobs are split
        by scale — the big buttons and Featured sit inside their own edge, the
        prose-sized details links outside theirs.
-       The press colour is not a colour of its own: it is whatever the panel these
-       controls sit on is painted, so a press reads as the label dropping out of
-       sight rather than changing hue. It follows .options-container — move one and
-       the other has to move with it. */
+       The press colour is transparent, so a press reads as the label dropping out
+       of sight whatever surface the controls sit on. */
     --home-accent: var(--blue-bright);
-    --home-accent-press: var(--white);
+    --home-accent-press: transparent;
     --home-outline-width: var(--stroke);
     --home-outline-offset: -8px;
     /* Featured cards and the info button's focus ring, whose padding is tighter. */
@@ -126,8 +124,11 @@
    centre line as a page that isn't. Ignored where scrollbars are overlays, which
    is every touch browser, and there they never shifted anything to begin with. */
 html {min-height: 100%;background: var(--field);scrollbar-gutter: stable both-edges;}
+/* svh after the vh fallback: mobile 100vh is measured with the URL bar hidden, so
+   a page that fits the visible screen would still scroll by the bar's height. */
 body {
     min-height: 100vh;
+    min-height: 100svh;
     margin: 0;
     color: var(--ink);
     font: 14px/1.35 var(--mono);
@@ -190,6 +191,7 @@ button { cursor: pointer; }
     position: relative;
     width: min(1120px, calc(100% - 28px));
     min-height: 100vh;
+    min-height: 100svh;
     margin: 0 auto;
     padding: 16px;
     background: transparent;
@@ -411,7 +413,7 @@ button { cursor: pointer; }
    details panel reaching Featured, so a negative value would let them collide.
    To close the gap instead, shrink the details panel itself — its padding or the
    16px .option-details-row type — and the gap follows it down. */
-.options-container {--featured-offset: 24px;--options-gap: 12px;background: var(--white);/* box-shadow: 0 0 4px 4px white; *//* outline: var(--stroke) solid var(--blue-bright); */outline-offset: -1px;display: grid;grid-template-columns: repeat(2, minmax(0, 1fr));grid-template-rows: auto 1fr;gap: var(--options-gap);padding: 12px;min-height: 285px;}
+.options-container {--featured-offset: 24px;--options-gap: 12px;/* box-shadow: 0 0 4px 4px white; *//* outline: var(--stroke) solid var(--blue-bright); */outline-offset: -1px;display: grid;grid-template-columns: repeat(2, minmax(0, 1fr));grid-template-rows: auto 1fr;gap: var(--options-gap);padding: 12px;min-height: 285px;}
 /* Placed explicitly rather than by source order: Featured comes last in the
    markup so the narrow layout can stack it directly under Opportunities, but on
    a wide screen it belongs in the space left below it. The 700px query hands
@@ -485,10 +487,7 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
    panel below nor overlay it, and the gap between the two is exactly the panel's
    own height at any width. Narrow screens go back to toggling display — there the
    panel sits above the other buttons, where a permanent gap is just dead space. */
-/* The only control on the panel not sitting on the panel's own white, so it
-   carries its own press colour: the drop-out reads only if the swapped-in colour
-   is the surface underneath. Retint the background and this line follows it. */
-.option-details { --home-accent-press: var(--field); visibility: hidden; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: var(--stroke); margin-left: var(--stroke); padding: 8px; background: var(--field);
+.option-details { visibility: hidden; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: var(--stroke); margin-left: var(--stroke); padding: 8px;
     border: 0px solid var(--ink); border-top: 0;}
 .option-details.open { visibility: visible; box-shadow: 0 0px 4px var(--ink); }
 .option-details-row { display: contents; color: var(--ink); font-size: 16px; }
@@ -672,7 +671,7 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
    already tonally above what surrounds it; a sink drawn on it would say the
    opposite of what the colour says, which is the contradiction this frame kept
    falling into. The recess is one level in, where the well is. */
-.repo {position: relative;min-width: 0;min-height: 520px;padding: var(--frame-rail);/* background: var(--frame-face); */box-shadow: var(--raise-frame);}
+.repo {position: relative;min-width: 0;padding: var(--frame-rail);/* background: var(--frame-face); */box-shadow: var(--raise-frame);}
 /* The rail's shadow thrown down onto the well. This is what states the depth now:
    an edge alone cannot, since the plane it borders is white sheets and the light
    half of any bevel drawn against those is invisible. Only the top and left carry
@@ -689,7 +688,10 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
    popups would poke out past the recessed frame instead of being covered by it
    like the rest of the card content. Isolated, the whole repobox paints as one
    auto-stacked unit that the overlay's z-index:1 simply sits in front of. */
-.repobox {isolation: isolate;height: 100%;max-height: 70vh;min-height: 70vh;overflow-x: hidden;overflow-y: scroll;scrollbar-gutter: stable;background: var(--well);padding: 4px;padding-right: 8px;}
+/* The 520px floor lives here rather than as .repo's min-height: there, a viewport
+   under ~740px tall left the scroller at 70vh inside a taller frame, with an empty
+   band of well beneath the last card. */
+.repobox {isolation: isolate;height: max(70vh, calc(520px - 2 * var(--frame-rail)));overflow-x: hidden;overflow-y: scroll;scrollbar-gutter: stable;background: var(--well);padding: 4px;padding-right: 8px;}
 .repo-status-message { margin: auto; padding: 20px; color: var(--muted); text-align: center; }
 /* The waiting message earns its place only if the wait is real. The wipe clears in
    250ms and the data usually beats it, so an unconditional "Loading…" reads as a
@@ -1062,7 +1064,9 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
    measured rects, resolve against this padding box. */
 /* position: relative so the wrap connectors, which are absolutely placed from
    measured rects, resolve against this padding box. */
-.article { position: relative; margin: 0 auto; padding: 16px clamp(16px, 4vw, 32px) 32px; padding-bottom: 0; background: var(--white); color: var(--ink); }
+/* The side padding grows to hold the text to a ~75-character measure on wide
+   screens, so the sheet still fills the frame and the scrollbar stays at its edge. */
+.article { --measure: 720px; position: relative; margin: 0 auto; padding: 16px max(clamp(16px, 4vw, 32px), calc((100% - var(--measure)) / 2)) 0; background: var(--white); color: var(--ink); }
 /* Holds a boxed run and the punctuation after it on one line; applied by
    spanNodes, which is where the reasoning lives. */
 .nowrap { white-space: nowrap; }
@@ -1193,7 +1197,7 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
 .article-return { color: var(--blue); font-size: 15px; text-decoration: underline; }
 
 ::-webkit-scrollbar { width: 7px; height: 14px; }
-::-webkit-scrollbar-track { background: var(--transparent); }
+::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--white); border: 0px solid var(--ink); }
 
 @media (max-width: 700px) {
@@ -1244,6 +1248,15 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
        from the ::-webkit-scrollbar styling rather than sitting alongside it,
        which would flatten the beveled bars into plain ones. */
     .repobox, .details-popup-content, .custom-options { scrollbar-color: var(--ink) transparent; }
+    /* Invisible hit areas for controls drawn under fingertip size, same idea as the
+       page arrows above. Each is bounded so it can't reach a neighbouring control. */
+    .title-option { position: relative; }
+    .title-option::after { content: ""; position: absolute; inset: -6px -4px; }
+    .remove-filter-btn::after { content: ""; position: absolute; inset: -6px -4px -6px -6px; }
+    /* Padding traded for negative margin: the tap target grows, the layout doesn't. */
+    .checkbox-label { padding-block: 7px; margin-block: -7px; }
+    /* Its pseudo-elements are taken by the arrow and focus ring, so this one grows visibly. */
+    .custom-selected { min-height: 32px; }
 }
 
 @media (max-width: 430px) {
