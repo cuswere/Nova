@@ -1,5 +1,585 @@
 [
   {
+    "slug": "time-isnt-on-our-side",
+    "title": "Time Isn’t On Our Side",
+    "link": "https://blog.praxiscenterforaesthetics.com/time-isnt-on-our-side/",
+    "date": "2026-10-07T20:39:42.000Z",
+    "author": "Brainard Carey",
+    "opportunities": [
+      {
+        "title": "Palm Beach County",
+        "deadline": "October 19"
+      },
+      {
+        "title": "Farmington Main Library and Farmington Land Trust",
+        "deadline": "October 19"
+      },
+      {
+        "title": "sƛ̓x̣etkʷ Artist-in-Residence Program",
+        "deadline": "October 20"
+      }
+    ],
+    "blocks": [
+      {
+        "type": "p",
+        "spans": [
+          {
+            "text": "Time slips by sometimes without us even noticing. Life gets busy, we become distracted, and before you know it a decade has flown past. Of course, there is no way to make time stand still. But we can – each one of us – choose to live in the moment as often and as fully as possible. Every day holds great possibility, and while we don’t want to overwhelm ourselves by placing unrealistic expectations, we have the opportunity to seek out possibility with every passing day."
+          }
+        ]
+      },
+      {
+        "type": "p",
+        "spans": [
+          {
+            "href": "https://discover.pbc.gov/fdo/art/Pages/Calls-to-Artists.aspx",
+            "text": "Palm Beach County"
+          },
+          {
+            "text": " seeks an artist or team to create integrated public artwork for the renovated Aqua Crest Aquatic Complex, celebrating healthy living, recreation, competitive swimming, and community access. "
+          },
+          {
+            "href": "https://discover.pbc.gov/fdo/art/Pages/Calls-to-Artists.aspx",
+            "text": "Visit the website for more information"
+          },
+          {
+            "text": ". Deadline is "
+          },
+          {
+            "bold": true,
+            "text": "October 19"
+          },
+          {
+            "text": "."
+          }
+        ],
+        "listing": true
+      },
+      {
+        "type": "p",
+        "spans": [
+          {
+            "href": "https://www.galleryforgood.org/riverofdreams",
+            "text": "Farmington Main Library and Farmington Land Trust"
+          },
+          {
+            "text": " invite Connecticut artists 18+ to submit work for an exhibit titled "
+          },
+          {
+            "italic": true,
+            "text": "River of Dreams"
+          },
+          {
+            "text": ". Fourteen works will be featured at the Land Trust’s fundraiser. "
+          },
+          {
+            "href": "https://www.galleryforgood.org/riverofdreams",
+            "text": "Learn more at the website"
+          },
+          {
+            "text": ". Deadline for submissions is "
+          },
+          {
+            "bold": true,
+            "text": "October 19"
+          },
+          {
+            "text": "."
+          }
+        ],
+        "listing": true
+      },
+      {
+        "type": "p",
+        "spans": [
+          {
+            "href": "https://sfcc.spokane.edu/Artist-in-Residence-Program",
+            "text": "sƛ̓x̣etkʷ Artist-in-Residence Program"
+          },
+          {
+            "text": " is a three-month residency supporting an emerging Native American artist with lodging, stipend, studio space, and professional development opportunities connecting artists with students and the Spokane community. For details and to apply, visit the website. Deadline is "
+          },
+          {
+            "bold": true,
+            "text": "October 20"
+          },
+          {
+            "text": "."
+          }
+        ],
+        "listing": true
+      },
+      {
+        "type": "p",
+        "spans": [
+          {
+            "href": "https://praxiscenterforaestheticstudies.com/l/products?sortKey=name&sortDirection=asc&page=1",
+            "text": "Praxis Center"
+          },
+          {
+            "text": " understands that time is finite resource. That’s why we gather experts and opportunities from around the art world, helping to open up your career prospects without you having to squander every moment on research. Give Praxis a try today and see how far it can take you."
+          }
+        ]
+      },
+      {
+        "type": "h3",
+        "spans": [
+          {
+            "italic": true,
+            "text": "Brainard Carey is an author, artist and educator. He is the director of Praxis Center for Aesthetics and is currently faculty at the School of Visual Arts in NYC. He has written seven books for artists, including "
+          },
+          {
+            "italic": true,
+            "href": "https://www.amazon.com/dp/162153765X/ref=redir_mobile_desktop?_encoding=UTF8&fbclid=IwAR0m2cFPe9xHLHPOV6ZWn4LLIYT6KcNYm6pGmWSxRBQedXbFxe-n82LTyfo&ref_=dp_ob_neva_mobile",
+            "text": "Making it in the Art World"
+          },
+          {
+            "italic": true,
+            "text": ". His seventh book, "
+          },
+          {
+            "italic": true,
+            "href": "https://www.amazon.com/Problem-Art-World-Z-Navigation/dp/1621537951",
+            "text": "The Problems in the Art World: An Artist’s A-Z Action Guide"
+          },
+          {
+            "italic": true,
+            "text": ", is available now."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "creating-community-through-art",
+    "title": "Creating Community Through Art",
+    "link": "https://blog.praxiscenterforaesthetics.com/creating-community-through-art/",
+    "date": "2026-09-30T21:15:20.000Z",
+    "author": "Brainard Carey",
+    "opportunities": [
+      {
+        "title": "Mount Allison University",
+        "deadline": "October 7"
+      },
+      {
+        "title": "The Creative Catalyst Fellowship",
+        "deadline": "October 15"
+      }
+    ],
+    "blocks": [
+      {
+        "type": "p",
+        "spans": [
+          {
+            "text": "Art creates connection where words sometimes fail. For those artists exploring questions of identity, community, belonging, and civic life, that connection can open the door to larger conversations. Some opportunities can offer artists the time, resources, and support to develop meaningful work and bring those ideas into the world."
+          }
+        ]
+      },
+      {
+        "type": "p",
+        "spans": [
+          {
+            "href": "https://ocfl.net/ArtsCulture.aspx",
+            "text": "Orange County Arts & Cultural Affairs"
+          },
+          {
+            "text": " has multiple calls for public art. Their mission is to elevate Central Florida’s arts and culture to that befitting a world-class community. "
+          },
+          {
+            "href": "https://ocfl.net/ArtsCulture.aspx",
+            "text": "Visit the website for more information"
+          },
+          {
+            "text": ". Deadlines vary."
+          }
+        ]
+      },
+      {
+        "type": "p",
+        "spans": [
+          {
+            "href": "https://akimbo.ca/listings/call-for-expressions-of-interest-mikmaq-basketry-public-art-mount-allison-university/",
+            "text": "Mount Allison University"
+          },
+          {
+            "text": " invites Mi’kmaq basket makers and Mi’kmaq-led teams to submit Expressions of Interest for a permanent public artwork celebrating Mi’kmaq basketry traditions and cultural knowledge. "
+          },
+          {
+            "href": "https://akimbo.ca/listings/call-for-expressions-of-interest-mikmaq-basketry-public-art-mount-allison-university/",
+            "text": "Learn more at the website"
+          },
+          {
+            "text": ". Deadline is "
+          },
+          {
+            "bold": true,
+            "text": "October 7"
+          },
+          {
+            "text": "."
+          }
+        ],
+        "listing": true
+      },
+      {
+        "type": "p",
+        "spans": [
+          {
+            "href": "https://aapifund.org/2027-creative-catalyst-fellowship-open-call/",
+            "text": "The Creative Catalyst Fellowship"
+          },
+          {
+            "text": " awards up to eight artists $30,000 each to create work exploring AAPI issues and belonging, with opportunities for civic engagement, peer learning, and broader public impact. "
+          },
+          {
+            "href": "https://aapifund.org/2027-creative-catalyst-fellowship-open-call/",
+            "text": "For more details, visit the website"
+          },
+          {
+            "text": ". Deadline is "
+          },
+          {
+            "bold": true,
+            "text": "October 15"
+          },
+          {
+            "text": "."
+          }
+        ],
+        "listing": true
+      },
+      {
+        "type": "p",
+        "spans": [
+          {
+            "href": "https://praxiscenterforaestheticstudies.com/l/products?sortKey=name&sortDirection=asc&page=1",
+            "text": "Praxis Center"
+          },
+          {
+            "text": " is dedicated to helping artists find their best path forward. Whether that means seeking out funding, exhibition, residencies, or other opportunities, we are here every step of the way."
+          }
+        ]
+      },
+      {
+        "type": "h3",
+        "spans": [
+          {
+            "italic": true,
+            "text": "Brainard Carey is an author, artist and educator. He is the director of Praxis Center for Aesthetics and is currently faculty at the School of Visual Arts in NYC. He has written seven books for artists, including "
+          },
+          {
+            "italic": true,
+            "href": "https://www.amazon.com/dp/162153765X/ref=redir_mobile_desktop?_encoding=UTF8&fbclid=IwAR0m2cFPe9xHLHPOV6ZWn4LLIYT6KcNYm6pGmWSxRBQedXbFxe-n82LTyfo&ref_=dp_ob_neva_mobile",
+            "text": "Making it in the Art World"
+          },
+          {
+            "italic": true,
+            "text": ". His seventh book, "
+          },
+          {
+            "italic": true,
+            "href": "https://www.amazon.com/Problem-Art-World-Z-Navigation/dp/1621537951",
+            "text": "The Problems in the Art World: An Artist’s A-Z Action Guide"
+          },
+          {
+            "italic": true,
+            "text": ", is available now."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "careers-dont-wait",
+    "title": "Careers Don’t Wait",
+    "link": "https://blog.praxiscenterforaesthetics.com/careers-dont-wait/",
+    "date": "2026-09-23T20:21:41.000Z",
+    "author": "Brainard Carey",
+    "opportunities": [
+      {
+        "title": "Camargo Fellowship",
+        "deadline": "September 30"
+      },
+      {
+        "title": "BE OPEN Art’s Art Limitless",
+        "deadline": "October 1"
+      }
+    ],
+    "blocks": [
+      {
+        "type": "p",
+        "spans": [
+          {
+            "text": "No matter what else is going on in your life at any given moment, a career demands attention. Through family stress, the ups and downs of daily life, and even broader world issues, you must find a way to maintain some focus on the road ahead when it comes to your path in the professional realm. An art career is no different – and in fact it could be argued that launching and maintaining a career in art is even more effort than the traditional path because there’s simply no straightforward roadmap. But where there’s a will there’s a way. And where there’s a way, we are there to help navigate."
+          }
+        ]
+      },
+      {
+        "type": "p",
+        "spans": [
+          {
+            "href": "https://paletteofrosesartleague.org/rose-city-art-gallery-application-2/",
+            "text": "Rose City Art Gallery"
+          },
+          {
+            "text": " showcases high-quality original artwork by Palette of Roses Art League members, maintaining professional presentation standards while fostering community, collaboration, sales, and artist promotion. "
+          },
+          {
+            "href": "https://paletteofrosesartleague.org/rose-city-art-gallery-application-2/",
+            "text": "Learn more at the website"
+          },
+          {
+            "text": ". Deadlines vary depending on exhibition."
+          }
+        ]
+      },
+      {
+        "type": "p",
+        "spans": [
+          {
+            "href": "https://camargofoundation.org/en/camargo-fellowship-2026-2027",
+            "text": "Camargo Fellowship"
+          },
+          {
+            "text": " offers 10-week residencies in France for established and mid-career artists, scholars and thinkers. "
+          },
+          {
+            "href": "https://camargofoundation.org/en/camargo-fellowship-2026-2027",
+            "text": "For more details, visit the webiste"
+          },
+          {
+            "text": ". Deadline is "
+          },
+          {
+            "bold": true,
+            "text": "September 30"
+          },
+          {
+            "text": "."
+          }
+        ],
+        "listing": true
+      },
+      {
+        "type": "p",
+        "spans": [
+          {
+            "href": "https://art.beopenfuture.com/art-limitless/",
+            "text": "BE OPEN Art’s Art Limitless"
+          },
+          {
+            "text": " program highlights artists advancing sustainable creation and responsible consumption. Selected artists compete for monthly prizes, grants, public votes, and international visibility. "
+          },
+          {
+            "href": "https://art.beopenfuture.com/art-limitless/",
+            "text": "Visit the website for more information and to apply"
+          },
+          {
+            "text": ". Deadline is "
+          },
+          {
+            "bold": true,
+            "text": "October 1"
+          },
+          {
+            "text": "."
+          }
+        ],
+        "listing": true
+      },
+      {
+        "type": "p",
+        "spans": [
+          {
+            "href": "https://praxiscenterforaestheticstudies.com/l/products?sortKey=name&sortDirection=asc&page=1",
+            "text": "Praxis Center"
+          },
+          {
+            "text": " works for working artists because we live in the same world you do. We understand that not everything stands aside just because you need it to, and we are here to help. Whether you need a guide to connecting with experts, a helping hand finding opportunities, or just the camaraderie of a peer group who understands, Praxis is there for you."
+          }
+        ]
+      },
+      {
+        "type": "h3",
+        "spans": [
+          {
+            "italic": true,
+            "text": "Brainard Carey is an author, artist and educator. He is the director of Praxis Center for Aesthetics and is currently faculty at the School of Visual Arts in NYC. He has written seven books for artists, including "
+          },
+          {
+            "italic": true,
+            "href": "https://www.amazon.com/dp/162153765X/ref=redir_mobile_desktop?_encoding=UTF8&fbclid=IwAR0m2cFPe9xHLHPOV6ZWn4LLIYT6KcNYm6pGmWSxRBQedXbFxe-n82LTyfo&ref_=dp_ob_neva_mobile",
+            "text": "Making it in the Art World"
+          },
+          {
+            "italic": true,
+            "text": ". His seventh book, "
+          },
+          {
+            "italic": true,
+            "href": "https://www.amazon.com/Problem-Art-World-Z-Navigation/dp/1621537951",
+            "text": "The Problems in the Art World: An Artist’s A-Z Action Guide"
+          },
+          {
+            "italic": true,
+            "text": ", is available now."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "hows-your-energy",
+    "title": "How’s Your Energy?",
+    "link": "https://blog.praxiscenterforaesthetics.com/hows-your-energy/",
+    "date": "2026-09-09T19:14:04.000Z",
+    "author": "Brainard Carey",
+    "opportunities": [
+      {
+        "title": "SSNYC-CCA’s Artist-in-Residence program",
+        "deadline": "September 19"
+      },
+      {
+        "title": "ND Awards",
+        "deadline": "September 20"
+      },
+      {
+        "title": "WMATA",
+        "deadline": "September 24"
+      }
+    ],
+    "blocks": [
+      {
+        "type": "p",
+        "spans": [
+          {
+            "text": "The turn from summer to fall comes with a particular kind of energy. After months of scattered schedules and a little more time to wander, September arrives with a gentle reminder that it’s time to get moving again. For artists, that shift can feel especially invigorating. A new season brings fresh ideas, renewed focus, and the sense that something exciting might be just around the corner. It’s a great time to dust off those plans you started earlier in the year, revisit your goals, and get ready to put yourself and your work back out into the world."
+          }
+        ]
+      },
+      {
+        "type": "p",
+        "spans": [
+          {
+            "href": "https://www.sculpturespacenyc.com/sculpture-space-nyc-residency-open-call",
+            "text": "SSNYC-CCA’s Artist-in-Residence program"
+          },
+          {
+            "text": " offers ceramic artists 21+ dedicated studio time, community, equipment, and resources to develop a focused project in NYC’s collaborative studio environment. "
+          },
+          {
+            "href": "https://www.sculpturespacenyc.com/sculpture-space-nyc-residency-open-call",
+            "text": "Learn more at the website"
+          },
+          {
+            "text": ". Deadline is "
+          },
+          {
+            "bold": true,
+            "text": "September 19"
+          },
+          {
+            "text": "."
+          }
+        ],
+        "listing": true
+      },
+      {
+        "type": "p",
+        "spans": [
+          {
+            "href": "https://ndawards.net/",
+            "text": "ND Awards"
+          },
+          {
+            "text": " celebrates photographers by creating opportunities to share compelling work and diverse perspectives worldwide. Winners receive prestigious titles, cash prizes, and global recognition from leading photography professionals. "
+          },
+          {
+            "href": "https://ndawards.net/",
+            "text": "Visit the website for more information and to apply"
+          },
+          {
+            "text": ". Deadline is "
+          },
+          {
+            "bold": true,
+            "text": "September 20"
+          },
+          {
+            "text": "."
+          }
+        ],
+        "listing": true
+      },
+      {
+        "type": "p",
+        "spans": [
+          {
+            "href": "https://www.wmata.com/initiatives/art-in-transit/artist-opportunities.html",
+            "text": "WMATA"
+          },
+          {
+            "text": " seeks artists or artist-led teams to create a site-specific, three-dimensional artwork welcoming visitors to Washington, D.C.’s reconstructed Northern Bus Garage. Five finalists receive $3,500 stipends; the project budget is $330,000. "
+          },
+          {
+            "href": "https://www.wmata.com/initiatives/art-in-transit/artist-opportunities.html",
+            "text": "For details and to apply, visit the website"
+          },
+          {
+            "text": ". Deadline is "
+          },
+          {
+            "bold": true,
+            "text": "September 24"
+          },
+          {
+            "text": "."
+          }
+        ],
+        "listing": true
+      },
+      {
+        "type": "p",
+        "spans": [
+          {
+            "href": "https://praxiscenterforaestheticstudies.com/l/products?sortKey=name&sortDirection=asc&page=1",
+            "text": "Praxis Center"
+          },
+          {
+            "text": " is here as we head into a busy new season, ready to help you navigate step by step as you move forward in the career you’ve always imagined. Consider this your invitation to get curious, and keep your eyes open. There’s plenty ahead, and you never know which possibility might be the one that gets things moving."
+          }
+        ]
+      },
+      {
+        "type": "h3",
+        "spans": [
+          {
+            "italic": true,
+            "text": "Brainard Carey is an author, artist and educator. He is the director of Praxis Center for Aesthetics and is currently faculty at the School of Visual Arts in NYC. He has written seven books for artists, including "
+          },
+          {
+            "italic": true,
+            "href": "https://www.amazon.com/dp/162153765X/ref=redir_mobile_desktop?_encoding=UTF8&fbclid=IwAR0m2cFPe9xHLHPOV6ZWn4LLIYT6KcNYm6pGmWSxRBQedXbFxe-n82LTyfo&ref_=dp_ob_neva_mobile",
+            "text": "Making it in the Art World"
+          },
+          {
+            "italic": true,
+            "text": ". His seventh book, "
+          },
+          {
+            "italic": true,
+            "href": "https://www.amazon.com/Problem-Art-World-Z-Navigation/dp/1621537951",
+            "text": "The Problems in the Art World: An Artist’s A-Z Action Guide"
+          },
+          {
+            "italic": true,
+            "text": ", is available now."
+          }
+        ]
+      }
+    ]
+  },
+  {
     "slug": "are-you-an-artist",
     "title": "Are You An Artist?",
     "link": "https://blog.praxiscenterforaesthetics.com/are-you-an-artist/",
