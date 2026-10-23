@@ -1,5 +1,5 @@
 import { element, formatDate, loadFeatured, renderBlocks } from './featured.js?v=b50d3ddf';
-import { initSharedPage } from './shared.js?v=31ca9b7b';
+import { initSharedPage } from './shared.js?v=14cd09b3';
 
 function notFound(message) {
     const fragment = document.createDocumentFragment();

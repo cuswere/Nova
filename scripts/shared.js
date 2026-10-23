@@ -8,7 +8,6 @@ export function initSharedPage() {
     setupNavigationState();
     setupExitConfirm();
 }
-
 /* Confirms before handing the reader off to another site. Driven by the
    data-confirm-exit attribute rather than a URL, so the dialog is reusable and
    the destination stays declared in the markup — the article page marks up its

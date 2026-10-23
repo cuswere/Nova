@@ -1,4 +1,4 @@
-import { initSharedPage } from './shared.js?v=31ca9b7b';
+import { initSharedPage } from './shared.js?v=14cd09b3';
 
 // Matches the mobile breakpoint the stylesheet switches on (max-width: 700px);
 // a full 50-card page is a lot of scrolling once cards stack to one column.

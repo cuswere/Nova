@@ -1,5 +1,5 @@
 import { element, formatShortDate, loadFeatured } from './featured.js?v=b50d3ddf';
-import { initSharedPage } from './shared.js?v=31ca9b7b';
+import { initSharedPage } from './shared.js?v=14cd09b3';
 
 // How many of the archived articles the home page shows; the rest stay in the
 // JSON so their article pages keep resolving.
@@ -151,6 +151,9 @@ async function setupFeatured() {
     } catch (error) {
         console.error('Error loading featured articles:', error);
         list.replaceChildren(element('p', 'featured-status', "Couldn't load featured grants."));
+    } finally {
+        // Releases the buttons held back by the inline script in index.html.
+        document.documentElement.classList.remove('featured-pending');
     }
 }
 
