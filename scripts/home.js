@@ -1,5 +1,5 @@
-import { element, formatShortDate, loadFeatured } from './featured.js?v=aa319bda';
-import { initSharedPage } from './shared.js?v=31ca9b7b';
+import { element, formatShortDate, loadFeatured } from './featured.js?v=1b496b17';
+import { initSharedPage } from './shared.js?v=17b861e8';
 
 // How many of the archived articles the home page shows; the rest stay in the
 // JSON so their article pages keep resolving.

@@ -1,4 +1,4 @@
-import { initSharedPage } from './shared.js?v=31ca9b7b';
+import { initSharedPage } from './shared.js?v=17b861e8';
 
 const FORM_ACTION = 'https://script.google.com/macros/s/AKfycbzlRGwFvvOxhwLVMfcbah_PhqAkTENbD6A2MEzTpojI7HdRhT4HRa4FPnbIcHa9adY/exec';
 const PENDING_MS = 800;
