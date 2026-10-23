@@ -1,0 +1,128 @@
+/* Aperture, kept from the line studies. Lab-only: the live catalogue DOM and interactions stay intact.
+   Empty pseudo-elements are decorative; no labels or information are suppressed. */
+html.v-aperture {
+    --lab-paper: #f5f4ef;
+}
+html.v-aperture .repobox {
+    background: var(--lab-paper);
+    padding: 20px;
+}
+html.v-aperture .opportunity-card {
+    position: relative;
+    min-width: 0;
+    min-height: 0;
+    margin: 0;
+    background: transparent;
+    box-shadow: none;
+    gap: 18px;
+}
+html.v-aperture .opportunity-main-column {
+    gap: 12px;
+    margin: 0;
+}
+html.v-aperture .opportunity-title::after { display: none; }
+html.v-aperture .opportunity-card a {
+    padding: 0;
+    background: transparent;
+    font-size: 20px;
+    line-height: 1.35;
+    font-weight: 400;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 4px;
+}
+html.v-aperture .opportunity-card a .link-text {
+    text-decoration-thickness: 1px;
+}
+html.v-aperture .opportunity-card .link-line-background {
+    background: var(--lab-paper);
+}
+html.v-aperture .date-cell {
+    outline: 0;
+    padding: 0;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 1.5;
+}
+html.v-aperture .top-right-grid { outline: 0; padding: 0; }
+html.v-aperture :is(.details-summary-row, .detail-token-row) {
+    justify-content: flex-start;
+    gap: 8px;
+    margin: 0;
+}
+html.v-aperture .grid-cell {
+    min-height: 32px;
+    padding: 6px 9px;
+    font-size: 13px;
+    line-height: 1.4;
+    text-transform: none;
+    letter-spacing: 0;
+    background: var(--lab-paper);
+}
+html.v-aperture .type-cell { border-color: transparent; padding-left: 0; }
+html.v-aperture .fee-cell { background: var(--amber); }
+html.v-aperture .detail-token.has-details {
+    min-height: 44px;
+    padding-right: 27px;
+    cursor: pointer;
+}
+html.v-aperture .detail-token-fold {
+    top: 50%;
+    right: 7px;
+    transform: translateY(-50%);
+    border: 0;
+    background: transparent;
+}
+html.v-aperture .details-popup { --dialogue-background: var(--lab-paper); }
+html.v-aperture .fee-cell .details-popup { --dialogue-background: var(--amber); }
+html.v-aperture .details-popup-content {
+    padding: 12px 14px;
+    border: 1px solid var(--blue-bright);
+    box-shadow: none;
+    line-height: 1.5;
+}
+html.v-aperture .details-popup-tail { background: var(--blue-bright); }
+html.v-aperture .grid-cell.popup-pinned { background: var(--blue-bright); color: #fff; }
+html.v-aperture :is(a, .detail-token):focus-visible {
+    outline: 2px solid var(--blue-bright);
+    outline-offset: 4px;
+}
+
+/* Aperture: four open corners suggest a frame without enclosing the content. */
+html.v-aperture .opportunity-card {
+    grid-template-columns: 1fr;
+    padding: 24px;
+    margin: 0 0 36px;
+    background:
+        linear-gradient(var(--blue-bright), var(--blue-bright)) left top / 32px 1px,
+        linear-gradient(var(--blue-bright), var(--blue-bright)) left top / 1px 32px,
+        linear-gradient(var(--blue-bright), var(--blue-bright)) right top / 32px 1px,
+        linear-gradient(var(--blue-bright), var(--blue-bright)) right top / 1px 32px,
+        linear-gradient(var(--blue-bright), var(--blue-bright)) left bottom / 32px 1px,
+        linear-gradient(var(--blue-bright), var(--blue-bright)) left bottom / 1px 32px,
+        linear-gradient(var(--blue-bright), var(--blue-bright)) right bottom / 32px 1px,
+        linear-gradient(var(--blue-bright), var(--blue-bright)) right bottom / 1px 32px;
+    background-repeat: no-repeat;
+}
+html.v-aperture .opportunity-card:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    bottom: -28px;
+    left: 50%;
+    height: 20px;
+    border-left: 1px solid var(--blue-bright);
+    pointer-events: none;
+}
+html.v-aperture .opportunity-card a { font-family: Georgia, 'Times New Roman', serif; font-size: 26px; }
+html.v-aperture .opportunity-details-column { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 10px 20px; }
+html.v-aperture .grid-cell { border-radius: 18px; }
+
+/* These studies use plain links, not the production page's measured line masks.
+   Those absolute masks retain old measurements when only a variant changes. */
+html.v-aperture .link-line-backgrounds { display: none; }
+html.v-aperture .opportunity-card a.line-background-ready { pointer-events: auto; }
+
+@media (max-width: 700px) {
+    html.v-aperture .repobox { padding: 16px 12px; }
+    html.v-aperture .opportunity-card { padding: 20px 16px; }
+    html.v-aperture .opportunity-card a { font-size: 23px; }
+}

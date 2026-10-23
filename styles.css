@@ -730,16 +730,17 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
    --connector-x is nudged by drawTitleBackground when the default column would
    graze the end of a wrapped line; see connectorOffset there. */
 .opportunity-title { position: relative; }
-.opportunity-title::after {content: "";position: absolute;left: var(--connector-x, 75px);top: 4px;bottom: -16px;width: 1px;background: var(--field);}
+.opportunity-title::after {content: "";position: absolute;left: var(--connector-x, 75px);top: 4px;bottom: -16px;width: 1px;background: var(--blue-bright);}
 /* z-index raises the title above the deadline connector line (see
    .opportunity-title::after), which would otherwise paint over it by DOM order. The
    isolation here already makes the link an atomic stacking context — it exists
    to contain .link-line-backgrounds' z-index: -1 — so the whole title subtree
    lifts as one unit, and 1 still sits well below the popups' 40. */
-.opportunity-card a {font-size: 18px;font-weight: 600;position: relative;isolation: isolate;z-index: 1;display: inline-block;min-width: 0;max-width: 100%;padding: 8px;background: var(--desktop);color: var(--ink);text-decoration: underline;text-decoration-thickness: 2px;text-underline-offset: 2px;vertical-align: top;}
+.opportunity-card a {font-size: 18px;font-weight: 600;position: relative;isolation: isolate;z-index: 1;display: inline-block;min-width: 0;max-width: 100%;padding: 8px;background: var(--white);color: var(--blue-bright);text-decoration: underline;text-decoration-thickness: 2px;text-underline-offset: 2px;vertical-align: top;}
 .link-text { display: inline; }
 .link-line-backgrounds { position: absolute; z-index: -1; inset: 0; pointer-events: none; }
-.link-line-background {position: absolute;display: block;background: var(--field);pointer-events: auto;}
+/* The card's own white: invisible as a fill, but it still hides the connector behind the words. */
+.link-line-background {position: absolute;display: block;background: var(--white);pointer-events: auto;}
 .opportunity-card a.line-background-ready {background: transparent;pointer-events: none;}
 .opportunity-card a.line-background-ready .link-text {pointer-events: auto;/* color: var(--ink); */text-decoration: underline;text-decoration-thickness: 2px;}
 .opportunity-card a .link-text svg { fill: none; stroke: currentColor; }
@@ -758,12 +759,12 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
     .opportunity-card a.line-background-ready:has(.link-text:hover, .link-line-background:hover) .link-line-background {background: var(--white);}
 }
 
-.top-right-grid { outline: 1px solid var(--ink); padding: 8px; min-width: 0; max-width: 100%; }
+.top-right-grid { outline: 1px solid var(--blue-bright); padding: 8px; min-width: 0; max-width: 100%; }
 .details-summary-row { display: flex; justify-content: flex-start; align-items: flex-start; align-self: stretch; flex-wrap: wrap; gap: 4px; }
 .grid-cell, .date-cell { min-width: 0; padding: 4px 5px; text-align: center; font-size: 14px; text-transform: uppercase; letter-spacing: .04em; }
-.grid-cell { background: none; border: 1px solid var(--ink); flex: 0 1 auto; display: flex; align-items: center; justify-content: center; max-width: 100%; overflow: hidden; overflow-wrap: anywhere; line-height: 1.15; box-shadow: none; }
-.fee-cell { min-height: 26px; padding: 3px 5px; color: var(--ink); background: var(--amber); box-shadow: none; }
-.type-cell {border-color: var(--ink) !important;color: var(--ink);background: var(--white);}
+.grid-cell { color: var(--blue-bright); background: none; border: 1px solid var(--blue-bright); flex: 0 1 auto; display: flex; align-items: center; justify-content: center; max-width: 100%; overflow: hidden; overflow-wrap: anywhere; line-height: 1.15; box-shadow: none; }
+.fee-cell { min-height: 26px; padding: 3px 5px; color: var(--blue-bright); background: var(--amber); box-shadow: none; }
+.type-cell {border-color: var(--blue-bright) !important;color: var(--blue-bright);background: transparent;}
 .type-cell::selection, .title::selection { background: #fff; color: var(--ink); }
 /* Shared details affordance: a dotted underline on the token label (hard-edged
    square dots via a sharp-stop gradient, not soft radial circles, so they stay
@@ -774,8 +775,8 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
    cell reserves matching right-side padding to keep the centered label clear
    of its footprint. Both reveal the details on hover/focus, flipping
    up/down to avoid clipping. */
-.detail-token.has-details { --detail-tail-length: 8px; --detail-tail-width: 12px; --detail-fold-size: 13px; --detail-fold-center-offset: 7.5px; --detail-fold-clear: var(--field); position: relative; overflow: visible; padding-right: 16px; cursor: help; user-select: none; }
-.detail-token.has-details:focus-visible { outline: 1px dotted var(--ink); outline-offset: 2px; }
+.detail-token.has-details { --detail-tail-length: 8px; --detail-tail-width: 12px; --detail-fold-size: 13px; --detail-fold-center-offset: 7.5px; --detail-fold-clear: var(--white); position: relative; overflow: visible; padding-right: 16px; cursor: help; user-select: none; }
+.detail-token.has-details:focus-visible { outline: 1px dotted var(--blue-bright); outline-offset: 2px; }
 /* No press state: the popup now pins on pointerdown, so the inversion is already
    on screen by the time a dim would paint. Pinned is the only state left. */
 .detail-token-label { position: relative; display: inline-block; }
@@ -795,10 +796,10 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
    their own border; the outer top/right edges rely on that real border
    instead of a second coincident line, so there's nothing to drift at
    different zoom levels. */
-.detail-token-fold { position: absolute; top: 0; right: 0; width: var(--detail-fold-size, 13px); height: var(--detail-fold-size, 13px); display: grid; place-items: center; color: var(--ink); background: inherit; border-bottom: 1px solid var(--ink); border-left: 1px solid var(--ink); font-size: 12px; font-weight: 700; line-height: 1; z-index: 3; }
+.detail-token-fold { position: absolute; top: 0; right: 0; width: var(--detail-fold-size, 13px); height: var(--detail-fold-size, 13px); display: grid; place-items: center; color: var(--blue-bright); background: inherit; border-bottom: 1px solid var(--blue-bright); border-left: 1px solid var(--blue-bright); font-size: 12px; font-weight: 700; line-height: 1; z-index: 3; }
 /* Hover inks the fold in; the eligibility token additionally clears its own
    field wash so the filled corner reads against plain white. */
-.detail-token.has-details:focus-visible .detail-token-fold { color: #fff; background: var(--ink); }
+.detail-token.has-details:focus-visible .detail-token-fold { color: #fff; background: var(--blue-bright); }
 .award-cell.detail-token.has-details:focus-visible,
 .eligibility-cell.detail-token.has-details:focus-visible { background: #fff; }
 /* Pinned is the full inversion, and must win over the hover/focus rules. */
@@ -806,7 +807,7 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
 .award-cell.detail-token.has-details.popup-pinned:hover,
 .award-cell.detail-token.has-details.popup-pinned:focus-visible,
 .eligibility-cell.detail-token.has-details.popup-pinned:hover,
-.eligibility-cell.detail-token.has-details.popup-pinned:focus-visible { color: #fff; background: var(--ink); }
+.eligibility-cell.detail-token.has-details.popup-pinned:focus-visible { color: #fff; background: var(--blue-bright); }
 /* The fold stays black-filled whenever pinned, hover/focus notwithstanding —
    no white-border variant. */
 .detail-token.popup-pinned .detail-token-fold {color: var(--detail-fold-clear);background: var(--detail-fold-clear);}
@@ -899,7 +900,7 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
    the 10px inset is carried by the row so both tokens keep the same gap from
    the pane edge the eligibility token used to hold on its own. */
 .detail-token-row { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: flex-start; gap: 4px; margin-right: 10px; }
-.award-cell, .eligibility-cell {min-height: 20px;padding: 3px 5px;color: var(--ink);background: var(--field);box-shadow: none;}
+.award-cell, .eligibility-cell {min-height: 20px;padding: 3px 5px;color: var(--blue-bright);background: transparent;box-shadow: none;}
 .date-cell {
     padding: 4px;
     width: fit-content;
@@ -909,7 +910,8 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
     text-transform: none;
     letter-spacing: 0;
     font-size: 14px;
-    outline: 1px solid var(--field);
+    color: var(--blue-bright);
+    outline: 1px solid var(--blue-bright);
     /* border-right: 2px solid var(--blue-bright); */
     font-weight: bold;
     /* border-bottom: 2px solid var(--blue-bright); */

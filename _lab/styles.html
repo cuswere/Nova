@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Style lab — Praxis Nova</title>
+<!-- Scratch prototype, not part of the site. Loads the real Opportunities page in a
+     frame and switches its cards between the designs in aperture.css and
+     uniform.css. Delete the _lab folder when done. -->
+<style>
+    :root { --field: #e5e4e1; --ink: #101010; --blue: #1010ff; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; background: var(--field); color: var(--ink); font: 14px/1.35 monospace; }
+    body { display: grid; grid-template-columns: 260px 1fr; }
+    aside { padding: 14px; border-right: 1px solid var(--ink); overflow-y: auto; }
+    h1 { margin: 0 0 12px; font-size: 14px; color: #fff; background: var(--blue); padding: 4px 6px; letter-spacing: .05em; }
+    legend { font-weight: 600; font-size: 12px; margin-bottom: 6px; letter-spacing: .05em; }
+    fieldset { margin: 0 0 14px; padding: 0; border: 0; }
+    .v { display: block; width: 100%; margin: 0 0 6px; padding: 6px 8px; text-align: left; font: inherit; color: var(--ink); background: #fff; border: 1px solid var(--ink); cursor: pointer; }
+    .v small { display: block; margin-top: 2px; color: #565656; font-size: 12px; }
+    .v[aria-pressed="true"] { color: #fff; background: var(--blue); border-color: var(--blue); }
+    .v[aria-pressed="true"] small { color: #dcdcff; }
+    .row { display: flex; gap: 6px; }
+    .row button { font: inherit; padding: 3px 7px; background: #fff; border: 1px solid var(--ink); cursor: pointer; }
+    .row button[aria-pressed="true"] { color: #fff; background: var(--ink); }
+    .hint { color: #565656; font-size: 12px; }
+    main { display: grid; place-items: start center; overflow: auto; padding: 14px; }
+    iframe { width: 1120px; max-width: 100%; height: calc(100vh - 28px); border: 1px solid var(--ink); background: var(--field); }
+    iframe.phone { width: 390px; height: min(844px, calc(100vh - 28px)); }
+</style>
+</head>
+<body>
+<aside>
+    <h1>STYLE LAB</h1>
+    <fieldset><legend>CARD DESIGN</legend><div id="list"></div></fieldset>
+    <fieldset>
+        <legend>LINE</legend>
+        <div class="row">
+            <button type="button" id="line-2" aria-pressed="true">2px</button>
+            <button type="button" id="line-3" aria-pressed="false">3px</button>
+        </div>
+    </fieldset>
+    <fieldset>
+        <legend>GROUND</legend>
+        <div class="row">
+            <button type="button" id="ground-field" aria-pressed="true">Grey</button>
+            <button type="button" id="ground-white" aria-pressed="false">White</button>
+        </div>
+    </fieldset>
+    <fieldset>
+        <legend>VIEW</legend>
+        <div class="row">
+            <button type="button" id="desktop" aria-pressed="true">Desktop</button>
+            <button type="button" id="phone" aria-pressed="false">Phone</button>
+        </div>
+    </fieldset>
+    <p class="hint">The page in the frame is live: hover and tap the tokens to see each design's popups, use the filters and search. Keys 1–9 switch designs. Line and Ground apply to every design except Current and Aperture.</p>
+</aside>
+<main><iframe id="frame" src="../opportunities.html" title="Opportunities"></iframe></main>
+<script>
+const VARIANTS = [
+    ['', 'Current', 'Blue lines on white sheets, as on the site now.'],
+    ['v-aperture', 'Aperture', 'Kept as is. Open corners, generous space, a fine thread between entries.'],
+    ['u v-grid', 'Grid', 'Closed boxes and shared rules; rings at the junctions.'],
+    ['u v-offset', 'Offset', 'Everything an L on its bottom-right, one direction.'],
+    ['u v-rail', 'Rail', 'Horizontal lines only; tokens underlined.'],
+    ['u v-capsule', 'Capsule', 'Closed shapes only, every corner turned.'],
+    ['u v-weft', 'Weft', 'Weave made uniform: Ls turn over on a checkerboard; contents follow their cell.'],
+    ['u v-pinwheel', 'Pinwheel', 'The L takes all four turns; each 2×2 block draws a cross of paired rules.'],
+    ['u v-meander', 'Meander', 'One column, one unbroken line: a fret threading the list in reading order.'],
+    ['u v-bracket', 'Bracket', 'No edges, only corners; across the gutters they meet as open crosses.'],
+];
+const frame = document.getElementById('frame');
+let current = '';
+const toggles = { line: '', ground: '' };
+const ALL = new Set(['lw-3', 'ground-white', ...VARIANTS.flatMap(([c]) => c.split(' ').filter(Boolean))]);
+
+function apply() {
+    const doc = frame.contentDocument;
+    if (!doc?.head) return;
+    if (!doc.getElementById('lab-aperture')) {
+        for (const [id, file] of [['lab-aperture', 'aperture.css'], ['lab-uniform', 'uniform.css']]) {
+            doc.head.append(Object.assign(doc.createElement('link'), { id, rel: 'stylesheet', href: new URL(`${file}?${Date.now()}`, location.href).href }));
+        }
+    }
+    const html = doc.documentElement;
+    ALL.forEach((c) => html.classList.remove(c));
+    [current, toggles.line, toggles.ground].join(' ').split(' ').filter(Boolean).forEach((c) => html.classList.add(c));
+}
+frame.addEventListener('load', apply);
+
+const buttons = VARIANTS.map(([cls, name, note], i) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'v';
+    b.innerHTML = `${i < 9 ? `${i + 1}. ` : ''}${name}<small>${note}</small>`;
+    b.setAttribute('aria-pressed', String(i === 0));
+    b.addEventListener('click', () => { current = cls; buttons.forEach((x) => x.setAttribute('aria-pressed', String(x === b))); apply(); });
+    document.getElementById('list').append(b);
+    return b;
+});
+document.addEventListener('keydown', (e) => { const n = Number(e.key); if (n >= 1 && n <= Math.min(9, VARIANTS.length)) buttons[n - 1].click(); });
+
+// Two-way switches. They set classes that only the uniform designs (class u) read.
+function switcher(key, options) {
+    const els = options.map(([id, value]) => [document.getElementById(id), value]);
+    els.forEach(([el, value]) => el.addEventListener('click', () => {
+        toggles[key] = value;
+        els.forEach(([x]) => x.setAttribute('aria-pressed', String(x === el)));
+        apply();
+    }));
+}
+switcher('line', [['line-2', ''], ['line-3', 'lw-3']]);
+switcher('ground', [['ground-field', ''], ['ground-white', 'ground-white']]);
+
+const desktop = document.getElementById('desktop');
+const phone = document.getElementById('phone');
+desktop.addEventListener('click', () => { frame.classList.remove('phone'); desktop.setAttribute('aria-pressed', 'true'); phone.setAttribute('aria-pressed', 'false'); });
+phone.addEventListener('click', () => { frame.classList.add('phone'); phone.setAttribute('aria-pressed', 'true'); desktop.setAttribute('aria-pressed', 'false'); });
+</script>
+</body>
+</html>

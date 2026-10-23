@@ -1,0 +1,179 @@
+/* Uniform-line studies. Scratch, not part of the site. The lab sets `u` plus one
+   design class (v-grid, v-weft, …) on <html> inside its frame, and optionally
+   lw-3 (3px lines) and ground-white.
+
+   One rule governs every design: each line on the cards is var(--line) — 2px, or
+   3px under lw-3, never both — and is drawn by CSS at that width rather than left
+   to a font or a scaled graphic. So the + is two drawn bars, the link icon's
+   strokes are pinned to the line width, and the popup hangs from a straight stem
+   rather than a pointed tail, whose slanted edges cannot hold the width. Overlays
+   (the popups) are always closed panes, whatever grammar the cards use. */
+html.u { --line: 2px; --plus: 8px; --ground: var(--field); }
+html.u.lw-3 { --line: 3px; }
+html.u.ground-white { --ground: var(--white); }
+
+html.u .repobox { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: max-content; align-content: start; background: var(--ground); }
+html.u .repo-status-message { grid-column: 1 / -1; }
+html.u .opportunity-card { position: relative; grid-template-columns: 1fr; align-content: space-between; row-gap: 16px; min-height: 0; margin: 0; background: transparent; box-shadow: none; }
+html.u .opportunity-main-column { gap: 12px; margin: 0; }
+html.u .opportunity-title::after { display: none; }
+html.u .link-line-backgrounds { display: none; }
+html.u .opportunity-card a.line-background-ready { pointer-events: auto; }
+html.u .opportunity-card a { padding: 0; background: transparent; text-underline-offset: 3px; }
+html.u .opportunity-card a,
+html.u .opportunity-card a .link-text { text-decoration-thickness: var(--line); }
+/* The icon is drawn in a 20-unit box shown at 14px, so its strokes would land at
+   1.4px. Non-scaling strokes are measured in screen pixels instead. */
+html.u .opportunity-card a .link-text svg path { vector-effect: non-scaling-stroke; stroke-width: var(--line); }
+html.u .top-right-grid { outline: 0; padding: 0; }
+html.u :is(.details-summary-row, .detail-token-row) { justify-content: flex-start; gap: 8px; margin: 0; }
+html.u .grid-cell { border-width: var(--line); }
+html.u .date-cell { outline: 0; padding: 3px 6px; font-weight: 400; }
+html.u .detail-token.has-details { --detail-fold-size: 14px; --detail-fold-clear: var(--ground); padding-right: 20px; }
+html.u .detail-token-label::after { height: var(--line); background-size: calc(var(--line) * 2.5) var(--line); background-image: linear-gradient(to right, currentColor 0 var(--line), transparent var(--line) calc(var(--line) * 2.5)); }
+/* The + as two bars of exactly the line width, centred in the fold's interior. */
+html.u .detail-token-fold { color: transparent; font-size: 0; border-width: 0 0 var(--line) var(--line); background-image: linear-gradient(var(--blue-bright), var(--blue-bright)), linear-gradient(var(--blue-bright), var(--blue-bright)); background-size: var(--plus) var(--line), var(--line) var(--plus); background-position: center; background-repeat: no-repeat; }
+html.u .detail-token.has-details:focus-visible { outline: var(--line) solid var(--blue-bright); outline-offset: 2px; }
+/* The fold's states, all from the same bars rather than the site's flap: + at rest,
+   + reversed out of blue under the pointer or focus, − once the popup is open. The
+   site's own state rules use the background shorthand, which resets the bars'
+   size, so each restates it. */
+html.u .detail-token.has-details:focus-visible .detail-token-fold { color: transparent; background-color: var(--blue-bright); background-image: linear-gradient(var(--ground), var(--ground)), linear-gradient(var(--ground), var(--ground)); background-size: var(--plus) var(--line), var(--line) var(--plus); background-position: center; background-repeat: no-repeat; }
+html.u .detail-token.has-details.popup-pinned .detail-token-fold { color: transparent; background-color: transparent; background-image: linear-gradient(var(--ground), var(--ground)); background-size: var(--plus) var(--line); background-position: center; background-repeat: no-repeat; border-color: var(--ground); }
+html.u .grid-cell.detail-token.has-details.popup-pinned { color: var(--ground); background-color: var(--blue-bright); }
+@media (hover: hover) {
+    html.u .detail-token.has-details:not(.popup-pinned):hover .detail-token-fold { color: transparent; background-color: var(--blue-bright); background-image: linear-gradient(var(--ground), var(--ground)), linear-gradient(var(--ground), var(--ground)); background-size: var(--plus) var(--line), var(--line) var(--plus); background-position: center; background-repeat: no-repeat; }
+    html.u .opportunity-card a:hover .link-text,
+    html.u .opportunity-card a.line-background-ready:has(.link-text:hover) .link-text { outline: var(--line) solid var(--blue-bright); outline-offset: 6px; }
+}
+html.u .opportunity-card a.is-touched .link-text { outline-width: var(--line); }
+
+html.u .details-popup { --dialogue-background: var(--ground); --detail-tail-length: 10px; }
+html.u .fee-cell .details-popup { --dialogue-background: var(--amber); }
+html.u .details-popup-content { color: var(--blue-bright); border: var(--line) solid var(--blue-bright); box-shadow: none; }
+html.u .details-popup-content::-webkit-scrollbar-thumb { background: var(--blue-bright); }
+/* Rounded to a whole pixel so a 3px stem doesn't straddle two. */
+html.u .details-popup-tail,
+html.u .detail-token.popup-down .details-popup-tail { clip-path: none; width: var(--line); margin-left: round(down, calc((var(--detail-tail-width) - var(--line)) / 2), 1px); background: var(--blue-bright); }
+html.u .details-popup-tail::after { display: none; }
+
+/* ═══ Grid: closed boxes and shared rules. Each cell draws its top and left; the
+   outer edges close the right and bottom; a ring sits on every top junction. The
+   ring's interior is 8px less the line, so ring and rule centres coincide on a
+   whole pixel at either width. */
+html.v-grid .repobox { padding: 20px 22px 20px 20px; }
+html.v-grid .opportunity-card { padding: 18px; border-top: var(--line) solid var(--blue-bright); border-left: var(--line) solid var(--blue-bright); }
+html.v-grid .opportunity-card:nth-child(even),
+html.v-grid .opportunity-card:last-child { border-right: var(--line) solid var(--blue-bright); }
+html.v-grid .opportunity-card:nth-last-child(-n+2) { border-bottom: var(--line) solid var(--blue-bright); }
+html.v-grid .opportunity-card::before,
+html.v-grid :is(.opportunity-card:nth-child(even), .opportunity-card:last-child)::after { content: ""; position: absolute; z-index: 2; top: calc(-4px - var(--line)); width: calc(8px - var(--line)); height: calc(8px - var(--line)); border: var(--line) solid var(--blue-bright); border-radius: 50%; background: var(--ground); pointer-events: none; }
+html.v-grid .opportunity-card::before { left: calc(-4px - var(--line)); }
+html.v-grid .opportunity-card::after { right: calc(-4px - var(--line)); }
+html.v-grid .date-cell { border: var(--line) solid var(--blue-bright); }
+
+/* ═══ Offset: the home page's grammar made strict. Everything on a card is an L on
+   its bottom and right, offset by exactly the line — cells, deadline, tokens. */
+html.v-offset .repobox { gap: 26px 30px; padding: 22px 30px 28px 22px; }
+html.v-offset .opportunity-card { padding: 14px 16px 16px; box-shadow: var(--line) var(--line) 0 var(--blue-bright); }
+html.v-offset :is(.date-cell, .grid-cell) { box-shadow: var(--line) var(--line) 0 var(--blue-bright); }
+html.v-offset .grid-cell { border: 0 !important; }
+html.v-offset .detail-token-fold { border: 0; }
+html.v-offset :is(.details-summary-row, .detail-token-row) { gap: 10px; }
+
+/* ═══ Rail: horizontal lines only. Entries ruled off beneath; tokens and the
+   deadline underlined, the same mark a link's underline already is. */
+html.v-rail .repobox { column-gap: 34px; padding: 4px 24px 18px 20px; }
+html.v-rail .opportunity-card { padding: 18px 0 20px; border-bottom: var(--line) solid var(--blue-bright); }
+html.v-rail .date-cell { padding: 3px 2px; border-bottom: var(--line) solid var(--blue-bright); }
+html.v-rail .grid-cell { border-width: 0 0 var(--line) !important; border-style: solid !important; padding: 4px 2px; }
+html.v-rail .detail-token.has-details { padding-right: 18px; }
+html.v-rail .detail-token-fold { border: 0; }
+html.v-rail .details-popup-content { border-width: var(--line) 0; }
+
+/* ═══ Capsule: closed shapes only, every corner turned. */
+html.v-capsule { --plus: 6px; }
+html.v-capsule .repobox { gap: 14px; padding: 16px 20px 18px 16px; }
+html.v-capsule .opportunity-card { padding: 18px 20px 20px; border: var(--line) solid var(--blue-bright); border-radius: 18px; }
+html.v-capsule .date-cell { border: var(--line) solid var(--blue-bright); border-radius: 999px; padding: 3px 12px; }
+html.v-capsule .grid-cell { border-radius: 999px; padding: 4px 12px; }
+html.v-capsule .detail-token.has-details { padding-right: 28px; }
+html.v-capsule .detail-token-fold { top: 50%; right: 6px; translate: 0 -50%; border: var(--line) solid var(--blue-bright); border-radius: 50%; }
+html.v-capsule .details-popup-content { border-radius: 14px; }
+
+/* ═══ Weft: Weave made uniform. Each cell is one L, and the L turns over on a
+   checkerboard — cells 2 and 3 of every four — so the corners interlock into a
+   woven field. Everything inside a cell is an L facing the same way as its cell,
+   so the direction is a property of the entry, not of the element. */
+html.v-weft { --dx: var(--line); --dy: var(--line); }
+html.v-weft .repobox { gap: 26px 30px; padding: 24px 30px 28px 24px; }
+html.v-weft .opportunity-card:is(:nth-child(4n + 2), :nth-child(4n + 3)) { --dx: calc(var(--line) * -1); --dy: calc(var(--line) * -1); }
+html.v-weft .opportunity-card { padding: 14px 16px 16px; box-shadow: var(--dx) var(--dy) 0 var(--blue-bright); }
+html.v-weft :is(.date-cell, .grid-cell) { box-shadow: var(--dx) var(--dy) 0 var(--blue-bright); }
+html.v-weft .grid-cell { border: 0 !important; }
+html.v-weft .detail-token-fold { border: 0; }
+html.v-weft :is(.details-summary-row, .detail-token-row) { gap: 10px; }
+
+/* ═══ Pinwheel: the L takes all four turns in a cycle, so around the centre of each
+   2×2 block four corners face inward and draw a cross of paired rules — a sigil
+   that repeats down the list. Contents follow their cell's turn, as in Weft. */
+html.v-pinwheel { --dx: var(--line); --dy: var(--line); }
+html.v-pinwheel .repobox { gap: 28px 32px; padding: 26px 32px 30px 26px; }
+html.v-pinwheel .opportunity-card:nth-child(4n + 2) { --dx: calc(var(--line) * -1); }
+html.v-pinwheel .opportunity-card:nth-child(4n + 3) { --dy: calc(var(--line) * -1); }
+html.v-pinwheel .opportunity-card:nth-child(4n + 4) { --dx: calc(var(--line) * -1); --dy: calc(var(--line) * -1); }
+html.v-pinwheel .opportunity-card { padding: 14px 16px 16px; box-shadow: var(--dx) var(--dy) 0 var(--blue-bright); }
+html.v-pinwheel :is(.date-cell, .grid-cell) { box-shadow: var(--dx) var(--dy) 0 var(--blue-bright); }
+html.v-pinwheel .grid-cell { border: 0 !important; }
+html.v-pinwheel .detail-token-fold { border: 0; }
+html.v-pinwheel :is(.details-summary-row, .detail-token-row) { gap: 10px; }
+
+/* ═══ Meander: one column and one unbroken line. Each entry draws its top and one
+   side, alternating, so the rule runs across, turns down, runs back across the
+   next — a fret that threads the whole list in reading order. */
+html.v-meander .repobox { grid-template-columns: 1fr; padding: 22px 28px 26px 24px; }
+html.v-meander .opportunity-card { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); column-gap: 24px; padding: 20px 26px 22px; border-top: var(--line) solid var(--blue-bright); }
+html.v-meander .opportunity-card:nth-child(odd) { border-right: var(--line) solid var(--blue-bright); }
+html.v-meander .opportunity-card:nth-child(even) { border-left: var(--line) solid var(--blue-bright); }
+html.v-meander .opportunity-card:last-child { border-bottom: var(--line) solid var(--blue-bright); }
+html.v-meander .date-cell { border: var(--line) solid var(--blue-bright); }
+
+/* ═══ Bracket: no edges, only corners. Every cell, token and deadline is marked by
+   four brackets of the line width; across the gutters the cells' brackets meet in
+   fours and draw a small open cross at every junction. */
+html.v-bracket { --arm: 16px; }
+html.v-bracket :is(.opportunity-card, .grid-cell, .date-cell) {
+    background-image:
+        linear-gradient(var(--blue-bright), var(--blue-bright)), linear-gradient(var(--blue-bright), var(--blue-bright)),
+        linear-gradient(var(--blue-bright), var(--blue-bright)), linear-gradient(var(--blue-bright), var(--blue-bright)),
+        linear-gradient(var(--blue-bright), var(--blue-bright)), linear-gradient(var(--blue-bright), var(--blue-bright)),
+        linear-gradient(var(--blue-bright), var(--blue-bright)), linear-gradient(var(--blue-bright), var(--blue-bright));
+    background-size: var(--arm) var(--line), var(--line) var(--arm), var(--arm) var(--line), var(--line) var(--arm), var(--arm) var(--line), var(--line) var(--arm), var(--arm) var(--line), var(--line) var(--arm);
+    background-position: left top, left top, right top, right top, left bottom, left bottom, right bottom, right bottom;
+    background-repeat: no-repeat;
+}
+html.v-bracket :is(.grid-cell, .date-cell) { --arm: 6px; }
+html.v-bracket .repobox { gap: 20px; padding: 22px 26px 26px 22px; }
+html.v-bracket .opportunity-card { padding: 20px; }
+html.v-bracket .grid-cell { border: 0 !important; padding: 5px 9px; }
+html.v-bracket .detail-token.has-details { padding-right: 24px; }
+html.v-bracket .detail-token-fold { top: 4px; right: 4px; border: 0; }
+
+@media (max-width: 700px) {
+    html.u .repobox { grid-template-columns: 1fr; }
+    html.v-grid .repobox { padding: 16px 16px 16px 14px; }
+    html.v-grid .opportunity-card { padding: 16px 14px; border-right: var(--line) solid var(--blue-bright); }
+    html.v-grid .opportunity-card:nth-last-child(2) { border-bottom: 0; }
+    html.v-grid .opportunity-card::after { content: ""; position: absolute; z-index: 2; top: calc(-4px - var(--line)); right: calc(-4px - var(--line)); width: calc(8px - var(--line)); height: calc(8px - var(--line)); border: var(--line) solid var(--blue-bright); border-radius: 50%; background: var(--ground); pointer-events: none; }
+    html.v-offset .repobox { gap: 22px; padding: 18px 20px 22px 14px; }
+    html.v-rail .repobox { padding: 0 18px 14px 14px; }
+    /* One column: Weft alternates every cell; Pinwheel keeps a two-step swing. */
+    html.v-weft .opportunity-card:nth-child(n) { --dx: var(--line); --dy: var(--line); }
+    html.v-weft .opportunity-card:nth-child(even) { --dx: calc(var(--line) * -1); --dy: calc(var(--line) * -1); }
+    html.v-pinwheel .opportunity-card:nth-child(n) { --dx: var(--line); --dy: var(--line); }
+    html.v-pinwheel .opportunity-card:nth-child(even) { --dx: calc(var(--line) * -1); }
+    :is(html.v-weft, html.v-pinwheel) .repobox { gap: 24px; padding: 20px 20px 24px 16px; }
+    html.v-meander .repobox { padding: 16px 16px 18px 14px; }
+    html.v-meander .opportunity-card { grid-template-columns: 1fr; padding: 18px 16px 20px; }
+    html.v-bracket .repobox { padding: 18px 18px 20px 14px; }
+}
