@@ -916,7 +916,6 @@ span.option-btn {display: flex;background: transparent;box-shadow: var(--stroke)
     font-weight: bold;
     /* border-bottom: 2px solid var(--blue-bright); */
     }
-.date-cell strong { font-weight: 600; }
 
 /* Filters */
 .filters { align-self: start; padding: 8px; }

@@ -1,0 +1,26 @@
+/* Font studies. Scratch, not part of the site: the lab sets f-martian or f-source on
+   <html> inside its frame and loads the families from Google Fonts.
+
+   The aim is type drawn in the same 2px line as everything else. A font's stroke
+   width is a fraction of its size that grows with weight, so one weight cannot give
+   2px at every size — each size gets its own. These were measured, not chosen by
+   eye: "H" rendered on a canvas at each size and weight, ink summed along a row
+   through its stems, and the weight read off where the stems come to 2.0px.
+
+     size   Martian Mono (condensed)   Source Code Pro
+     14px   636                        795
+     16px   541                        666
+     18px   441                        631
+
+   The system monospace (Consolas here) can't take part: its stems top out at about
+   1.6px at 14px, bold included. Every element is held to its size's weight, so
+   bold and strong no longer add weight — all text is drawn in the one line. */
+html.f-martian { --lab-font: "Martian Mono", monospace; --fw-14: 636; --fw-16: 541; --fw-18: 441; font-stretch: condensed; }
+html.f-source { --lab-font: "Source Code Pro", monospace; --fw-14: 795; --fw-16: 666; --fw-18: 631; }
+
+:is(html.f-martian, html.f-source) body,
+:is(html.f-martian, html.f-source) body * { font-family: var(--lab-font) !important; font-weight: var(--fw-14) !important; }
+:is(html.f-martian, html.f-source) .opportunity-card a,
+:is(html.f-martian, html.f-source) .opportunity-card a * { font-weight: var(--fw-18) !important; }
+:is(html.f-martian, html.f-source) .fee-cell .details-popup-content,
+:is(html.f-martian, html.f-source) .fee-cell .details-popup-content * { font-weight: var(--fw-16) !important; }

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Home type lab — Praxis Nova</title>
+<!-- Scratch prototype, not part of the site. Loads the real home page in a frame and
+     sets it in the Compact design: Martian Mono at one size, every stroke and line 2px.
+     Delete the _lab folder when done. -->
+<style>
+    :root { --field: #e5e4e1; --ink: #101010; --blue: #1010ff; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; background: var(--field); color: var(--ink); font: 14px/1.35 monospace; }
+    body { display: grid; grid-template-columns: 260px 1fr; }
+    aside { padding: 14px; border-right: 1px solid var(--ink); overflow-y: auto; }
+    h1 { margin: 0 0 12px; font-size: 14px; color: #fff; background: var(--blue); padding: 4px 6px; letter-spacing: .05em; }
+    legend { font-weight: 600; font-size: 12px; margin-bottom: 6px; letter-spacing: .05em; }
+    fieldset { margin: 0 0 14px; padding: 0; border: 0; }
+    .row { display: flex; flex-wrap: wrap; gap: 6px; }
+    .row button { font: inherit; padding: 3px 7px; background: #fff; border: 1px solid var(--ink); cursor: pointer; }
+    .row button[aria-pressed="true"] { color: #fff; background: var(--ink); }
+    .hint { color: #565656; font-size: 12px; }
+    #readout { margin: 0; padding: 6px; font-size: 11px; white-space: pre; overflow-x: auto; background: #fff; border: 1px solid var(--ink); }
+    main { display: grid; place-items: start center; overflow: auto; padding: 14px; }
+    iframe { width: 1120px; max-width: 100%; height: calc(100vh - 28px); border: 1px solid var(--ink); background: var(--field); }
+    iframe.phone { width: 390px; height: min(844px, calc(100vh - 28px)); }
+</style>
+</head>
+<body>
+<aside>
+    <h1>HOME TYPE LAB</h1>
+    <fieldset>
+        <legend>SIZE (ALL TEXT)</legend>
+        <div class="row">
+            <button type="button" id="size-16" aria-pressed="false">16px</button>
+            <button type="button" id="size-18" aria-pressed="true">18px</button>
+        </div>
+    </fieldset>
+    <fieldset>
+        <legend>VIEW</legend>
+        <div class="row">
+            <button type="button" id="desktop" aria-pressed="true">Desktop</button>
+            <button type="button" id="phone" aria-pressed="false">Phone</button>
+        </div>
+    </fieldset>
+    <fieldset>
+        <legend>WEIGHTS IN USE</legend>
+        <pre id="readout">—</pre>
+    </fieldset>
+    <p class="hint">Every piece of text at one size, on desktop and phones alike, and every stroke and line at 2px: the weight is measured in this browser so the letters' strokes come out at 2px. 18px matches the opportunity cards' titles. The PRAXIS logo keeps its own letterforms.</p>
+</aside>
+<main><iframe id="frame" src="../index.html" title="Home"></iframe></main>
+<script>
+const FONTS = 'https://fonts.googleapis.com/css2?family=Martian+Mono:wdth,wght@75..112.5,100..800&display=swap';
+const frame = document.getElementById('frame');
+const state = { size: 18 };
+
+/* Compact: one size for all text (--t), every line 2px, so distinction comes only
+   from the mark: the buttons in capitals, article titles underlined, opportunity
+   names plain, dates boxed. Spacing is drawn from the size, so 16px and 18px keep
+   the same proportions. Featured reads as a ledger on desktop — date first in a fixed
+   column, name after — and phones stack each row, since they scroll anyway. */
+const COMPACT_CSS = `
+html.compact { --stroke: 2px; --home-outline-width: 2px; --lh: calc(var(--t) * 1.5); }
+html.compact body *, html.compact .page-title::before { font-size: var(--t) !important; }
+html.compact span.option-btn { --option-btn-size: var(--t); text-transform: uppercase; letter-spacing: .06em; }
+/* The one exception to one size: the primary button at 24px. Its weight is set from
+   its own size like everything else, so its strokes still come out at 2px — larger,
+   not heavier — and its lines stay 2px. */
+html.compact :is(.option-btn-opportunities, .option-btn-opportunities *) { font-size: 24px !important; }
+@media (min-width: 701px) {
+    html.compact .action-group { align-self: start; margin-top: var(--featured-offset); }
+}
+/* Short windows give up the extra breathing room above Featured (it is only ever added
+   on top of the space the details panel reserves), so at 18px the page still fits
+   whole down to a 1280×610 window. */
+@media (min-width: 701px) and (max-height: 660px) {
+    html.compact .options-container { --featured-offset: 0px; }
+    html.compact .home-wordmark { margin-bottom: 8px; }
+}
+html.compact .featured-list { gap: var(--t); margin-top: calc(var(--t) / 2); }
+html.compact .featured-item { gap: calc(var(--t) / 4); }
+html.compact :is(.featured-line, .featured-opportunities, .featured-status) { line-height: var(--lh); }
+html.compact .featured-opportunities { gap: 0; margin-left: 2px; padding-left: calc(var(--t) * .75); border-left: 2px solid currentColor; }
+/* Dates boxed in the line width, as on the cards, so they part from names and titles. */
+html.compact :is(.featured-opportunity-deadline, .featured-date) { display: inline-block; padding: 0 4px; border: 2px solid currentColor; line-height: calc(var(--t) * 1.125); text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; }
+html.compact .featured-date { margin-left: calc(var(--t) / 2); }
+/* A ledger: the date first in a fixed column, the name after it. Dates line up down
+   the branch, long names wrap within their own column, and there is no leader to
+   shrink to a stub when they do. */
+html.compact .featured-opportunities li { display: grid; grid-template-columns: max-content minmax(0, 1fr); align-items: start; column-gap: calc(var(--t) * .75); }
+html.compact .featured-opportunity-leader { display: none; }
+/* One width for every box: ten characters plus their letter-spacing, padding and border. */
+html.compact .featured-opportunity-deadline { order: -1; width: calc(10ch + .6em + 12px); margin-top: 1px; }
+@media (max-width: 700px) {
+    /* Too narrow for a date column beside the names: each name takes the full width
+       and its boxed date sits beneath it. */
+    html.compact .featured-opportunities li { display: block; margin-bottom: calc(var(--t) / 2); }
+    html.compact .featured-opportunity-deadline { display: table; margin-top: 2px; }
+    html.compact .featured-group { padding: 8px 16px 16px; }
+}`;
+
+function applyLayout() {
+    const doc = frame.contentDocument;
+    if (!doc?.head) return;
+    if (!doc.getElementById('lab-compact')) doc.head.append(Object.assign(doc.createElement('style'), { id: 'lab-compact', textContent: COMPACT_CSS }));
+    doc.documentElement.classList.add('compact');
+    doc.documentElement.style.setProperty('--t', `${state.size}px`);
+    // The article date is rendered as " - 07/10/26"; boxed, the dash would sit inside
+    // the box. The lab trims it here — on the site it is a one-line change in home.js.
+    for (const date of doc.querySelectorAll('.featured-date')) {
+        const text = date.textContent.replace(/^\s*-\s*/, '');
+        // Only on change: a write wakes the observer that calls this.
+        if (date.textContent !== text) date.textContent = text;
+    }
+}
+
+/* Stem width per weight, measured at the size it will be used at, in the framed
+   page's own renderer: "H" on a canvas, ink summed along a row through both stems. */
+function measureCurve(win, size) {
+    const canvas = Object.assign(win.document.createElement('canvas'), { width: Math.ceil(size * 3), height: Math.ceil(size * 2) });
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    const base = Math.round(size * 1.5);
+    const points = [];
+    for (let w = 100; w <= 800; w += 10) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.font = `condensed ${w} ${size}px "Martian Mono"`;
+        ctx.fillText('H', Math.round(size * 0.5), base);
+        const y = Math.round(base - ctx.measureText('H').actualBoundingBoxAscent * 0.25);
+        const row = ctx.getImageData(0, y, canvas.width, 1).data;
+        let ink = 0; for (let i = 3; i < row.length; i += 4) ink += row[i] / 255;
+        points.push([w, ink / 2]);
+    }
+    return points;
+}
+
+// The weight whose stems come to 2px at `size` px, clamped to the font's range.
+const curves = new Map();
+function weightFor(win, size) {
+    const key = size.toFixed(2);
+    if (!curves.has(key)) curves.set(key, measureCurve(win, size));
+    const curve = curves.get(key);
+    if (2 <= curve[0][1]) return 100;
+    for (let i = 1; i < curve.length; i++) {
+        const [w0, a] = curve[i - 1], [w1, b] = curve[i];
+        if (2 <= b) return Math.round(b === a ? w1 : w0 + (2 - a) / (b - a) * (w1 - w0));
+    }
+    return 800;
+}
+
+function ownText(el) { return [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim()); }
+
+async function tune() {
+    const doc = frame.contentDocument, win = frame.contentWindow;
+    if (!doc?.body) return;
+    applyLayout();
+    // The @font-face rules must be parsed before fonts.load can find the face; until
+    // then it resolves at once and the curve would be measured on the fallback font.
+    win.labFontsLoaded ??= new Promise((resolve) => {
+        doc.head.append(Object.assign(doc.createElement('link'), { id: 'lab-fonts', rel: 'stylesheet', href: FONTS, onload: resolve, onerror: resolve }));
+    });
+    await win.labFontsLoaded;
+    let style = doc.getElementById('lab-type');
+    if (!style) { style = doc.createElement('style'); style.id = 'lab-type'; doc.head.append(style); }
+    // Everything but the logo, whose letterforms are the brand.
+    style.textContent = `body, body *:not(.praxis-mark), body .page-title::before { font-family: "Martian Mono", monospace !important; font-stretch: condensed !important; }`;
+    await doc.fonts.load('condensed 400 16px "Martian Mono"');
+    await doc.fonts.ready;
+    // A variable face spans several times its lightest stem; a flat curve means the
+    // font isn't ready yet, so measure nothing and try again on the next pass.
+    const probe = measureCurve(win, 40);
+    if (probe.at(-1)[1] < probe[0][1] * 2) return;
+
+    const used = new Map();
+    for (const el of doc.body.querySelectorAll('*')) {
+        if (el.closest('.praxis-mark, script, style') || !ownText(el)) continue;
+        const size = parseFloat(win.getComputedStyle(el).fontSize);
+        const w = weightFor(win, size);
+        used.set(size, w);
+        el.style.setProperty('font-weight', String(w), 'important');
+    }
+    const title = doc.querySelector('.page-title');
+    if (title) style.textContent += `\n.page-title::before { font-weight: ${weightFor(win, parseFloat(win.getComputedStyle(title, '::before').fontSize))} !important; }`;
+    document.getElementById('readout').textContent = ['  size  wght  stroke', ...[...used].map(([s, w]) => `${s.toFixed(1).padStart(5)}px  ${String(w).padStart(3)}  2px`)].join('\n');
+}
+
+let timer = 0;
+const retune = () => { clearTimeout(timer); timer = setTimeout(tune, 80); };
+frame.addEventListener('load', () => {
+    const win = frame.contentWindow;
+    win.addEventListener('resize', retune);
+    // Featured articles arrive after load; tune them as they land.
+    new win.MutationObserver(retune).observe(frame.contentDocument.body, { childList: true, subtree: true });
+    tune();
+});
+
+function switcher(options, apply) {
+    const els = options.map(([id, value]) => [document.getElementById(id), value]);
+    els.forEach(([el, value]) => el.addEventListener('click', () => { els.forEach(([x]) => x.setAttribute('aria-pressed', String(x === el))); apply(value); }));
+}
+switcher([['size-16', 16], ['size-18', 18]], (v) => { state.size = v; tune(); });
+switcher([['desktop', false], ['phone', true]], (v) => { frame.classList.toggle('phone', v); });
+</script>
+</body>
+</html>

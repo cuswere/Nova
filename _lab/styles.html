@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Style lab — Praxis Nova</title>
 <!-- Scratch prototype, not part of the site. Loads the real Opportunities page in a
-     frame and switches its cards between the designs in aperture.css and
-     uniform.css. Delete the _lab folder when done. -->
+     frame and switches its cards to the Meander design in uniform.css, with type
+     studies in fonts.css. Delete the _lab folder when done. -->
 <style>
     :root { --field: #e5e4e1; --ink: #101010; --blue: #1010ff; }
     * { box-sizing: border-box; }
@@ -48,44 +48,46 @@
         </div>
     </fieldset>
     <fieldset>
+        <legend>FONT</legend>
+        <div class="row" style="flex-wrap: wrap">
+            <button type="button" id="font-system" aria-pressed="true">System</button>
+            <button type="button" id="font-martian" aria-pressed="false">Martian Mono</button>
+            <button type="button" id="font-source" aria-pressed="false">Source Code Pro</button>
+        </div>
+    </fieldset>
+    <fieldset>
         <legend>VIEW</legend>
         <div class="row">
             <button type="button" id="desktop" aria-pressed="true">Desktop</button>
             <button type="button" id="phone" aria-pressed="false">Phone</button>
         </div>
     </fieldset>
-    <p class="hint">The page in the frame is live: hover and tap the tokens to see each design's popups, use the filters and search. Keys 1–9 switch designs. Line and Ground apply to every design except Current and Aperture.</p>
+    <p class="hint">The page in the frame is live: hover and tap the tokens to see each design's popups, use the filters and search. Keys 1–2 switch designs. Line, Ground and Font apply to Meander; Font weights are tuned so the letters' strokes come out at 2px.</p>
 </aside>
 <main><iframe id="frame" src="../opportunities.html" title="Opportunities"></iframe></main>
 <script>
 const VARIANTS = [
     ['', 'Current', 'Blue lines on white sheets, as on the site now.'],
-    ['v-aperture', 'Aperture', 'Kept as is. Open corners, generous space, a fine thread between entries.'],
-    ['u v-grid', 'Grid', 'Closed boxes and shared rules; rings at the junctions.'],
-    ['u v-offset', 'Offset', 'Everything an L on its bottom-right, one direction.'],
-    ['u v-rail', 'Rail', 'Horizontal lines only; tokens underlined.'],
-    ['u v-capsule', 'Capsule', 'Closed shapes only, every corner turned.'],
-    ['u v-weft', 'Weft', 'Weave made uniform: Ls turn over on a checkerboard; contents follow their cell.'],
-    ['u v-pinwheel', 'Pinwheel', 'The L takes all four turns; each 2×2 block draws a cross of paired rules.'],
     ['u v-meander', 'Meander', 'One column, one unbroken line: a fret threading the list in reading order.'],
-    ['u v-bracket', 'Bracket', 'No edges, only corners; across the gutters they meet as open crosses.'],
 ];
 const frame = document.getElementById('frame');
-let current = '';
-const toggles = { line: '', ground: '' };
-const ALL = new Set(['lw-3', 'ground-white', ...VARIANTS.flatMap(([c]) => c.split(' ').filter(Boolean))]);
+let current = 'u v-meander';
+const toggles = { line: '', ground: '', font: '' };
+const ALL = new Set(['lw-3', 'ground-white', 'f-martian', 'f-source', ...VARIANTS.flatMap(([c]) => c.split(' ').filter(Boolean))]);
+const FONTS = 'https://fonts.googleapis.com/css2?family=Martian+Mono:wdth,wght@75..112.5,100..800&family=Source+Code+Pro:wght@200..900&display=swap';
 
 function apply() {
     const doc = frame.contentDocument;
     if (!doc?.head) return;
-    if (!doc.getElementById('lab-aperture')) {
-        for (const [id, file] of [['lab-aperture', 'aperture.css'], ['lab-uniform', 'uniform.css']]) {
-            doc.head.append(Object.assign(doc.createElement('link'), { id, rel: 'stylesheet', href: new URL(`${file}?${Date.now()}`, location.href).href }));
+    if (!doc.getElementById('lab-uniform')) {
+        for (const [id, href] of [['lab-fonts', FONTS], ['lab-uniform', 'uniform.css'], ['lab-font-rules', 'fonts.css']]) {
+            const url = href.startsWith('http') ? href : new URL(`${href}?${Date.now()}`, location.href).href;
+            doc.head.append(Object.assign(doc.createElement('link'), { id, rel: 'stylesheet', href: url }));
         }
     }
     const html = doc.documentElement;
     ALL.forEach((c) => html.classList.remove(c));
-    [current, toggles.line, toggles.ground].join(' ').split(' ').filter(Boolean).forEach((c) => html.classList.add(c));
+    [current, toggles.line, toggles.ground, toggles.font].join(' ').split(' ').filter(Boolean).forEach((c) => html.classList.add(c));
 }
 frame.addEventListener('load', apply);
 
@@ -94,7 +96,7 @@ const buttons = VARIANTS.map(([cls, name, note], i) => {
     b.type = 'button';
     b.className = 'v';
     b.innerHTML = `${i < 9 ? `${i + 1}. ` : ''}${name}<small>${note}</small>`;
-    b.setAttribute('aria-pressed', String(i === 0));
+    b.setAttribute('aria-pressed', String(cls === current));
     b.addEventListener('click', () => { current = cls; buttons.forEach((x) => x.setAttribute('aria-pressed', String(x === b))); apply(); });
     document.getElementById('list').append(b);
     return b;
@@ -112,6 +114,7 @@ function switcher(key, options) {
 }
 switcher('line', [['line-2', ''], ['line-3', 'lw-3']]);
 switcher('ground', [['ground-field', ''], ['ground-white', 'ground-white']]);
+switcher('font', [['font-system', ''], ['font-martian', 'f-martian'], ['font-source', 'f-source']]);
 
 const desktop = document.getElementById('desktop');
 const phone = document.getElementById('phone');

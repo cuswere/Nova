@@ -457,7 +457,7 @@ function opportunityCard(item) {
     main.appendChild(opportunityTitle(item));
 
     const deadline = element('div', 'field date-cell');
-    deadline.append(element('strong', '', 'Deadline: '), formatDeadline(item.deadline));
+    deadline.append(`Deadline: ${formatDeadline(item.deadline)}`);
     main.appendChild(deadline);
 
     const details = element('div', 'opportunity-details-column');
